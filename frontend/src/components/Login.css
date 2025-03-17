@@ -1,0 +1,170 @@
+/* Apply background to the whole page */
+body {
+    height: 100vh; /* Full viewport height */
+    display: flex;  /* Enables flexbox */
+    justify-content: center; /* Pushes content to both sides */
+    align-items: center; /* Centers vertically */
+    padding: 0 50px; /* Adds space on both sides */
+    font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif;
+    color: white; /* Adjust for readability */
+    background: url('../../public/light.jpg') no-repeat center center/cover;
+}
+
+/* .login-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('../../public/light.jpg') no-repeat center center/cover;
+} */
+
+.container {
+    display: flex;
+    justify-content: space-between; /* Pushes items to left and right */
+    align-items: center;
+    width: 80%; /* Ensures it doesn't stretch too much */
+    max-width: 1200px; /* Limits maximum width */
+}
+
+/* Left-side welcome text container */
+.welcome-container {
+    flex: 1; /* Takes available space */
+    text-align: left;
+    position:absolute;
+    left: 200px;
+    opacity: 0;
+    animation: fadeIn 2s ease-out forwards;
+}
+
+.typed-cursor {
+    font-size: 48px; /* Match the font size */
+    color: white; /* Adjust based on your theme */
+    animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.welcome-container h1 {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.welcome-container h3 {
+    font-size: 20px;
+    margin: 10px 0;
+    font-weight: normal;
+    opacity: 0.8; /* Slightly faded subtitle */
+}
+
+
+/* Ensure the login container stands out */
+.login-container {
+    flex: 0.4; /* Takes less space */
+    width: 350px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    color: black;
+    margin-left: auto;
+    position: absolute;
+    right: 100px;
+}
+
+/* Style adjustments */
+.role-selection {
+    display: flex;
+    justify-content: space-between;
+}
+
+.role-btn {
+    flex: 1;
+    margin: 5px;
+    padding: 10px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.role-btn:hover {
+    background: #0056b3;
+}
+
+/* Login form styling */
+.login-form {
+    margin-top: 20px;
+}
+
+.login-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.back-icon {
+    width: 30px;  /* Adjust as needed */
+    height: auto;  /* Maintains aspect ratio */
+    cursor: pointer;
+    margin-right: 10px;  /* Adds spacing */
+    transition: 0.3s;
+    filter: invert(33%) sepia(99%) saturate(745%) hue-rotate(200deg); /* Adjusts color */
+}
+
+.input-field {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Login button */
+.login-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    background-color: #218838;
+}
+
+/* Make it responsive for smaller screens */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: center; /* Center elements */
+        text-align: center;
+    }
+
+    .welcome-container {
+        position: static; /* Remove absolute positioning */
+        text-align: center;
+        margin-bottom: 30px; /* Add space between welcome and login */
+    }
+
+    .login-container {
+        position: static; /* Remove absolute positioning */
+        width: 90%; /* Make it responsive */
+        max-width: 350px;
+        margin: 0 auto; /* Center it */
+    }
+}
