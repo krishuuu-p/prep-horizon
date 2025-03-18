@@ -1,35 +1,25 @@
-/* Apply background to the whole page */
 body {
-    height: 100vh; /* Full viewport height */
-    display: flex;  /* Enables flexbox */
-    justify-content: center; /* Pushes content to both sides */
-    align-items: center; /* Centers vertically */
-    padding: 0 50px; /* Adds space on both sides */
-    font-family: Arial, sans-serif;
-    font-family: Arial, sans-serif;
-    color: white; /* Adjust for readability */
-    background: url('../../public/light.jpg') no-repeat center center/cover;
-}
-
-/* .login-page {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0 50px;
+    font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif;
+    color: white;
     background: url('../../public/light.jpg') no-repeat center center/cover;
-} */
+}
 
 .container {
     display: flex;
-    justify-content: space-between; /* Pushes items to left and right */
+    justify-content: space-between;
     align-items: center;
-    width: 80%; /* Ensures it doesn't stretch too much */
-    max-width: 1200px; /* Limits maximum width */
+    width: 80%;
+    max-width: 1200px;
 }
 
-/* Left-side welcome text container */
 .welcome-container {
-    flex: 1; /* Takes available space */
+    flex: 1;
     text-align: left;
     position:absolute;
     left: 200px;
@@ -38,8 +28,8 @@ body {
 }
 
 .typed-cursor {
-    font-size: 48px; /* Match the font size */
-    color: white; /* Adjust based on your theme */
+    font-size: 48px; 
+    color: white;
     animation: blink 0.7s infinite;
 }
 
@@ -62,16 +52,14 @@ body {
     font-size: 20px;
     margin: 10px 0;
     font-weight: normal;
-    opacity: 0.8; /* Slightly faded subtitle */
+    opacity: 0.8;
 }
 
-
-/* Ensure the login container stands out */
 .login-container {
-    flex: 0.4; /* Takes less space */
+    flex: 0.4;
     width: 350px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -81,7 +69,6 @@ body {
     right: 100px;
 }
 
-/* Style adjustments */
 .role-selection {
     display: flex;
     justify-content: space-between;
@@ -103,7 +90,6 @@ body {
     background: #0056b3;
 }
 
-/* Login form styling */
 .login-form {
     margin-top: 20px;
 }
@@ -115,12 +101,12 @@ body {
 }
 
 .back-icon {
-    width: 30px;  /* Adjust as needed */
-    height: auto;  /* Maintains aspect ratio */
+    width: 30px;
+    height: auto;
     cursor: pointer;
-    margin-right: 10px;  /* Adds spacing */
+    margin-right: 10px;
     transition: 0.3s;
-    filter: invert(33%) sepia(99%) saturate(745%) hue-rotate(200deg); /* Adjusts color */
+    filter: invert(33%) sepia(99%) saturate(745%) hue-rotate(200deg);
 }
 
 .input-field {
@@ -131,7 +117,22 @@ body {
     border-radius: 5px;
 }
 
-/* Login button */
+.password-container {
+    position: relative;
+    width: 100%;
+}
+
+.eye-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+}
+
 .login-btn {
     width: 100%;
     padding: 10px;
@@ -147,24 +148,38 @@ body {
     background-color: #218838;
 }
 
-/* Make it responsive for smaller screens */
+@keyframes slideIn {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.login-slide {
+    animation: slideIn 0.8s ease-out forwards;
+}
+
 @media (max-width: 900px) {
     .container {
-        flex-direction: column; /* Stack elements vertically */
-        align-items: center; /* Center elements */
+        flex-direction: column;
+        align-items: center;
         text-align: center;
     }
 
     .welcome-container {
-        position: static; /* Remove absolute positioning */
+        position: static;
         text-align: center;
-        margin-bottom: 30px; /* Add space between welcome and login */
+        margin-bottom: 30px;
     }
 
     .login-container {
-        position: static; /* Remove absolute positioning */
-        width: 90%; /* Make it responsive */
+        position: static;
+        width: 90%;
         max-width: 350px;
-        margin: 0 auto; /* Center it */
+        margin: 0 auto;
     }
 }

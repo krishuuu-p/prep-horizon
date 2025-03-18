@@ -3,26 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
 import backIcon from '../assets/back-icon.svg';
-import { motion } from "framer-motion";
 import Typed from 'typed.js';
+import { Eye, EyeOff } from "lucide-react";
 
 function WelcomeText() {
     const textRef = useRef(null);
 
     useEffect(() => {
         const typed = new Typed(textRef.current, {
-            strings: ["Desi Assessment"],  // The text to type out
-            typeSpeed: 100,                // Typing speed in milliseconds
-            backSpeed: 50,                 // Speed when deleting
-            startDelay: 500,               // Delay before typing starts
-            backDelay: 2000,               // Time before starting to delete
-            loop: true,                    // Loop the animation indefinitely
-            showCursor: true,              // Show blinking cursor
-            cursorChar: "|",               // Cursor character
+            strings: ["Desi Assessment"],
+            typeSpeed: 100,
+            backSpeed: 50,
+            startDelay: 500,
+            backDelay: 2000,
+            loop: true,
+            showCursor: true,
+            cursorChar: "|",               
         });
 
         return () => {
-            typed.destroy(); // Cleanup when component unmounts
+            typed.destroy();
         };
     }, []);
 
@@ -39,6 +39,7 @@ function Login() {
     const [userType, setUserType] = useState(null); 
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async () => {
@@ -57,34 +58,21 @@ function Login() {
 
     return (
         <div className="container">
-            <WelcomeText>
-                <h3>Welcome to</h3>
-                <h1>Desi Assessment</h1>
-                <h3>Your one-stop solution for seamless online assessments.</h3>
-            </WelcomeText>
+            <WelcomeText />
             <div className="login-container">
                 {!userType && (
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}  // Start hidden & to the right
-                        animate={{ opacity: 1, x: 0 }}   // Animate into place
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                    >
+                    <div className= "login-slide">
                         <h2 className="login-title">Login As</h2>
                         <div className="role-selection">
                             <button className="role-btn" onClick={() => setUserType('student')}>Student</button>
                             <button className="role-btn" onClick={() => setUserType('teacher')}>Teacher</button>
                             <button className="role-btn" onClick={() => setUserType('admin')}>Administrator</button>
                         </div>
-                    </motion.div>
+                    </div>
                 )}
 
                 {userType && (
-                    <motion.div
-                        className="login-form"
-                        initial={{ opacity: 0, x: 50 }}  // Start hidden & to the right
-                        animate={{ opacity: 1, x: 0 }}   // Animate into place
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                    >
+                    <div className= "login-form login-slide">
                         <div className="login-header">
                             <img 
                                 src={backIcon} 
@@ -101,15 +89,24 @@ function Login() {
                             onChange={(e) => setUserId(e.target.value)}
                             className="input-field"
                         />
-                        <input
-                            type="password"
-                            placeholder="Enter Password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="input-field"
-                        />
+                        <div className="password-container">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Enter Password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="input-field"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="eye-icon"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                         <button className="login-btn" onClick={handleLogin}>Login</button>
-                    </motion.div>
+                    </div>
                 )}
             </div>
         </div>
