@@ -1,21 +1,12 @@
-body {
+.container {
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0 50px;
-    font-family: Arial, sans-serif;
     font-family: Arial, sans-serif;
     color: white;
-    background: url('../../public/light.jpg') no-repeat center center/cover;
-}
-
-.container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 80%;
-    max-width: 1200px;
+    width: 100vw;
+    background: url('../../../public/light.jpg') no-repeat center center/cover;
 }
 
 .welcome-container {
@@ -63,7 +54,8 @@ body {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
-    color: black;
+    color: white;
+    background-color: black;
     margin-left: auto;
     position: absolute;
     right: 100px;

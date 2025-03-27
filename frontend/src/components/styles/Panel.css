@@ -1,0 +1,68 @@
+/* Top Panel */
+.panel {
+    background-color: #144884; /* Dark Blue */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    height: 60px;
+    font-size: 18px;
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box; /* Include padding in width */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Left-side navigation */
+.left-options {
+    display: flex;
+    gap: 20px;
+}
+
+.left-options span {
+    cursor: pointer;
+    transition: all 0.3s;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+
+.left-options .active {
+    background-color: white;
+    color: black;
+    font-weight: bold;
+}
+
+.left-options span:hover {
+    color: #FFD700; /* Gold hover effect */
+    text-decoration: underline;
+}
+
+/* Right-side options */
+.right-options {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Coaching name */
+.coaching-name {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/* Logout button */
+.logout-btn {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: darkred;
+}

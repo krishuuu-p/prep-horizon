@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './Login.css';
+import './styles/Login.css';
 import backIcon from '../assets/back-icon.svg';
 import Typed from 'typed.js';
 import { Eye, EyeOff } from "lucide-react";
@@ -50,7 +50,7 @@ function Login() {
                 role: userType
             });
     
-            navigate(`${response.data.dashboard}/${userId}`);
+            navigate(`${response.data.dashboard}/${userId}/home`);
         } catch (error) {
             alert("Invalid credentials. Please try again.");
         }
