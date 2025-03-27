@@ -7,6 +7,7 @@ import RegisterAdmin from './pages/RegisterAdmin';
 import StudentPage from './components/StudentPage';
 import TeacherPage from './components/TeacherPage';
 import AdminPage from './components/AdminPage';
+import TestPage from './components/pages/TestPage';
 
 function App() {
   return (
