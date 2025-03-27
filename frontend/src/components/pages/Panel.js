@@ -1,8 +1,9 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import '../styles/Panel.css';
 
 function Panel({ activePage, setActivePage }) {
     const navigate = useNavigate();
+    const { userType, userId } = useParams();
 
     const handleLogout = () => {
         navigate('/');
@@ -10,7 +11,9 @@ function Panel({ activePage, setActivePage }) {
 
     const handleNavigation = (page) => {
         setActivePage(page);
-        navigate(`./${page.toLowerCase().replace(/\s+/g, '-')}`); // Navigates to the respective page
+        if (page !== activePage) {
+            navigate(`/${userType}/${userId}/${page.toLowerCase().replace(/\s+/g, '-')}`);
+        }
     };
 
     return (
