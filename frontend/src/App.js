@@ -17,9 +17,10 @@ function App() {
         <Route path="/register/student" element={<RegisterStudent />} />
         <Route path="/register/teacher" element={<RegisterTeacher />} />
         <Route path="/register/admin" element={<RegisterAdmin />} />
-        <Route path="/student/:userId" element={<StudentPage />} />
-        <Route path="/teacher/:userId" element={<TeacherPage />} />
-        <Route path="/admin/:userId" element={<AdminPage />} />
+        <Route path="/:userType/:userId/home" element={<StudentPage />} />
+        <Route path="/:userType/:userId/tests" element={<TestPage />} />
+        <Route path="/:userType/:userId" element={<TeacherPage />} />
+        <Route path="/:userType/:userId" element={<AdminPage />} />
       </Routes>
     </Router>
   );
