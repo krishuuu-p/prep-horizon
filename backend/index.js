@@ -107,3 +107,42 @@ app.post('/retrieve-password', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+const TEST_FILE = 'testData.xlsx';
+
+function parseExcelDate(value) {
+    if (!value || isNaN(value)) return value; // Return as-is if not a valid number
+    return new Date((value - 25569) * 86400 * 1000).toISOString(); // Convert to ISO format
+}
+
+app.get('/api/tests', (req, res) => {
+    try {
+        if (!fs.existsSync(TEST_FILE)) {
+            return res.status(404).json({ message: "Test data file not found" });
+        }
+
+        const workbook = xlsx.readFile(TEST_FILE);
+        const sheets = workbook.Sheets;
+
+        function processSheet(sheet) {
+            if (!sheet) return [];
+            let json = xlsx.utils.sheet_to_json(sheet, { raw: false });
+            return json.map(test => ({
+                ...test,
+                "Start Date": parseExcelDate(test["Start Date"]),
+                "Start Time": parseExcelDate(test["Start Time"]),
+                "End Date": parseExcelDate(test["End Date"]),
+                "End Time": parseExcelDate(test["End Time"])
+            }));
+        }
+
+        const activeTests = processSheet(sheets["Active Tests"]);
+        const upcomingTests = processSheet(sheets["Upcoming Tests"]);
+        const recentTests = processSheet(sheets["Recent Tests"]);
+
+        res.json({ activeTests, upcomingTests, recentTests });
+    } catch (error) {
+        console.error("Error reading test file:", error);
+        res.status(500).json({ message: "Error loading test data" });
+    }
+});

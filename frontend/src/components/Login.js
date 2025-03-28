@@ -11,7 +11,7 @@ function WelcomeText() {
 
     useEffect(() => {
         const typed = new Typed(textRef.current, {
-            strings: ["Desi Assessment"],
+            strings: ["PrepHorizon"],
             typeSpeed: 100,
             backSpeed: 50,
             startDelay: 500,
@@ -56,6 +56,12 @@ function Login() {
         }
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter") {
+            handleLogin();
+        }
+    };
+
     return (
         <div className="container">
             <WelcomeText />
@@ -87,6 +93,7 @@ function Login() {
                             placeholder="Enter ID"
                             value={userId}
                             onChange={(e) => setUserId(e.target.value)}
+                            onKeyDown={handleKeyDown}
                             className="input-field"
                         />
                         <div className="password-container">
@@ -95,6 +102,7 @@ function Login() {
                                 placeholder="Enter Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                onKeyDown={handleKeyDown}
                                 className="input-field"
                             />
                             <button

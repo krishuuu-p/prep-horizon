@@ -13,10 +13,120 @@
 
 /* Content should take the full width and height */
 .content {
-    flex-grow: 1;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
+    flex-direction: column;
+    font-size: 18px;
     width: 100%; /* Make sure it expands fully */
+}
+
+.user-greeting {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.user-greeting h1 {
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+.caption {
+    /* font-size: 18px; */
+    color: #4b4747; /* Light gray text */
+}
+  
+.separator {
+    border: none;
+    height: 1px;
+    background-color: #444; /* Dark gray line */
+    margin: 10px 0;
+}
+
+/* Wrapper for all the test sections */
+.test-sections {
+    display: flex;   /* Makes sections align horizontally */
+    flex-wrap: wrap; /* Ensures they wrap on smaller screens */
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Sections */
+.section {
+    margin-left: 20px;   
+}
+
+.section h2 {
+    color: #144884;
+    margin-bottom: 10px;
+}
+
+/* Test List Grid */
+.test-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Test Cards */
+.test-card {
+    width: 400px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+    margin-bottom: 20px;
+}
+
+.test-card:hover {
+    transform: scale(1.05);
+}
+
+/* Active Test */
+.active-test {
+    background-color: #e0f2f1;
+    border-left: 5px solid #00796b;
+}
+
+/* Upcoming Test */
+.upcoming-test {
+    background-color: #fff3e0;
+    border-left: 5px solid #ff9800;
+}
+
+/* Recent Test */
+.recent-test {
+    background-color: #e3f2fd;
+    border-left: 5px solid #1976d2;
+}
+
+/* Buttons */
+.start-btn {
+    background-color: #00796b;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.analysis-btn {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.start-btn:hover {
+    background-color: #004d40;
+}
+
+.analysis-btn:hover {
+    background-color: #0d47a1;
 }
