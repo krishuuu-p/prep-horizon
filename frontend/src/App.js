@@ -8,6 +8,7 @@ import StudentPage from './components/StudentPage';
 import TeacherPage from './components/TeacherPage';
 import AdminPage from './components/AdminPage';
 import TestPage from './components/pages/TestPage';
+import PdfToQuizPage from './components/pages/PdfToQuizPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/register/admin" element={<RegisterAdmin />} />
         <Route path="/:userType/:userId/home" element={<StudentPage />} />
         <Route path="/:userType/:userId/tests" element={<TestPage />} />
+        <Route path="/:userType/:userId/PDF-to-Quiz" element={<PdfToQuizPage />} />
         <Route path="/:userType/:userId" element={<TeacherPage />} />
         <Route path="/:userType/:userId" element={<AdminPage />} />
       </Routes>

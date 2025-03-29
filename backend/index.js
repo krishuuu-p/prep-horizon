@@ -1,15 +1,39 @@
 const express = require('express');
+const axios = require("axios");
+const multer = require("multer");
 const cors = require('cors');
 const xlsx = require('xlsx');
 const fs = require('fs');
-
+const FormData = require('form-data');
 const app = express();
 const PORT = 5000;
 const EXCEL_FILE = 'users.xlsx'; // Ensure this file is in the same folder or update the path
-
+const FLASK_API_URL = "http://127.0.0.1:5001/process-pdf";
 app.use(cors());
 app.use(express.json());
+const upload = multer({ dest: "uploads/" });
 
+// API to handle PDF uploads & send to Flask
+app.post("/upload-pdf", upload.single("file"), async (req, res) => {
+  try {
+      const pdfFile = req.file;
+      if (!pdfFile) return res.status(400).json({ message: "No file uploaded" });
+
+      // Create a FormData instance and append the file as a stream
+      const form = new FormData();
+      form.append("file", fs.createReadStream(pdfFile.path), pdfFile.originalname);
+
+      // Send file to Flask API with correct headers from form-data
+      const flaskResponse = await axios.post(FLASK_API_URL, form, {
+          headers: form.getHeaders(),
+      });
+
+      res.json(flaskResponse.data);
+  } catch (error) {
+      console.error("Error processing PDF:", error);
+      res.status(500).json({ message: "Failed to process PDF" });
+  }
+});
 // Utility: Load users from the Excel file
 function loadUsersFromExcel() {
   try {
