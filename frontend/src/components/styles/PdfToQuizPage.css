@@ -1,99 +1,140 @@
 /* Wrapper for the entire student page */
-.pdf-to-quiz-page {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw; /* Make it take the full width */
-    background-color: white; /* Ensure white background */
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
+.quiz-container {
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-top: 20px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-wrap; /* Preserve line breaks */
+  word-wrap: break-word; /* Break long words if needed */
+  max-height: 400px;      /* Constrain height */
+  overflow-y: auto;       /* Enable vertical scrolling */
 }
-  
-  /* Ensure each immediate child in .student-page takes full width and has spacing */
-  .pdf-to-quiz-page > * {
-    width: 100%;
-  }
-  
-  /* Container styling for the main content area */
-  .pdf-container {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-  /* Headings and paragraph */
-  .pdf-container h1 {
-    font-size: 1.75rem;
-    margin-bottom: 0px;
-  }
-  
-  .pdf-container p.lead {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 20px;
-  }
-  
-  /* Form styling */
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Form group spacing */
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  /* Labels styling */
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  /* Standard input, textarea and select styling */
-  .form-control,
-  .form-control-file,
-  textarea.form-control,
-  select.form-control {
-    width: 100%;
-    padding: 8px 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  
-  /* File input specific styling if needed */
-  .form-control-file {
-    padding: 4px 0;
-  }
-  
-  /* Button styling */
-  .btn {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 1rem;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    border: none;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-  }
-  
-  /* Secondary button style */
-  .btn.btn-secondary {
-    background-color: #6c757d;
-    color: #fff;
-  }
-  
-  .btn.btn-secondary:hover {
-    background-color: #5a6268;
-  }
-  
+
+/* Ensure each immediate child takes full width */
+.pdf-to-quiz-page > * {
+  width: 100%;
+}
+
+/* Container styling for the main content area */
+.pdf-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 800px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Headings and paragraph */
+.pdf-container h1 {
+  font-size: 1.75rem;
+  margin-bottom: 10px;
+}
+
+.pdf-container p.lead {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Form styling */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Form group spacing */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Labels styling */
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+/* Standard input, textarea and select styling */
+.form-control,
+.form-control-file,
+textarea.form-control,
+select.form-control {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* File input specific styling */
+.form-control-file {
+  padding: 4px 0;
+}
+
+/* Button styling */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+/* Secondary button style */
+.btn.btn-secondary {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.btn.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* Spinner Styles */
+.loading-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.spinner {
+  margin: 0 auto;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ccc;
+  border-top: 5px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Animation for spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Updated styling for quiz output to match the rest of the page */
+.quiz-container {
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-top: 20px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  /* Use the same font and styling as the rest of the page */
+  font-family: inherit;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-wrap; /* Preserve line breaks */
+}
