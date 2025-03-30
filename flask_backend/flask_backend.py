@@ -1,20 +1,18 @@
 from flask import Flask, request, jsonify
 import PyPDF2  # For reading PDFs
-from bs4 import BeautifulSoup  # For parsing HTML content from URLs
 import requests  # For fetching webpage content
-import random  # To simulate AI-based MCQ generation
+from bs4 import BeautifulSoup  # For parsing HTML content from URLs
 from flask_cors import CORS
 import os
+import subprocess  # To call the local command-line tool
 
 app = Flask(__name__)
-CORS(app)  # Allow requests from React/Node.js
+CORS(app)
 
 def extract_text_from_url(url):
     try:
         response = requests.get(url)
-        # Parse the HTML content
         soup = BeautifulSoup(response.text, "html.parser")
-        # Get the text with newlines between elements
         text = soup.get_text(separator="\n")
         return text
     except Exception as e:
@@ -26,25 +24,47 @@ def extract_text_from_pdf(pdf_path):
         with open(pdf_path, "rb") as file:
             reader = PyPDF2.PdfReader(file)
             for page in reader.pages:
-                text += page.extract_text() + "\n"
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
     except Exception as e:
         return f"Error reading PDF: {str(e)}"
-    return text
+    return text.strip()
 
-def generate_mcqs(text):
+def generate_questions(text, num_questions):
     if not text:
-        return []
-    # Dummy AI-generated MCQs (replace with real ML logic)
-    mcqs = [
-        {"question": "What is the main topic of the text?", "options": ["Topic A", "Topic B", "Topic C", "Topic D"], "answer": "Topic A"},
-        {"question": "What is the second paragraph about?", "options": ["Concept X", "Concept Y", "Concept Z", "None"], "answer": "Concept X"},
-    ]
-    return mcqs
+        return "No text provided for question generation."
+    
+    prompt = (
+        "Content:\n" + text + "\n\n" +
+        f"Generate a list of exactly {num_questions} high-quality multiple-choice questions based on the \
+            following content along with their options. " +
+        "Do not include answers or any other type of questions other than MCQ and do not print anything \
+                else other than questions and their answers . Ensure each question is clear and concise\n\n"
+    )
+    
+    try:
+        result = subprocess.run(
+            [
+                "ollama", "run", "gemma3",
+            ],
+            input=prompt,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",  # Force UTF-8 decoding
+            check=True
+        )
+        output = result.stdout.strip()
+        if not output:
+            return "No output received from Gemma3."
+        return output
+    except subprocess.CalledProcessError as e:
+        return f"Error generating questions: {e.stderr}"
 
 @app.route("/process-pdf", methods=["POST"])
 def process_pdf_route():
     text = ""
-    # Case 1: Process a file (PDF or TXT)
+    # Case 1: Process file upload (PDF or TXT)
     if "file" in request.files and request.files["file"].filename != "":
         file = request.files["file"]
         filename = file.filename
@@ -71,8 +91,12 @@ def process_pdf_route():
     if text.startswith("Error"):
         return jsonify({"error": text}), 500
 
-    mcqs = generate_mcqs(text)
-    return jsonify({"text": text, "mcqs": mcqs})
+    # Retrieve the desired number of questions from the form; default to "5"
+    num_questions = request.form.get("num_questions", "5")
+    print("Received num_questions:", num_questions)  # Debug logging
+
+    quiz_output = generate_questions(text, num_questions)
+    return jsonify({"quiz": quiz_output})
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
