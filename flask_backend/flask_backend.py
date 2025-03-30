@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import PyPDF2  # For reading PDFs
-from bs4 import BeautifulSoup  # For parsing text (if needed)
+from bs4 import BeautifulSoup  # For parsing HTML content from URLs
+import requests  # For fetching webpage content
 import random  # To simulate AI-based MCQ generation
 from flask_cors import CORS
 import os
@@ -8,7 +9,17 @@ import os
 app = Flask(__name__)
 CORS(app)  # Allow requests from React/Node.js
 
-# Function to extract text from a PDF
+def extract_text_from_url(url):
+    try:
+        response = requests.get(url)
+        # Parse the HTML content
+        soup = BeautifulSoup(response.text, "html.parser")
+        # Get the text with newlines between elements
+        text = soup.get_text(separator="\n")
+        return text
+    except Exception as e:
+        return f"Error fetching URL: {str(e)}"
+
 def extract_text_from_pdf(pdf_path):
     text = ""
     try:
@@ -20,40 +31,48 @@ def extract_text_from_pdf(pdf_path):
         return f"Error reading PDF: {str(e)}"
     return text
 
-# Function to simulate AI-based MCQ generation
 def generate_mcqs(text):
     if not text:
         return []
-
-    # Dummy AI-generated MCQs (replace this with real ML logic)
+    # Dummy AI-generated MCQs (replace with real ML logic)
     mcqs = [
         {"question": "What is the main topic of the text?", "options": ["Topic A", "Topic B", "Topic C", "Topic D"], "answer": "Topic A"},
         {"question": "What is the second paragraph about?", "options": ["Concept X", "Concept Y", "Concept Z", "None"], "answer": "Concept X"},
     ]
     return mcqs
 
-# API to process PDF & generate MCQs
 @app.route("/process-pdf", methods=["POST"])
-def process_pdf():
-    if "file" not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
+def process_pdf_route():
+    text = ""
+    # Case 1: Process a file (PDF or TXT)
+    if "file" in request.files and request.files["file"].filename != "":
+        file = request.files["file"]
+        filename = file.filename
+        ext = os.path.splitext(filename)[1].lower()
+        if ext == ".pdf":
+            temp_path = "uploaded.pdf"
+            file.save(temp_path)
+            text = extract_text_from_pdf(temp_path)
+            os.remove(temp_path)
+        elif ext == ".txt":
+            text = file.read().decode("utf-8")
+        else:
+            return jsonify({"error": "Unsupported file type"}), 400
+    # Case 2: Process URL input
+    elif "url" in request.form and request.form["url"]:
+        url = request.form["url"]
+        text = extract_text_from_url(url)
+    # Case 3: Process manual text input
+    elif "manual_text" in request.form and request.form["manual_text"]:
+        text = request.form["manual_text"]
+    else:
+        return jsonify({"error": "No input provided"}), 400
 
-    pdf_file = request.files["file"]
-    pdf_path = "uploaded.pdf"  # Save the uploaded PDF temporarily
-    pdf_file.save(pdf_path)
+    if text.startswith("Error"):
+        return jsonify({"error": text}), 500
 
-    # Extract text
-    extracted_text = extract_text_from_pdf(pdf_path)
-    # Remove the temporary file
-    os.remove(pdf_path)
-
-    if "Error" in extracted_text:
-        return jsonify({"error": extracted_text}), 500
-
-    # Generate MCQs using AI
-    mcqs = generate_mcqs(extracted_text)
-
-    return jsonify({"text": extracted_text, "mcqs": mcqs})
+    mcqs = generate_mcqs(text)
+    return jsonify({"text": text, "mcqs": mcqs})
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)

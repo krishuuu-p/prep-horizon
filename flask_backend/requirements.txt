@@ -2,3 +2,4 @@ Flask
 flask-cors
 PyPDF2
 beautifulsoup4
+requests

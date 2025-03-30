@@ -1,6 +1,6 @@
 const express = require('express');
-const axios = require("axios");
-const multer = require("multer");
+const axios = require('axios');
+const multer = require('multer');
 const cors = require('cors');
 const xlsx = require('xlsx');
 const fs = require('fs');
@@ -16,22 +16,33 @@ const upload = multer({ dest: "uploads/" });
 // API to handle PDF uploads & send to Flask
 app.post("/upload-pdf", upload.single("file"), async (req, res) => {
   try {
-      const pdfFile = req.file;
-      if (!pdfFile) return res.status(400).json({ message: "No file uploaded" });
-
-      // Create a FormData instance and append the file as a stream
       const form = new FormData();
-      form.append("file", fs.createReadStream(pdfFile.path), pdfFile.originalname);
+      // If file is provided, append it
+      if (req.file) {
+          form.append("file", fs.createReadStream(req.file.path), req.file.originalname);
+      }
+      // Append URL and manual text if provided
+      if (req.body.url) {
+          form.append("url", req.body.url);
+      }
+      if (req.body.manual_text) {
+          form.append("manual_text", req.body.manual_text);
+      }
 
-      // Send file to Flask API with correct headers from form-data
-      const flaskResponse = await axios.post(FLASK_API_URL, form, {
-          headers: form.getHeaders(),
+      // Forward the form data to the Flask API
+      const response = await axios.post(FLASK_API_URL, form, {
+          headers: form.getHeaders()
       });
 
-      res.json(flaskResponse.data);
+      // Clean up the uploaded file if it was saved locally
+      if (req.file) {
+          fs.unlinkSync(req.file.path);
+      }
+
+      res.json(response.data);
   } catch (error) {
-      console.error("Error processing PDF:", error);
-      res.status(500).json({ message: "Failed to process PDF" });
+      console.error("Error processing input:", error);
+      res.status(500).json({ message: "Failed to process input" });
   }
 });
 // Utility: Load users from the Excel file
