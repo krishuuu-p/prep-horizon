@@ -148,6 +148,27 @@ body {
     background-color: #218838;
 }
 
+.register-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #e26b10;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.register-btn:hover {
+    background-color: #d95f0e;
+}
+
+.register-text {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
 @keyframes slideIn {
     from {
         transform: translateX(50px);

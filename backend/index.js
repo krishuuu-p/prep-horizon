@@ -13,6 +13,25 @@ app.use(cors());
 app.use(express.json());
 const upload = multer({ dest: "uploads/" });
 
+const mysql = require('mysql2');
+const bcrypt = require('bcrypt'); // For password hashing
+
+// MySQL Connection
+const db = mysql.createConnection({
+    host: 'localhost',
+  user: 'root',
+  password: 'prep123', // Replace with your MySQL password
+  database: 'prep_horizon'
+});
+
+db.connect((err) => {
+  if (err) {
+      console.error('Database connection failed:', err);
+  } else {
+      console.log('Connected to MySQL database.');
+  }
+});
+
 // API to handle PDF uploads & send to Flask
 app.post("/upload-pdf", upload.single("file"), async (req, res) => {
   try {
@@ -45,6 +64,7 @@ app.post("/upload-pdf", upload.single("file"), async (req, res) => {
       res.status(500).json({ message: "Failed to process input" });
   }
 });
+
 // Utility: Load users from the Excel file
 function loadUsersFromExcel() {
   try {
@@ -73,33 +93,6 @@ function saveUsersToExcel(users) {
   }
 }
 
-// Registration endpoint: Save new user details after checking for duplicates
-app.post('/register', (req, res) => {
-  const { username, email, password, role, dashboard } = req.body;
-  if (!username || !email || !password || !role) {
-    return res.status(400).json({ message: "Username, email, password, and role are required." });
-  }
-  
-  const users = loadUsersFromExcel();
-  const existingUser = users.find(u => u.Username === username || u.Email === email);
-  if (existingUser) {
-    return res.status(409).json({ message: "User with that username or email already exists." });
-  }
-  
-  const newUser = {
-    Username: username,
-    Password: password,  // In production, hash the password before storing
-    Role: role,
-    Dashboard_URL: dashboard || `/${role}`, // Default dashboard URL based on role
-    Email: email
-  };
-  
-  users.push(newUser);
-  saveUsersToExcel(users);
-  
-  return res.status(201).json({ message: "User registered successfully." });
-});
-
 // Login endpoint: Authenticate user by username/email, password, and role
 app.post('/login', (req, res) => {
   const { id, password, role } = req.body;
@@ -111,13 +104,15 @@ app.post('/login', (req, res) => {
   );
   
   if (user) {
-    return res.json({
-      role: user.Role,
-      dashboard: user.Dashboard_URL
-    });
+    const Name = user.Name;
+    return res.json({ message: "Login successful", Name });
   } else {
     return res.status(401).json({ message: "Invalid credentials" });
   }
+});
+
+app.post('/register', (req, res) => {
+  
 });
 
 // Retrieve Password endpoint: Given an email, return the stored password
@@ -136,11 +131,6 @@ app.post('/retrieve-password', (req, res) => {
   }
   
   return res.json({ password: user.Password });
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
 
 const TEST_FILE = 'testData.xlsx';
@@ -180,4 +170,10 @@ app.get('/api/tests', (req, res) => {
         console.error("Error reading test file:", error);
         res.status(500).json({ message: "Error loading test data" });
     }
+});
+
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

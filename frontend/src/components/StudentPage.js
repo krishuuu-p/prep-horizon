@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Panel from './pages/Panel';
 import './styles/StudentPage.css';
 
 function StudentPage() {
     const [activePage, setActivePage] = useState("Home");
-    const { userId } = useParams();
     const [activeTests, setActiveTests] = useState([]);
     const [upcomingTests, setUpcomingTests] = useState([]);
     const [recentTests, setRecentTests] = useState([]);
+
+    const location = useLocation();
+    const name = location.state?.name || "Guest";
 
     useEffect(() => {
         fetch("http://localhost:5000/api/tests")
@@ -28,7 +30,7 @@ function StudentPage() {
 
             <div className="content">
                 <div className="user-greeting">
-                    <h1>Hello, {userId}</h1>
+                    <h1>Hello, {name}</h1>
                     <p className="caption">Here's a summary of your test activity this week.</p>
                     <hr className="separator" />
                 </div>

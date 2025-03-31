@@ -18,7 +18,7 @@ function WelcomeText() {
             backDelay: 2000,
             loop: true,
             showCursor: true,
-            cursorChar: "|",               
+            cursorChar: "|",     
         });
 
         return () => {
@@ -37,7 +37,8 @@ function WelcomeText() {
 
 function Login() {
     const [userType, setUserType] = useState(null); 
-    const [userId, setUserId] = useState('');
+    const [userName, setUserName] = useState('');
+    const [, setName] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -45,12 +46,13 @@ function Login() {
     const handleLogin = async () => {
         try {
             const response = await axios.post('http://localhost:5000/login', {
-                id: userId,
+                id: userName,
                 password: password,
                 role: userType
             });
-    
-            navigate(`${response.data.dashboard}/${userId}/home`);
+            
+            setName(response.data.Name);
+            navigate(`${userType}/${userName}/home`, {state: {name: response.data.Name}});
         } catch (error) {
             alert("Invalid credentials. Please try again.");
         }
@@ -61,6 +63,15 @@ function Login() {
             handleLogin();
         }
     };
+
+    const handleRegister = async () => {
+        try {
+            // const response = await axios.post('http://localhost:5000/register');
+            alert("Registration successful. Please check your email for further instructions.");
+        } catch (error) {
+            alert("Invalid credentials. Please try again.");
+        }
+    }
 
     return (
         <div className="container">
@@ -84,15 +95,15 @@ function Login() {
                                 src={backIcon} 
                                 alt="Back" 
                                 className="back-icon" 
-                                onClick={() => {setUserType(null); setUserId(''); setPassword('');}} 
+                                onClick={() => {setUserType(null); setUserName(''); setPassword('');}} 
                             />
                             <h2>{`Login as ${userType.charAt(0).toUpperCase() + userType.slice(1)}`}</h2>
                         </div>
                         <input
                             type="text"
-                            placeholder="Enter ID"
-                            value={userId}
-                            onChange={(e) => setUserId(e.target.value)}
+                            placeholder="Enter Username/Email"
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
                             onKeyDown={handleKeyDown}
                             className="input-field"
                         />
@@ -114,6 +125,20 @@ function Login() {
                             </button>
                         </div>
                         <button className="login-btn" onClick={handleLogin}>Login</button>
+                        {userType === 'admin' && (
+                            <div>
+                                <p className="register-text">If you are a new user, please register your organization.</p>
+                                <button className="register-btn" onClick={handleRegister}>Register Your Organization</button>
+                            </div>
+                        )}
+                        
+                        {/* 
+                        <div style={{ marginTop: '20px' }}>
+                            <p>
+                                <Link to="/forgot-password">Forgot Password?</Link>
+                            </p>
+                        </div>
+                        */}
                     </div>
                 )}
             </div>
