@@ -1,4 +1,4 @@
-# desiAssessment
+# PrepHorizon
 A testing platform
 Running the Full Stack Application
 Each part of the application should run in a separate terminal.
