@@ -15,6 +15,7 @@ const upload = multer({ dest: "uploads/" });
 
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt'); // For password hashing
+const saltRounds = 10;
 
 // MySQL Connection
 const db = mysql.createConnection({
@@ -113,6 +114,45 @@ app.post('/login', (req, res) => {
 
 app.post('/register', (req, res) => {
   
+});
+
+
+
+app.post('/loginNew', (req, res) => {
+  const { id, password, role } = req.body;
+
+  if (!id || !password || !role) {
+      return res.status(600).json({ message: "All fields are required" });
+  }
+
+  const query = `
+      SELECT id, name, username, email, password, role 
+      FROM users 
+      WHERE (username = ? OR email = ?) AND role = ?
+  `;
+
+  db.query(query, [id, id, role], async (err, results) => {
+      if (err) {
+          console.error("Database error:", err);
+          return res.status(601).json({ message: "Server error" });
+      }
+
+      if (results.length === 0) {
+          return res.status(602).json({ message: "Invalid credentials" });
+      }
+
+      const user = results[0];
+
+      // Compare the hashed password with the entered password
+
+      // const match = await bcrypt.compare(password, user.password);
+      const match = (password == user.password);
+      if (!match) {
+          return res.status(603).json({ message: "Invalid credentials" });
+      }
+
+      return res.json({ message: "Login successful", Name: user.name });
+  });
 });
 
 // Retrieve Password endpoint: Given an email, return the stored password
