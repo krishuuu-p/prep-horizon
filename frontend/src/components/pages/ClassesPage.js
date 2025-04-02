@@ -6,9 +6,9 @@ function ClassesPage() {
     const [activePage, setActivePage] = useState("Classes");
 
     return(
-    <>
+    <div className="classes-page">
     <AdminPanel activePage={activePage} setActivePage={setActivePage}/>
-    </>
+    </div>
     );
 }
 

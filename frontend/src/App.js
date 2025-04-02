@@ -10,9 +10,9 @@ import AdminPage from './components/AdminPage';
 import TestPage from './components/pages/TestPage';
 import PdfToQuizPage from './components/pages/PdfToQuizPage';
 import ClassesPage from './components/pages/ClassesPage';
-import StudentsManagementPage from './components/pages/StudentsManagementPage';
-import TeachersManagementPage from './components/pages/TeachersManagementPage';
-import TestsManagementPage from './components/pages/TestsManagementPage';
+import StudentManagementPage from './components/pages/StudentManagementPage';
+import TeacherManagementPage from './components/pages/TeacherManagementPage';
+import TestManagementPage from './components/pages/TestManagementPage';
 
 function App() {
   return (
@@ -28,10 +28,10 @@ function App() {
         <Route path="/admin/:userId/home" element={<AdminPage />} />
         <Route path="/:userType/:userId/tests" element={<TestPage />} />
         <Route path="/:userType/:userId/pdf-to-quiz" element={<PdfToQuizPage />} />
-        <Route path=":userType/:userId/classes" element={<ClassesPage />} />
-        <Route path=":userType/:userId/students-management" element={<StudentsManagementPage />} />
-        <Route path=":userType/:userId/teachers-management" element={<TeachersManagementPage />} />
-        <Route path=":userType/:userId/tests-management" element={<TestsManagementPage />} />
+        <Route path="/:userType/:userId/classes" element={<ClassesPage />} />
+        <Route path="/:userType/:userId/student-management" element={<StudentManagementPage />} />
+        <Route path="/:userType/:userId/teacher-management" element={<TeacherManagementPage />} />
+        <Route path="/:userType/:userId/tests-management" element={<TestManagementPage />} />
       </Routes>
     </Router>
   );

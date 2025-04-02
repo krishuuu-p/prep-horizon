@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import AdminPanel from "./AdminPanel";
-import "../styles/TestsManagementPage.css"
+import "../styles/TestManagementPage.css"
 
-function TestsManagementPage() {
-    const [activePage, setActivePage] = useState("Tests");
+function TestManagementPage() {
+    const [activePage, setActivePage] = useState("Test Management");
 
     return(
     <>
@@ -12,4 +12,4 @@ function TestsManagementPage() {
     );
 }
 
-export default TestsManagementPage;
+export default TestManagementPage;

@@ -19,7 +19,7 @@ function AdminPanel({ activePage, setActivePage }) {
     return (
         <div className="panel">
             <div className="left-options">
-                {["Home", "Classes", "Students Management", "Teachers Management", "Tests Management"].map((page) => (
+                {["Home", "Classes", "Student Management", "Teacher Management", "Tests Management"].map((page) => (
                     <span
                         key={page}
                         className={activePage === page ? "active" : ""}
