@@ -110,31 +110,9 @@ function saveUsersToExcel(users) {
   }
 }
 
-// Login endpoint: Authenticate user by username/email, password, and role
+
+
 app.post('/login', (req, res) => {
-  const { id, password, role } = req.body;
-  const users = loadUsersFromExcel();
-  const user = users.find(u =>
-    (u.Username === id || u.Email === id) &&
-    u.Password === password &&
-    u.Role === role
-  );
-  
-  if (user) {
-    const Name = user.Name;
-    return res.json({ message: "Login successful", Name });
-  } else {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-});
-
-app.post('/register', (req, res) => {
-  
-});
-
-
-
-app.post('/loginNew', (req, res) => {
   const { id, password, role } = req.body;
 
   if (!id || !password || !role) {
