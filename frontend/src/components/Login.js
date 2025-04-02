@@ -45,7 +45,7 @@ function Login() {
     const handleLogin = async () => {
         try {
             const response = await axios.post('http://localhost:5000/login', {
-                id: user.userName,
+                id: userName,
                 password: password,
                 role: user.userType
             });

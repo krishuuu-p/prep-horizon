@@ -10,6 +10,10 @@ import AdminPage from './components/AdminPage';
 import TestPage from './components/pages/TestPage';
 import PdfToQuizPage from './components/pages/PdfToQuizPage';
 import ActiveTestPage from './components/pages/ActiveTest';
+import ClassesPage from './components/pages/ClassesPage';
+import StudentManagementPage from './components/pages/StudentManagementPage';
+import TeacherManagementPage from './components/pages/TeacherManagementPage';
+import TestManagementPage from './components/pages/TestManagementPage';
 
 function App() {
   return (
@@ -26,6 +30,10 @@ function App() {
         <Route path="/:userType/:userName/tests" element={<TestPage />} />
         <Route path="/:userType/:userName/start-test" element={<ActiveTestPage />} />
         <Route path="/:userType/:userName/pdf-to-quiz" element={<PdfToQuizPage />} />
+        <Route path="/:userType/:userName/classes" element={<ClassesPage />} />
+        <Route path="/:userType/:userName/student-management" element={<StudentManagementPage />} />
+        <Route path="/:userType/:userName/teacher-management" element={<TeacherManagementPage />} />
+        <Route path="/:userType/:userName/tests-management" element={<TestManagementPage />} />
       </Routes>
     </Router>
   );
