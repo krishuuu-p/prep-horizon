@@ -4,7 +4,7 @@ import Panel from './Panel';
 import '../styles/PdfToQuizPage.css';
 
 function PdfToQuizPage() {
-  const [activePage, setActivePage] = useState("Tests");
+  const [activePage, setActivePage] = useState("PDF to Quiz");
   const [url, setUrl] = useState("");
   const [manualText, setManualText] = useState("");
   const [files, setFiles] = useState(null);

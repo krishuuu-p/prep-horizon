@@ -1,4 +1,4 @@
-Flask
+flask
 flask-cors
 PyPDF2
 beautifulsoup4

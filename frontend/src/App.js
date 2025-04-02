@@ -9,6 +9,7 @@ import TeacherPage from './components/TeacherPage';
 import AdminPage from './components/AdminPage';
 import TestPage from './components/pages/TestPage';
 import PdfToQuizPage from './components/pages/PdfToQuizPage';
+import ActiveTestPage from './components/pages/ActiveTest';
 
 function App() {
   return (
@@ -19,11 +20,12 @@ function App() {
         {/* <Route path="/register/student" element={<RegisterStudent />} />
         <Route path="/register/teacher" element={<RegisterTeacher />} />
         <Route path="/register/admin" element={<RegisterAdmin />} /> */}
-        <Route path="/student/:userId/home" element={<StudentPage />} />
-        <Route path="/teacher/:userId/home" element={<TeacherPage />} />
-        <Route path="/admin/:userId/home" element={<AdminPage />} />
-        <Route path="/:userType/:userId/tests" element={<TestPage />} />
-        <Route path="/:userType/:userId/pdf-to-quiz" element={<PdfToQuizPage />} />
+        <Route path="/student/:userName/home" element={<StudentPage />} />
+        <Route path="/teacher/:userName/home" element={<TeacherPage />} />
+        <Route path="/admin/:userName/home" element={<AdminPage />} />
+        <Route path="/:userType/:userName/tests" element={<TestPage />} />
+        <Route path="/:userType/:userName/start-test" element={<ActiveTestPage />} />
+        <Route path="/:userType/:userName/pdf-to-quiz" element={<PdfToQuizPage />} />
       </Routes>
     </Router>
   );

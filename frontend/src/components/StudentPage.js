@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Panel from './pages/Panel';
+import { useUser } from '../UserContext';
 import './styles/StudentPage.css';
 
 function StudentPage() {
+    const { user } = useUser();
     const [activePage, setActivePage] = useState("Home");
     const [activeTests, setActiveTests] = useState([]);
     const [upcomingTests, setUpcomingTests] = useState([]);
     const [recentTests, setRecentTests] = useState([]);
+    const navigate = useNavigate();
 
-    const location = useLocation();
-    const name = location.state?.name || "Guest";
+    const name = user.name;
+    const userType = user.userType;
+    const userName = user.userName;
 
     useEffect(() => {
         fetch("http://localhost:5000/api/tests")
@@ -22,11 +26,15 @@ function StudentPage() {
             })
             .catch(error => console.error("Error fetching test data:", error));
     }, []);
+
+    const handleStartTest = () => {
+        navigate(`/${userType}/${userName}/start-test`);
+    }
     
 
     return (
         <div className="student-page">
-            <Panel activePage={activePage} setActivePage={setActivePage} />
+            <Panel activePage={activePage} setActivePage={setActivePage} userType={userType} userName={userName} />
 
             <div className="content">
                 <div className="user-greeting">
@@ -48,7 +56,7 @@ function StudentPage() {
                                     <h3>{test["Test Title"]}</h3>
                                     <p><strong>Start:</strong> {test["Start Date"]} at {test["Start Time"]}</p>
                                     <p><strong>End:</strong> {test["End Date"]} at {test["End Time"]}</p>
-                                    <button className="start-btn">Start Test</button>
+                                    <button className="start-btn" onClick={handleStartTest}>Start Test</button>
                                 </div>
                             ))}
                         </div>

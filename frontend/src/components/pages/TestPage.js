@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../styles/TestPage.css";
 import Panel from "./Panel";
 import "../styles/StudentPage.css";
@@ -6,9 +6,7 @@ import "../styles/StudentPage.css";
 const TestsPage = () => {
     const [activePage, setActivePage] = useState("Tests");
     const [activeTab, setActiveTab] = useState("Active Tests");
-	const [tests, setTests] = useState({ past: [], active: [], upcoming: [] });
-
-    
+	// const [tests, setTests] = useState({ past: [], active: [], upcoming: [] });
 
 	// Hardcoded test data
     const testData = {
