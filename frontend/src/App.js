@@ -31,9 +31,9 @@ function App() {
         <Route path="/:userType/:userName/start-test" element={<ActiveTestPage />} />
         <Route path="/:userType/:userName/pdf-to-quiz" element={<PdfToQuizPage />} />
         <Route path="/:userType/:userName/classes" element={<ClassesPage />} />
-        <Route path="/:userType/:userName/student-management" element={<StudentManagementPage />} />
-        <Route path="/:userType/:userName/teacher-management" element={<TeacherManagementPage />} />
-        <Route path="/:userType/:userName/tests-management" element={<TestManagementPage />} />
+        <Route path="/admin/:userName/student-management" element={<StudentManagementPage />} />
+        <Route path="/admin/:userName/teacher-management" element={<TeacherManagementPage />} />
+        <Route path="/admin/:userName/tests-management" element={<TestManagementPage />} />
       </Routes>
     </Router>
   );

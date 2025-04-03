@@ -5,6 +5,7 @@ const cors = require('cors');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const FormData = require('form-data');
+const queries = require("./Queries");
 const path = require("path");
 const app = express();
 const PORT = 5000;
@@ -47,6 +48,27 @@ db.connect((err) => {
   } else {
       console.log('Connected to MySQL database.');
   }
+});
+
+// Route to save student responses
+app.post("/student/submit-test", async (req, res) => {
+    try {
+        const { student_id, test_id, responses } = req.body;
+        const result = await queries.saveStudentResponses(student_id, test_id, responses);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Route to get questions for a test
+app.get("/test/questions/:test_id", async (req, res) => {
+    try {
+        const questions = await queries.getQuestionsForTest(req.params.test_id);
+        res.json({ success: true, questions });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 // API to handle PDF uploads & send to Flask
@@ -97,20 +119,6 @@ function loadUsersFromExcel() {
     return [];
   }
 }
-
-// Utility: Save users to the Excel file
-function saveUsersToExcel(users) {
-  try {
-    const worksheet = xlsx.utils.json_to_sheet(users);
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Users');
-    xlsx.writeFile(workbook, EXCEL_FILE);
-  } catch (error) {
-    console.error("Error writing to Excel file:", error);
-  }
-}
-
-
 
 app.post('/login', (req, res) => {
   const { id, password, role } = req.body;
@@ -174,38 +182,16 @@ function parseExcelDate(value) {
     return new Date((value - 25569) * 86400 * 1000).toISOString(); // Convert to ISO format
 }
 
-app.get('/api/tests', (req, res) => {
+app.get("/api/tests/:studentId", async (req, res) => {
     try {
-        if (!fs.existsSync(TEST_FILE)) {
-            return res.status(404).json({ message: "Test data file not found" });
-        }
-
-        const workbook = xlsx.readFile(TEST_FILE);
-        const sheets = workbook.Sheets;
-
-        function processSheet(sheet) {
-            if (!sheet) return [];
-            let json = xlsx.utils.sheet_to_json(sheet, { raw: false });
-            return json.map(test => ({
-                ...test,
-                "Start Date": parseExcelDate(test["Start Date"]),
-                "Start Time": parseExcelDate(test["Start Time"]),
-                "End Date": parseExcelDate(test["End Date"]),
-                "End Time": parseExcelDate(test["End Time"])
-            }));
-        }
-
-        const activeTests = processSheet(sheets["Active Tests"]);
-        const upcomingTests = processSheet(sheets["Upcoming Tests"]);
-        const recentTests = processSheet(sheets["Recent Tests"]);
-
-        res.json({ activeTests, upcomingTests, recentTests });
+        const { studentId } = req.params;
+        const tests = await queries.getTestsForStudent(studentId);
+        res.json(tests);
     } catch (error) {
-        console.error("Error reading test file:", error);
-        res.status(500).json({ message: "Error loading test data" });
+        console.error("Error fetching tests:", error);
+        res.status(500).json({ message: "Error fetching test data" });
     }
 });
-
 
 // Add a single student (Form Submission)
 app.post("/add-student", async (req, res) => {
@@ -278,7 +264,6 @@ app.post("/upload-students", uploadUsers.single("file"), async (req, res) => {
   }
 });
 
-
 // Add a single teacher (Form Submission)
 app.post("/add-teacher", async (req, res) => {
     const { username, password, name, email } = req.body;
@@ -303,54 +288,52 @@ app.post("/add-teacher", async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Server error" });
     }
-  });
+});
   
-  // Add multiple teachers (Excel Upload)
-  app.post("/upload-teachers", uploadUsers.single("file"), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+// Add multiple teachers (Excel Upload)
+app.post("/upload-teachers", uploadUsers.single("file"), async (req, res) => {
+if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+}
+
+try {
+    const filePath = path.join(__dirname, "uploads", req.file.filename);
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const teachers = xlsx.utils.sheet_to_json(sheet);
+
+    if (teachers.length === 0) {
+        return res.status(400).json({ message: "Empty file or invalid format" });
     }
-  
-    try {
-        const filePath = path.join(__dirname, "uploads", req.file.filename);
-        const workbook = xlsx.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const teachers = xlsx.utils.sheet_to_json(sheet);
-  
-        if (teachers.length === 0) {
-            return res.status(400).json({ message: "Empty file or invalid format" });
+
+    for (const teacher of teachers) {
+        const { username, password, name, email } = teacher;
+
+        if (!username || !password || !name || !email) {
+            return res.status(400).json({ message: "Missing fields in uploaded file" });
         }
-  
-        for (const teacher of teachers) {
-            const { username, password, name, email } = teacher;
-  
-            if (!username || !password || !name || !email) {
-                return res.status(400).json({ message: "Missing fields in uploaded file" });
+
+        // Hash the password before inserting into the database
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const query = "INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, 'teacher')";
+        db.query(query, [username, hashedPassword, name, email], (err, result) => {
+            if (err) {
+                console.error(`Error inserting ${username}:`, err);
             }
-  
-            // Hash the password before inserting into the database
-            const hashedPassword = await bcrypt.hash(password, 10);
-  
-            const query = "INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, 'teacher')";
-            db.query(query, [username, hashedPassword, name, email], (err, result) => {
-                if (err) {
-                    console.error(`Error inserting ${username}:`, err);
-                }
-            });
-        }
-  
-        // Remove the uploaded file after processing
-        fs.unlinkSync(filePath); 
-  
-        res.status(201).json({ message: `Teachers added successfully.` });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
+        });
     }
-  });
 
+    // Remove the uploaded file after processing
+    fs.unlinkSync(filePath); 
 
+    res.status(201).json({ message: `Teachers added successfully.` });
+} catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+}
+});
 
 app.post("/edit-user/:username", async (req, res) => {
   const { username } = req.params;
@@ -396,7 +379,6 @@ app.post("/edit-user/:username", async (req, res) => {
       res.status(500).json({ message: "Server error" });
   }
 });
-
 
 app.post("/upload-edit-users", uploadUsers.single("file"), async (req, res) => {
   if (!req.file) {
@@ -460,8 +442,6 @@ app.post("/upload-edit-users", uploadUsers.single("file"), async (req, res) => {
   }
 });
 
-
-
 app.post("/delete-user/:username", (req, res) => {
     const { username } = req.params;
 
@@ -481,7 +461,6 @@ app.post("/delete-user/:username", (req, res) => {
         res.json({ message: "User deleted successfully" });
     });
 });
-
 
 app.post("/upload-delete-users", uploadUsers.single("file"), async (req, res) => {
     if (!req.file) {
@@ -520,9 +499,6 @@ app.post("/upload-delete-users", uploadUsers.single("file"), async (req, res) =>
         res.status(500).json({ message: "Server error" });
     }
 });
-
-
-
 
 // Start the server
 app.listen(PORT, () => {

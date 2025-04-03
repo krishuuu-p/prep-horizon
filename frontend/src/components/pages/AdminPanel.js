@@ -1,9 +1,11 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../styles/AdminPanel.css';
+import { useUser } from '../../UserContext';
 
 function AdminPanel({ activePage, setActivePage }) {
     const navigate = useNavigate();
-    const { userType, userId } = useParams();
+    const { user } = useUser();
+    const userName = user.userName;
 
     const handleLogout = () => {
         navigate('/');
@@ -11,8 +13,9 @@ function AdminPanel({ activePage, setActivePage }) {
 
     const handleNavigation = (page) => {
         setActivePage(page);
+        console.log("userName is",userName);
         if (page !== activePage) {
-            navigate(`/admin/${userId}/${page.toLowerCase().replace(/\s+/g, '-')}`);
+            navigate(`/admin/${userName}/${page.toLowerCase().replace(/\s+/g, '-')}`);
         }
     };
 

@@ -17,7 +17,7 @@ function StudentPage() {
     const userName = user.userName;
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/tests")
+        fetch(`http://localhost:5000/api/tests/${user.userName}`)
             .then(response => response.json())
             .then(data => {
                 setActiveTests(data.activeTests);
@@ -25,7 +25,7 @@ function StudentPage() {
                 setRecentTests(data.recentTests);
             })
             .catch(error => console.error("Error fetching test data:", error));
-    }, []);
+    }, [user]);
 
     const handleStartTest = () => {
         navigate(`/${userType}/${userName}/start-test`);
@@ -34,7 +34,7 @@ function StudentPage() {
 
     return (
         <div className="student-page">
-            <Panel activePage={activePage} setActivePage={setActivePage} userType={userType} userName={userName} />
+            <Panel activePage={activePage} setActivePage={setActivePage} />
 
             <div className="content">
                 <div className="user-greeting">
@@ -51,14 +51,24 @@ function StudentPage() {
                             {activeTests.length === 0 && (
                                 <p className='caption'>No active tests at the moment.</p>
                             )}
-                            {activeTests.map((test, index) => (
-                                <div className="test-card active-test" key={index}>
-                                    <h3>{test["Test Title"]}</h3>
-                                    <p><strong>Start:</strong> {test["Start Date"]} at {test["Start Time"]}</p>
-                                    <p><strong>End:</strong> {test["End Date"]} at {test["End Time"]}</p>
-                                    <button className="start-btn" onClick={handleStartTest}>Start Test</button>
-                                </div>
-                            ))}
+                            {activeTests.map((test, index) => {
+                                const startdateObj = new Date(test.start_time);
+                                const startdate = startdateObj.toISOString().split("T")[0];
+                                const starttime = startdateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                                const enddateObj = new Date(test.end_time);
+                                const enddate = enddateObj.toISOString().split("T")[0];
+                                const endtime = enddateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                                return (
+                                    <div className="test-card active-test" key={index}>
+                                        <h3>{test.test_name}</h3>
+                                        <p><strong>Start:</strong> {startdate} at {starttime}</p>
+                                        <p><strong>End:</strong> {enddate} at {endtime}</p>
+                                        <button className="start-btn" onClick={handleStartTest}>Start Test</button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -69,14 +79,22 @@ function StudentPage() {
                             {upcomingTests.length === 0 && (
                                 <p className='caption'>No upcoming tests this week.</p>
                             )}
-                            {upcomingTests.map((test, index) => (
-                                <div className="test-card upcoming-test" key={index}>
-                                    <h3>{test["Test Title"]}</h3>
-                                    <p><strong>Start:</strong> {test["Start Date"]} at {test["Start Time"]}</p>
-                                    <p><strong>End:</strong> {test["End Date"]} at {test["End Time"]}</p>
-                                    <p><strong>Mode:</strong> {test["Mode"]}</p>
-                                </div>
-                            ))}
+                            {upcomingTests.map((test, index) => {
+                                const startdateObj = new Date(test.start_time);
+                                const startdate = startdateObj.toISOString().split("T")[0];
+                                const starttime = startdateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                                const enddateObj = new Date(test.end_time);
+                                const enddate = enddateObj.toISOString().split("T")[0];
+                                const endtime = enddateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                return (
+                                    <div className="test-card upcoming-test" key={index}>
+                                        <h3>{test.test_name}</h3>
+                                        <p><strong>Start:</strong> {startdate} at {starttime}</p>
+                                        <p><strong>End:</strong> {enddate} at {endtime}</p>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -87,13 +105,22 @@ function StudentPage() {
                             {recentTests.length === 0 && (
                                 <p className='caption'>No tests given this week.</p>
                             )}
-                            {recentTests.map((test, index) => (
-                                <div className="test-card recent-test" key={index}>
-                                    <h3>{test["Test Title"]}</h3>
-                                    <p><strong>Active:</strong> {test["Start Date"]} at {test["Start Time"]} - {test["End Date"]} at {test["End Time"]}</p>
-                                    <button className="analysis-btn">View Analysis</button>
-                                </div>
-                            ))}
+                            {recentTests.map((test, index) => { 
+                                const startdateObj = new Date(test.start_time);
+                                const startdate = startdateObj.toISOString().split("T")[0];
+                                const starttime = startdateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                                const enddateObj = new Date(test.end_time);
+                                const enddate = enddateObj.toISOString().split("T")[0];
+                                const endtime = enddateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                return (
+                                    <div className="test-card recent-test" key={index}>
+                                        <h3>{test.test_name}</h3>
+                                        <p><strong>Active:</strong> {startdate} at {starttime} - {enddate} at {endtime}</p>
+                                        <button className="analysis-btn">View Analysis</button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>                

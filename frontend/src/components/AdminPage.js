@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useUser } from "../UserContext";
 import AdminPanel from "./pages/AdminPanel";
 import "./styles/AdminPage.css"
 
 function AdminPage() {
     const [activePage, setActivePage] = useState("Home");
-    const location = useLocation();
+    const { user } = useUser();
 
-    const name = location.state?.name || "Guest";
+    const name = user.name;
 
     return (
         <>
