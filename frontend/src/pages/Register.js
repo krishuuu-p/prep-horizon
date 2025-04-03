@@ -33,7 +33,7 @@ function Register() {
     
     try {
       // POST request to your backend /register endpoint
-      const response = await axios.post('http://localhost:5000/register', {
+      const response = await axios.post('http://localhost:5002/register', {
         username,
         email,
         password

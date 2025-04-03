@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import '../styles/ActiveTest.css';
 
 const ActiveTestPage = () => {
     const [sections, setSections] = useState({
@@ -52,6 +53,8 @@ const ActiveTestPage = () => {
         Chemistry: 0,
     });
     const [timer, setTimer] = useState(600); // Example: 10 minutes in seconds
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+
 
     useEffect(() => {
         const countdown = setInterval(() => {
@@ -68,60 +71,188 @@ const ActiveTestPage = () => {
         return () => clearInterval(countdown);
     }, []);
 
+    
     const formatTime = () => {
         const minutes = Math.floor(timer / 60);
         const seconds = timer % 60;
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
-
+    
     const updateSingleQuestionStatus = (index) => {
         const updatedSections = { ...sections };
         const q = updatedSections[currentSubject][index];
-
+        
         if (q.status === "Not Visited") q.status = "Visited but Not Answered";
         setSections(updatedSections);
     };
+    const checkFirstQ=()=>{
+        const q = sections[currentSubject][currentQuestionIndex[currentSubject]];
+        if(q.status==="Not Visited"){
+            const updatedSections = { ...sections };
+            updatedSections[currentSubject][currentQuestionIndex[currentSubject]].status = "Visited but Not Answered";
+            setSections(updatedSections);
+        }
 
-    const loadQuestion = (index) => {
-        updateSingleQuestionStatus(index);
+        setTimeout(() => {
+            if (q.type === "MCQ") {
+                // If the user previously selected an answer, mark it
+                if (q.useranswer) {
+                    const selectedOption = document.querySelector(`input[name='answer'][value='${q.useranswer}']`);
+                    if (selectedOption) selectedOption.checked = true;
+                }
+            } 
+            else if (q.type === "Multiple Correct MCQ") {
+                // Check all previously selected options
+                if (q.useranswer) {
+                    q.useranswer.forEach((answer) => {
+                        const checkbox = document.querySelector(`input[name='answer'][value='${answer}']`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+            } 
+            else if (q.type === "Numerical") {
+                // If user previously entered a value, restore it
+                const numericalInput = document.querySelector("input[name='numerical-answer']");
+                if (numericalInput && q.useranswer) {
+                    numericalInput.value = q.useranswer;
+                }
+            }
+        }, 0); // Short delay to ensure inputs are in the DOM
+    }
+
+    const loadQuestion = useCallback((index) => {
+        const q = sections[currentSubject][index];
         setCurrentQuestionIndex((prev) => ({ ...prev, [currentSubject]: index }));
-    };
+    
+        if (q.status === "Not Visited") {
+            const updatedSections = { ...sections };
+            updatedSections[currentSubject][index].status = "Visited but Not Answered";
+            setSections(updatedSections);
+        }
+        // console.log("hi");
 
+        setTimeout(() => {
+            if (q.type === "MCQ") {
+                // If the user previously selected an answer, mark it
+                if (q.useranswer) {
+                    const selectedOption = document.querySelector(`input[name='answer'][value='${q.useranswer}']`);
+                    if (selectedOption) selectedOption.checked = true;
+                }
+            } 
+            else if (q.type === "Multiple Correct MCQ") {
+                // Check all previously selected options
+                if (q.useranswer) {
+                    q.useranswer.forEach((answer) => {
+                        const checkbox = document.querySelector(`input[name='answer'][value='${answer}']`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+            } 
+            else if (q.type === "Numerical") {
+                // If user previously entered a value, restore it
+                const numericalInput = document.querySelector("input[name='numerical-answer']");
+                if (numericalInput && q.useranswer) {
+                    numericalInput.value = q.useranswer;
+                }
+            }
+        }, 0); // Short delay to ensure inputs are in the DOM
+    }, [sections, currentSubject]);
+    
+    
+    
     const handleSaveNext = () => {
         const index = currentQuestionIndex[currentSubject];
         const updatedSections = { ...sections };
         const q = updatedSections[currentSubject][index];
-
-        q.useranswer = document.querySelector("input[name='answer']:checked")?.value || null;
-        q.status = q.useranswer ? "Answered" : "Visited but Not Answered";
-
+        console.log("This is selected answer",selectedAnswer);
+        // Check the question type and save the answer accordingly
+        if (q.type === "MCQ") {
+            q.useranswer = selectedAnswer; // Single answer (string)
+        } else if (q.type === "Multiple Correct MCQ") {
+            q.useranswer = [...selectedAnswer]; // Multiple answers (array)
+        } else if (q.type === "Numerical") {
+            q.useranswer = selectedAnswer ? selectedAnswer.trim() : null; // Trim spaces
+        }
+    
+        q.status = selectedAnswer && selectedAnswer.length > 0 ? "Answered" : "Visited but Not Answered";
+        console.log("I am handle Save and Next.")
+        console.log("This is useranswer",q.useranswer);
         setSections(updatedSections);
-        if (index + 1 < updatedSections[currentSubject].length) loadQuestion(index + 1);
+        // Move to the next question
+        if (index + 1 < updatedSections[currentSubject].length) {
+            console.log("this");
+            loadQuestion(index + 1);
+        }
     };
-
+    
+    
     const handleClearResponse = () => {
         const index = currentQuestionIndex[currentSubject];
         const updatedSections = { ...sections };
         const q = updatedSections[currentSubject][index];
-
-        q.useranswer = null;
+    
+        // Reset user answer based on question type
+        if (q.type === "MCQ") {
+            q.useranswer = null; // Single answer cleared
+            setSelectedAnswer(null);
+        } else if (q.type === "Multiple Correct MCQ") {
+            q.useranswer = []; // Multiple answers cleared
+            setSelectedAnswer([]);
+        } else if (q.type === "Numerical") {
+            q.useranswer = ""; // Numerical answer cleared
+            setSelectedAnswer("");
+        }
+    
         q.status = "Visited but Not Answered";
-
+    
         setSections(updatedSections);
-        document.querySelectorAll("input[name='answer']").forEach((input) => (input.checked = false));
     };
-
+    
+    
+    
     const handleMarkReview = () => {
-        const index = currentQuestionIndex[currentSubject];
-        const updatedSections = { ...sections };
-        const q = updatedSections[currentSubject][index];
+    const index = currentQuestionIndex[currentSubject];
+    const updatedSections = { ...sections };
+    const q = updatedSections[currentSubject][index];
 
-        q.useranswer = document.querySelector("input[name='answer']:checked")?.value || null;
-        q.status = "Marked for Review";
+    // Save answer based on question type
+    if (q.type === "MCQ") {
+        q.useranswer = selectedAnswer;
+    } else if (q.type === "Multiple Correct MCQ") {
+        q.useranswer = [...selectedAnswer]; // Copy array to avoid mutation
+    } else if (q.type === "Numerical") {
+        q.useranswer = selectedAnswer ? selectedAnswer.trim() : null;
+    }
 
-        setSections(updatedSections);
-        if (index + 1 < updatedSections[currentSubject].length) loadQuestion(index + 1);
-    };
+    q.status = "Marked for Review";
+
+    setSections(updatedSections);
+
+    // Move to the next question if available
+    if (index + 1 < updatedSections[currentSubject].length) {
+        loadQuestion(index + 1);
+    }
+};
+
+
+useEffect(() => {
+    const question = sections[currentSubject][currentQuestionIndex[currentSubject]];
+    
+    let savedAnswer;
+    
+    if (question.type === "MCQ") {
+        savedAnswer = question.useranswer || null;
+    } else if (question.type === "Multiple Correct MCQ") {
+        savedAnswer = question.useranswer || [];
+    } else if (question.type === "Numerical") {
+        savedAnswer = question.useranswer || "";  // Ensure empty string for numerical input
+    }
+    console.log("This is saved answer",savedAnswer);
+    console.log("I am use effect.")
+    setSelectedAnswer(savedAnswer);
+}, [currentSubject, currentQuestionIndex, sections]);
+    
+    
 
     return (
         <div>
@@ -133,7 +264,12 @@ const ActiveTestPage = () => {
             <div className="Subject pallete">
                 <li className="Subject">
                     {Object.keys(sections).map((subject) => (
-                        <button key={subject} className="subj" onClick={() => setCurrentSubject(subject)}>
+                        <button key={subject} className="subj" 
+                            onClick={() => {
+                                setCurrentSubject(subject);
+                            }
+                        }
+                            >
                             {subject}
                         </button>
                     ))}
@@ -145,7 +281,7 @@ const ActiveTestPage = () => {
                     <h3 className="question-heading">Question {currentQuestionIndex[currentSubject] + 1}</h3>
                     <p className="question-text">{sections[currentSubject][currentQuestionIndex[currentSubject]].question}</p>
 
-                    <div className="options">
+                    {/* <div className="options">
                         {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "MCQ" &&
                             Object.entries(sections[currentSubject][currentQuestionIndex[currentSubject]].options).map(
                                 ([key, value]) => (
@@ -155,7 +291,66 @@ const ActiveTestPage = () => {
                                     </label>
                                 )
                             )}
+                    </div> */}
+
+                    <div className="options">
+                        {/* Single Correct MCQ */}
+                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "MCQ" &&
+                            Object.entries(sections[currentSubject][currentQuestionIndex[currentSubject]].options).map(([key, value]) => (
+                                <label key={key}>
+                                    <input
+                                        type="radio"
+                                        name="answer"
+                                        value={key}
+                                        checked={selectedAnswer === key}
+                                        onChange={(e) => setSelectedAnswer(e.target.value)}
+                                    />
+                                    {value}
+                                </label>
+                            ))}
+
+                        {/* Multiple Correct MCQ */}
+                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "Multiple Correct MCQ" &&
+                            Object.entries(sections[currentSubject][currentQuestionIndex[currentSubject]].options).map(([key, value]) => (
+                                <label key={key}>
+                                {/* <input 
+    type="checkbox" 
+    value={key}
+    checked={Array.isArray(selectedAnswer) && selectedAnswer.includes(key)} 
+    onChange={handleMultiCorrectSelection} 
+/> */}
+                                    <input
+                                        type="checkbox"
+                                        name="answer"
+                                        value={key}
+                                        checked={Array.isArray(selectedAnswer) && selectedAnswer.includes(key)} 
+                                        onChange={(e) => {
+                                            let updatedSelection = [...(selectedAnswer || [])];
+                                            if (e.target.checked) {
+                                                updatedSelection.push(key);
+                                            } else {
+                                                updatedSelection = updatedSelection.filter((ans) => ans !== key);
+                                            }
+                                            console.log("This is updated selection",updatedSelection);
+                                            setSelectedAnswer(updatedSelection);
+                                        }}
+                                    />
+                                    {value}
+                                </label>
+                            ))}
+
+                        {/* Numerical Type */}
+                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "Numerical" && (
+                            <input
+                                type="text"
+                                name="numerical-answer"
+                                placeholder="Enter your answer"
+                                value={selectedAnswer || ""}
+                                onChange={(e) => setSelectedAnswer(e.target.value.trim())}
+                            />
+                        )}
                     </div>
+
 
                     <div className="buttons">
                         <button className="save-next" onClick={handleSaveNext}>
@@ -177,11 +372,17 @@ const ActiveTestPage = () => {
                         {sections[currentSubject].map((q, index) => (
                             <button
                                 key={index}
-                                onClick={() => loadQuestion(index)}
+                                onClick={() => {
+                                    checkFirstQ();
+                                    loadQuestion(index);
+                                }
+                                }
                                 style={{
                                     backgroundColor:
-                                        q.status === "Not Visited"
-                                            ? "white"
+                                        q.status === "Not Visited"&&index!==currentQuestionIndex[currentSubject]
+                                            ? "white":
+                                            q.status==="Not Visited"
+                                            ? "red"
                                             : q.status === "Visited but Not Answered"
                                             ? "red"
                                             : q.status === "Answered"

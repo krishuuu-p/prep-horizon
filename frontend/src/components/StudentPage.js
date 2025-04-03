@@ -17,7 +17,7 @@ function StudentPage() {
     const userName = user.userName;
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/tests")
+        fetch("http://localhost:5002/api/tests")
             .then(response => response.json())
             .then(data => {
                 setActiveTests(data.activeTests);

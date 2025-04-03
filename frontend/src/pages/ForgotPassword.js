@@ -43,7 +43,7 @@ function ForgotPassword() {
     }
     // If answer is correct, call backend to retrieve password
     try {
-      const response = await axios.post('http://localhost:5000/retrieve-password', { email });
+      const response = await axios.post('http://localhost:5002/retrieve-password', { email });
       setPassword(response.data.password);
       setMessage('Password retrieved successfully.');
       setStep(2);

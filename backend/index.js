@@ -6,7 +6,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const FormData = require('form-data');
 const app = express();
-const PORT = 5000;
+const PORT = 5002;
 const EXCEL_FILE = 'users.xlsx'; // Ensure this file is in the same folder or update the path
 const FLASK_API_URL = "http://127.0.0.1:5001/process-pdf";
 app.use(cors());
@@ -20,7 +20,7 @@ const bcrypt = require('bcrypt'); // For password hashing
 const db = mysql.createConnection({
     host: 'localhost',
   user: 'root',
-  password: 'prep123', // Replace with your MySQL password
+  password: 'Prephorizon@123', // Replace with your MySQL password
   database: 'prep_horizon'
 });
 
