@@ -57,36 +57,39 @@ function TeacherManagementPage() {
                         </button>
                     ))}
                 </div>
-                <div className="content">
+                <div className="user-content">
                     {activeTab === "Add Teachers" && (
                         <>
-                            <h2>Add Teachers</h2>
+                            <h2 className="user-h2">Add Teachers</h2>
                             <input type="text" name="username" placeholder="Username" onChange={handleInputChange} />
                             <input type="password" name="password" placeholder="Password" onChange={handleInputChange} />
                             <input type="text" name="name" placeholder="Name" onChange={handleInputChange} />
                             <input type="email" name="email" placeholder="Email" onChange={handleInputChange} />
                             <button onClick={() => handleSubmit("add-teacher")}>Add Teacher</button>
+                            <h2 className="OR">OR</h2>
                             <input type="file" onChange={handleFileChange} />
                             <button onClick={() => handleFileUpload("upload-teachers")}>Upload Excel</button>
                         </>
                     )}
                     {activeTab === "Edit Teachers" && (
                         <>
-                            <h2>Edit Teachers</h2>
+                            <h2 className="user-h2">Edit Teachers</h2>
                             <input type="text" name="username" placeholder="Username (Search)" onChange={handleInputChange} />
                             <input type="text" name="name" placeholder="New Name" onChange={handleInputChange} />
                             <input type="email" name="email" placeholder="New Email" onChange={handleInputChange} />
                             <input type="password" name="password" placeholder="New Password" onChange={handleInputChange} />
                             <button onClick={() => handleSubmit("edit-user/" + formData.username)}>Edit Teacher</button>
+                            <h2 className="OR">OR</h2>
                             <input type="file" onChange={handleFileChange} />
                             <button onClick={() => handleFileUpload("upload-edit-users")}>Upload Excel</button>
                         </>
                     )}
                     {activeTab === "Delete Teachers" && (
                         <>
-                            <h2>Delete Teachers</h2>
+                            <h2 className="user-h2">Delete Teachers</h2>
                             <input type="text" name="username" placeholder="Username (Search)" onChange={handleInputChange} />
                             <button onClick={() => handleSubmit("delete-user/" + formData.username)}>Delete Teacher</button>
+                            <h2 className="OR">OR</h2>
                             <input type="file" onChange={handleFileChange} />
                             <button onClick={() => handleFileUpload("upload-delete-users")}>Upload Excel</button>
                         </>

@@ -4,10 +4,11 @@ import AdminPanel from "./pages/AdminPanel";
 import "./styles/AdminPage.css"
 
 function AdminPage() {
-    const [activePage, setActivePage] = useState("Home");
     const { user } = useUser();
+    const [activePage, setActivePage] = useState("Home");
 
-    const name = user.name;
+    const userType = user.userType;
+    const userName = user.userName;
 
     return (
         <>
@@ -15,7 +16,7 @@ function AdminPage() {
 
         <div>
             <h2>Admin Dashboard</h2>
-            <p>Welcome, {name}!</p>
+            <p>Welcome, {userName}!</p>
         </div>
         </>
     );
