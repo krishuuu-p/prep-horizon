@@ -3,6 +3,9 @@ A testing platform
 Running the Full Stack Application
 Each part of the application should run in a separate terminal.
 
+
+Create 2 separates .env files by copying the contents of .env.example files in both frontend and backend folders
+
 🖥️ Terminal 1 (Flask Backend)
 1. Navigate to the backend folder
    
