@@ -26,7 +26,7 @@ function PdfToQuizPage() {
 
     try {
       // Ensure the endpoint URL matches your Flask server settings.
-      const response = await axios.post("http://localhost:5001/process-pdf", formData, {
+      const response = await axios.post(`${process.env.REACT_APP_FLASK_URL}/process-pdf`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       setQuiz(response.data.quiz);

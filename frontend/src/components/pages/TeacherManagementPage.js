@@ -19,7 +19,7 @@ function TeacherManagementPage() {
 
     const handleSubmit = async (endpoint) => {
         try {
-            const response = await axios.post(`http://localhost:5000/${endpoint}`, formData);
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/${endpoint}`, formData);
             alert(response.data.message);
         } catch (error) {
             alert("Error: " + (error.response?.data.message || error.message));
@@ -36,7 +36,7 @@ function TeacherManagementPage() {
         formData.append("file", selectedFile);
 
         try {
-            const response = await axios.post(`http://localhost:5000/${endpoint}`, formData, {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/${endpoint}`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             alert(response.data.message);

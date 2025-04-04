@@ -31,7 +31,7 @@ function RegisterStudent() {
 
     try {
       // POST request to /register with role and default dashboard
-      const response = await axios.post('http://localhost:5002/register', {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/register`, {
         username,
         email,
         password,

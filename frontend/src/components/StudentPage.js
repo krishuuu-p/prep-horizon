@@ -17,7 +17,7 @@ function StudentPage() {
     const userName = user.userName;
 
     useEffect(() => {
-        fetch(`http://localhost:5000/api/tests/${user.userName}`)
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/tests/${user.userName}`)
             .then(response => response.json())
             .then(data => {
                 setActiveTests(data.activeTests);

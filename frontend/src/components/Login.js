@@ -44,7 +44,7 @@ function Login() {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post('http://localhost:5002/login', {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/login`, {
                 id: user.userName,
                 password: password,
                 role: user.userType

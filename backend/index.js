@@ -8,7 +8,8 @@ const FormData = require('form-data');
 const queries = require("./Queries");
 const path = require("path");
 const app = express();
-const PORT = 5002;
+require('dotenv').config();
+const PORT=process.env.PORT
 const EXCEL_FILE = 'users.xlsx'; // Ensure this file is in the same folder or update the path
 const FLASK_API_URL = "http://127.0.0.1:5001/process-pdf";
 app.use(cors());
@@ -38,7 +39,7 @@ const uploadUsers = multer({ storage: storage });
 const db = mysql.createConnection({
     host: 'localhost',
   user: 'root',
-  password: 'Prephorizon@123', // Replace with your MySQL password
+  password: `${process.env.MYSQL_PASSWORD}`, // Replace with your MySQL password
   database: 'prep_horizon'
 });
 
@@ -134,6 +135,7 @@ app.post('/login', (req, res) => {
   `;
 
   db.query(query, [id, id, role], async (err, results) => {
+    console.log(results);
       if (err) {
           console.error("Database error:", err);
           return res.status(601).json({ message: "Server error" });
