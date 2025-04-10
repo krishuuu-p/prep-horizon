@@ -3,7 +3,9 @@ const axios = require('axios');
 const multer = require('multer');
 const cors = require('cors');
 const xlsx = require('xlsx');
+const http = require('http');
 const fs = require('fs');
+const { Server } = require('socket.io');
 const FormData = require('form-data');
 const queries = require("./Queries");
 const path = require("path");
@@ -16,11 +18,59 @@ const FLASK_API_URL = "http://127.0.0.1:5001/process-pdf";
 
 app.use(cors());
 app.use(express.json());
-
+const server = http.createServer(app);
 const upload = multer({ dest: "uploads/" });
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt'); // For password hashing
-
+const io = new Server(server, {
+    cors: {
+     origin: ['http://localhost:3000', 'http://10.81.65.73:3000'], // Or "http://localhost:3000" if frontend is running there
+      methods: ["GET", "POST"]
+    }
+  });
+  
+  const usersInRoom = {};
+  
+  io.on("connection", (socket) => {
+    console.log("New client connected:", socket.id);
+  
+    socket.on("join-room", (roomId) => {
+      console.log(`${socket.id} joined ${roomId}`);
+      socket.join(roomId);
+  
+      if (!usersInRoom[roomId]) {
+        usersInRoom[roomId] = [];
+      }
+  
+      usersInRoom[roomId].push(socket.id);
+  
+      const otherUsers = usersInRoom[roomId].filter((id) => id !== socket.id);
+      if (otherUsers.length > 0) {
+        socket.emit("user-joined", otherUsers[0]); // Tell this user who to call
+      }
+  
+      // Optional cleanup
+      socket.on("disconnect", () => {
+        console.log(`${socket.id} disconnected`);
+        usersInRoom[roomId] = usersInRoom[roomId].filter((id) => id !== socket.id);
+      });
+    });
+  
+    socket.on("sending-signal", (payload) => {
+      io.to(payload.userToSignal).emit("user-signal", {
+        signal: payload.signal,
+        callerID: payload.callerID
+      });
+    });
+  
+    socket.on("returning-signal", (payload) => {
+      io.to(payload.callerID).emit("receiving-returned-signal", {
+        signal: payload.signal,
+        id: socket.id
+      });
+    });
+  });
+  
 // Multer storage setup for file uploads for student and teacher management
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -588,6 +638,6 @@ app.post("/upload-delete-users", uploadUsers.single("file"), async (req, res) =>
 });
 
 // Start the server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

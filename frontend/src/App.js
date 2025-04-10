@@ -1,3 +1,5 @@
+import process from 'process';
+window.process = process;
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './components/pages/LoginPage';
 import ForgotPassword from './components/pages/ForgotPassword';
