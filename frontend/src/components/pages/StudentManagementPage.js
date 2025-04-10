@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import AdminPanel from "./AdminPanel";
-import "../styles/StudentManagementPage.css";
+import "../styles/ManagementPage.css";
 
 function StudentManagementPage() {
     const [activePage, setActivePage] = useState("Student Management");
@@ -40,14 +40,13 @@ function StudentManagementPage() {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             alert(response.data.message);
-            // alert(response.data.errors); // For debugging
         } catch (error) {
             alert(error.response?.data?.message || "Error uploading file");
         }
     };
 
     return (
-        <div className="student-management">
+        <div className="user-management">
             <AdminPanel activePage={activePage} setActivePage={setActivePage} />
             <div className="main-container">
                 <div className="sidebar">

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from 'axios';
 import AdminPanel from "./AdminPanel";
-import "../styles/TeacherManagementPage.css"
+import "../styles/ManagementPage.css"
 
 function TeacherManagementPage() {
     const [activePage, setActivePage] = useState("Teacher Management");
@@ -47,7 +47,7 @@ function TeacherManagementPage() {
     };
 
     return (
-        <div className="teacher-management">
+        <div className="user-management">
             <AdminPanel activePage={activePage} setActivePage={setActivePage} />
             <div className="main-container">
                 <div className="sidebar">

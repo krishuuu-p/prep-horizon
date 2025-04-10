@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../styles/TestPage.css";
 import Panel from "./Panel";
-import "../styles/StudentPage.css";
+import "../styles/StudentHomePage.css";
 
 const TestsPage = () => {
     const [activePage, setActivePage] = useState("Tests");
