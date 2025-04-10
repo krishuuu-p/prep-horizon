@@ -1,13 +1,12 @@
 # PrepHorizon
 A testing platform
 
-> Create 2 separates .env files by copying the contents of .env.example files in both frontend and backend folders
+Create 2 separates .env files by copying the contents of .env.example files in both frontend and backend folders
 
 ### Database syncing
 * Main database file is database_dump.sql
-* If you make any changes and want to create a dump: `mysqldump -u root -p --default-character-set=utf8 --databases prep_horizon > database_dump.sql`
-* If you want to sync the changes to your local database: `mysql -u root -p prep_horizon < database_dump.sql`
-
+* If you make any changes to database structure or add data and want to create a dump: `mysqldump -u root -p --default-character-set=utf8 --databases prep_horizon > database_dump.sql`
+* Whenever you pull, sync the changes to your local database: `mysql -u root -p prep_horizon < database_dump.sql`
 
 ### Running the website
 Running the Full Stack Application
