@@ -10,7 +10,7 @@ function Panel({ activePage, setActivePage }) {
 
     const handleLogout = () => {
         setUser({ userType: null, userName: '', name: '' });
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("user");
         navigate('/');
     };
 
