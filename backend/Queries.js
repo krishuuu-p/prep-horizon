@@ -2,27 +2,22 @@ const pool = require('./db');
 
 async function getTestsForStudent(studentId) { 
     try {
-        // Get user ID based on username
         const idQuery = `SELECT id FROM users WHERE username = ?;`;
         const [idResult] = await pool.query(idQuery, [studentId]);
 
-        // ✅ Fix: Ensure `idResult` is defined and has data
         if (!idResult || idResult.length === 0) {
             throw new Error("Student not found");
         }
 
-        // Get classes the student is enrolled in
         const classQuery = `SELECT class_id FROM enrollments WHERE student_id = ?;`;
         const [classResult] = await pool.query(classQuery, [idResult[0].id]);
 
-        // ✅ Fix: Ensure `classResult` is defined before accessing `length`
         if (!classResult || classResult.length === 0) {
             return { activeTests: [], upcomingTests: [], recentTests: [] };
         }
 
         const classIds = classResult.map(row => row.class_id);
 
-        // Fetch tests related to those classes
         const activeTestsQuery = `
             SELECT * FROM tests 
             WHERE class_id IN (?) AND NOW() BETWEEN start_time AND end_time
@@ -55,10 +50,8 @@ async function getTestsForStudent(studentId) {
 }
 
 module.exports = {
-    // Fetches tests available for a given student based on enrolled classes
     getTestsForStudent,
 
-    // Saves student responses for a test
     saveStudentResponses: async (student_id, test_id, responses) => {
         const client = await pool.connect();
         try {
@@ -83,7 +76,6 @@ module.exports = {
         }
     },
 
-    // Fetches questions for a test
     getQuestionsForTest: async (test_id) => {
         const query = `
             SELECT q.question_id, q.question_text, q.options, q.correct_answer

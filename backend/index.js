@@ -13,7 +13,7 @@ const app = express();
 require('dotenv').config();
 
 const PORT = process.env.PORT
-const EXCEL_FILE = 'users.xlsx'; // Ensure this file is in the same folder or update the path
+const EXCEL_FILE = 'users.xlsx'; 
 const FLASK_API_URL = "http://127.0.0.1:5001/process-pdf";
 
 app.use(cors());
@@ -21,7 +21,7 @@ app.use(express.json());
 const server = http.createServer(app);
 const upload = multer({ dest: "uploads/" });
 const mysql = require('mysql2');
-const bcrypt = require('bcrypt'); // For password hashing
+const bcrypt = require('bcrypt');
 const io = new Server(server, {
     cors: {
      origin: ['http://localhost:3000', 'http://10.81.65.73:3000'], // Or "http://localhost:3000" if frontend is running there
@@ -87,11 +87,10 @@ const storage = multer.diskStorage({
 
 const uploadUsers = multer({ storage: storage });
 
-// MySQL Connection
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: `${process.env.MYSQL_PASSWORD}`, // Replace with your MySQL password
+    password: `${process.env.MYSQL_PASSWORD}`, 
     database: 'prep_horizon'
 });
 
@@ -103,7 +102,6 @@ db.connect((err) => {
     }
 });
 
-// Route to save student responses
 app.post("/student/submit-test", async (req, res) => {
     try {
         const { student_id, test_id, responses } = req.body;
@@ -114,7 +112,6 @@ app.post("/student/submit-test", async (req, res) => {
     }
 });
 
-// Route to get questions for a test
 app.get("/test/questions/:test_id", async (req, res) => {
     try {
         const questions = await queries.getQuestionsForTest(req.params.test_id);
@@ -124,15 +121,12 @@ app.get("/test/questions/:test_id", async (req, res) => {
     }
 });
 
-// API to handle PDF uploads & send to Flask
 app.post("/upload-pdf", upload.single("file"), async (req, res) => {
     try {
         const form = new FormData();
-        // If file is provided, append it
         if (req.file) {
             form.append("file", fs.createReadStream(req.file.path), req.file.originalname);
         }
-        // Append URL and manual text if provided
         if (req.body.url) {
             form.append("url", req.body.url);
         }
@@ -140,12 +134,10 @@ app.post("/upload-pdf", upload.single("file"), async (req, res) => {
             form.append("manual_text", req.body.manual_text);
         }
 
-        // Forward the form data to the Flask API
         const response = await axios.post(FLASK_API_URL, form, {
             headers: form.getHeaders()
         });
 
-        // Clean up the uploaded file if it was saved locally
         if (req.file) {
             fs.unlinkSync(req.file.path);
         }
@@ -157,7 +149,6 @@ app.post("/upload-pdf", upload.single("file"), async (req, res) => {
     }
 });
 
-// Utility: Load users from the Excel file
 function loadUsersFromExcel() {
     try {
         if (fs.existsSync(EXCEL_FILE)) {
@@ -198,7 +189,6 @@ app.post('/login', (req, res) => {
 
         const user = results[0];
 
-        // Compare the hashed password with the entered password
 
         const match = await bcrypt.compare(password, user.password);
         //   const match = (password == user.password);
@@ -210,8 +200,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-// Retrieve Password endpoint: Given an email, return the stored password
-// WARNING: Returning plaintext passwords is insecure and only for demonstration.
 app.post('/retrieve-password', (req, res) => {
     const { email } = req.body;
     if (!email) {
@@ -231,8 +219,8 @@ app.post('/retrieve-password', (req, res) => {
 const TEST_FILE = 'testData.xlsx';
 
 function parseExcelDate(value) {
-    if (!value || isNaN(value)) return value; // Return as-is if not a valid number
-    return new Date((value - 25569) * 86400 * 1000).toISOString(); // Convert to ISO format
+    if (!value || isNaN(value)) return value; 
+    return new Date((value - 25569) * 86400 * 1000).toISOString(); 
 }
 
 app.get("/api/tests/:studentId", async (req, res) => {
@@ -260,7 +248,6 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
         const username = req.body.username;
         console.log(username);
 
-        // Get user ID based on username
         const idResult = await new Promise((resolve, reject) => {
             const query = `SELECT id FROM users WHERE username = ?;`;
             db.query(query, [username], (err, results) => {
@@ -278,7 +265,7 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const userId = idResult[0].id; // Correctly extracting user ID
+        const userId = idResult[0].id; 
 
         if (tests.length === 0) {
             return res.status(400).json({ message: "Empty file or invalid format" });
@@ -291,7 +278,6 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
             }
 
             const class_codes = classes.split(",").map(c => c.trim());
-            // get class IDs from the database
             const classIds = await new Promise((resolve, reject) => {
                 const query = "SELECT id FROM classes WHERE class_code IN (?)";
                 db.query(query, [class_codes], (err, results) => {
@@ -304,12 +290,10 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
             });
             console.log(classIds);
 
-            // Convert Excel datetime to ISO string
             const startDate = parseExcelDate(start_time);
             const endDate = parseExcelDate(end_time);
             const totalMarks = parseInt(total_marks, 10);
 
-            // add this test for all classIds
             for (const classId of classIds) {
                 const query = "INSERT INTO tests (test_name, start_time, end_time, total_marks, class_id, created_by) VALUES (?, ?, ?, ?, ?, ?)";
                 db.query(query, [test_name, startDate, endDate, totalMarks, classId, userId], (err, result) => {
@@ -320,7 +304,6 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
             }
         }
 
-        // Remove the uploaded file after processing
         fs.unlinkSync(filePath);
 
         res.status(201).json({ message: `Tests added successfully.` });
@@ -330,7 +313,6 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
     }
 });
 
-// Add a single student (Form Submission)
 app.post("/add-student", async (req, res) => {
     const { username, password, name, email } = req.body;
 
@@ -339,7 +321,6 @@ app.post("/add-student", async (req, res) => {
     }
 
     try {
-        // Hash the password before storing
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const query = "INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, 'student')";
@@ -356,7 +337,6 @@ app.post("/add-student", async (req, res) => {
     }
 });
 
-// Add multiple students (Excel Upload)
 app.post("/upload-students", uploadUsers.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -380,7 +360,6 @@ app.post("/upload-students", uploadUsers.single("file"), async (req, res) => {
                 return res.status(400).json({ message: "Missing fields in uploaded file" });
             }
 
-            // Hash the password before inserting into the database
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const query = "INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, 'student')";
@@ -391,7 +370,6 @@ app.post("/upload-students", uploadUsers.single("file"), async (req, res) => {
             });
         }
 
-        // Remove the uploaded file after processing
         fs.unlinkSync(filePath);
 
         res.status(201).json({ message: `Students added successfully.` });
@@ -401,7 +379,6 @@ app.post("/upload-students", uploadUsers.single("file"), async (req, res) => {
     }
 });
 
-// Add a single teacher (Form Submission)
 app.post("/add-teacher", async (req, res) => {
     const { username, password, name, email } = req.body;
 
@@ -410,7 +387,6 @@ app.post("/add-teacher", async (req, res) => {
     }
 
     try {
-        // Hash the password before storing
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const query = "INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, 'teacher')";
@@ -427,7 +403,6 @@ app.post("/add-teacher", async (req, res) => {
     }
 });
 
-// Add multiple teachers (Excel Upload)
 app.post("/upload-teachers", uploadUsers.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
@@ -451,7 +426,6 @@ app.post("/upload-teachers", uploadUsers.single("file"), async (req, res) => {
                 return res.status(400).json({ message: "Missing fields in uploaded file" });
             }
 
-            // Hash the password before inserting into the database
             const hashedPassword = await bcrypt.hash(password, 10);
 
             const query = "INSERT INTO users (username, password, name, email, role) VALUES (?, ?, ?, ?, 'teacher')";
@@ -462,7 +436,6 @@ app.post("/upload-teachers", uploadUsers.single("file"), async (req, res) => {
             });
         }
 
-        // Remove the uploaded file after processing
         fs.unlinkSync(filePath);
 
         res.status(201).json({ message: `Teachers added successfully.` });
@@ -745,7 +718,6 @@ app.post("/add-class", async (req, res) => {
             return res.status(400).json({ message: "Empty file or invalid format" });
         }
 
-        // Convert db.query() to promise-based
         const dbQuery = (sql, params) => {
             return new Promise((resolve, reject) => {
                 db.query(sql, params, (err, results) => {
@@ -755,7 +727,6 @@ app.post("/add-class", async (req, res) => {
             });
         };
 
-        // Fetch class_id
         const classResults = await dbQuery("SELECT id FROM classes WHERE class_code = ?", [class_code]);
 
         if (classResults.length === 0) {
@@ -764,7 +735,6 @@ app.post("/add-class", async (req, res) => {
 
         const class_id = classResults[0].id;
 
-        // Process all users
         for (const user of users) {
             const { username } = user;
 
@@ -772,17 +742,15 @@ app.post("/add-class", async (req, res) => {
                 return res.status(400).json({ message: "Missing field - username" });
             }
 
-            // Fetch user_id
             const userResults = await dbQuery("SELECT id FROM users WHERE username = ?", [username]);
 
             if (userResults.length === 0) {
                 console.warn(`User not found: ${username}`);
-                continue; // Skip to next user
+                continue;
             }
 
             const user_id = userResults[0].id;
 
-            // Insert into enrollments
             try {
                 await dbQuery("INSERT INTO enrollments (student_id, class_id) VALUES (?, ?)", [user_id, class_id]);
             } catch (insertError) {
@@ -821,7 +789,6 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
             return res.status(400).json({ message: "Empty file or invalid format" });
         }
 
-        // Convert db.query() to a Promise-based function
         const dbQuery = (sql, params) => {
             return new Promise((resolve, reject) => {
                 db.query(sql, params, (err, results) => {
@@ -831,7 +798,6 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
             });
         };
 
-        // Fetch class_id
         const classResults = await dbQuery("SELECT id FROM classes WHERE class_code = ?", [class_code]);
 
         if (classResults.length === 0) {
@@ -840,7 +806,6 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
 
         const class_id = classResults[0].id;
 
-        // Process all users for deletion
         for (const user of users) {
             const { username } = user;
 
@@ -848,17 +813,15 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
                 return res.status(400).json({ message: "Missing field - username" });
             }
 
-            // Fetch user_id
             const userResults = await dbQuery("SELECT id FROM users WHERE username = ?", [username]);
 
             if (userResults.length === 0) {
                 console.warn(`User not found: ${username}`);
-                continue; // Skip to next user
+                continue; 
             }
 
             const user_id = userResults[0].id;
 
-            // Delete from enrollments
             try {
                 await dbQuery("DELETE FROM enrollments WHERE student_id = ? AND class_id = ?", [user_id, class_id]);
             } catch (deleteError) {
@@ -878,7 +841,6 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
 
 
 
-// Start the server
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

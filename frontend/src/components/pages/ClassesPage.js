@@ -19,7 +19,7 @@ function ClassesPage() {
 
     const handleSubmit = async (endpoint) => {
         try {
-            const response = await axios.post(`http://localhost:5000/${endpoint}`, classFormData);
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/${endpoint}`, classFormData);
             alert(response.data.message);
         } catch (error) {
             alert("Error: " + (error.response?.data.message || error.message));
@@ -37,7 +37,7 @@ function ClassesPage() {
         formData.append("class_code", classFormData.class_code);
 
         try {
-            const response = await axios.post(`http://localhost:5000/${endpoint}`, formData, {
+            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/${endpoint}`, formData, {
                 headers: {"Content-Type": "multipart/form-data"},
             });
             alert(response.data.message);
