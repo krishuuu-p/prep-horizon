@@ -1,5 +1,5 @@
 {
-  "name": "desiassessment",
+  "name": "prephorizon",
   "version": "1.0.0",
   "description": "A testing platform",
   "main": "index.js",
@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/krishuuu-p/desiAssessment.git"
+    "url": "git+https://github.com/krishuuu-p/prep-horizon.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/krishuuu-p/desiAssessment/issues"
+    "url": "https://github.com/krishuuu-p/prep-horizon/issues"
   },
-  "homepage": "https://github.com/krishuuu-p/desiAssessment#readme",
+  "homepage": "https://github.com/krishuuu-p/prep-horizon#readme",
   "dependencies": {
     "lucide-react": "^0.482.0",
     "react": "^19.0.0",
