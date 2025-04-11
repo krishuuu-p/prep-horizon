@@ -126,7 +126,6 @@ const ActiveTestPage = () => {
             updatedSections[currentSubject][index].status = "Visited but Not Answered";
             setSections(updatedSections);
         }
-        // console.log("hi");
 
         setTimeout(() => {
             if (q.type === "MCQ") {

@@ -18,13 +18,14 @@ const FLASK_API_URL = "http://127.0.0.1:5001/process-pdf";
 
 app.use(cors());
 app.use(express.json());
+
 const server = http.createServer(app);
 const upload = multer({ dest: "uploads/" });
 const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const io = new Server(server, {
     cors: {
-     origin: ['http://localhost:3000', 'http://10.81.65.73:3000'], // Or "http://localhost:3000" if frontend is running there
+     origin: ['http://localhost:3000', 'http://10.81.65.73:3000'],
       methods: ["GET", "POST"]
     }
   });
@@ -71,7 +72,6 @@ const io = new Server(server, {
     });
   });
   
-// Multer storage setup for file uploads for student and teacher management
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadPath = path.join(__dirname, "uploads");
@@ -90,7 +90,7 @@ const uploadUsers = multer({ storage: storage });
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: `${process.env.MYSQL_PASSWORD}`, 
+    password: `${process.env.MYSQL_PASSWORD}`,
     database: 'prep_horizon'
 });
 
@@ -127,6 +127,7 @@ app.post("/upload-pdf", upload.single("file"), async (req, res) => {
         if (req.file) {
             form.append("file", fs.createReadStream(req.file.path), req.file.originalname);
         }
+
         if (req.body.url) {
             form.append("url", req.body.url);
         }
@@ -188,10 +189,7 @@ app.post('/login', (req, res) => {
         }
 
         const user = results[0];
-
-
         const match = await bcrypt.compare(password, user.password);
-        //   const match = (password == user.password);
         if (!match) {
             return res.status(603).json({ message: "Invalid credentials" });
         }
@@ -219,9 +217,30 @@ app.post('/retrieve-password', (req, res) => {
 const TEST_FILE = 'testData.xlsx';
 
 function parseExcelDate(value) {
-    if (!value || isNaN(value)) return value; 
-    return new Date((value - 25569) * 86400 * 1000).toISOString(); 
+    if (!value || isNaN(value)) return value;
+    return new Date((value - 25569) * 86400 * 1000).toISOString();
 }
+
+app.get("/get-classes", async (req, res) => {
+    try {
+        const classes = await queries.getClasses();
+        res.json({ classes });
+    } catch (error) {
+        console.error("Error fetching classes:", error);
+        res.status(500).json({ message: "Error fetching classes" });
+    }
+});
+
+app.get("/get-upcoming-tests/:classId", async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const tests = await queries.getTestsForClass(classId);
+        res.json({ tests });
+    } catch (error) {
+        console.error("Error fetching tests:", error);
+        res.status(500).json({ message: "Error fetching tests" });
+    }
+});
 
 app.get("/api/tests/:studentId", async (req, res) => {
     try {
@@ -246,7 +265,6 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
         const sheet = workbook.Sheets[sheetName];
         const tests = xlsx.utils.sheet_to_json(sheet, { raw: false });
         const username = req.body.username;
-        console.log(username);
 
         const idResult = await new Promise((resolve, reject) => {
             const query = `SELECT id FROM users WHERE username = ?;`;
@@ -259,13 +277,11 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
             });
         });
 
-        console.log(idResult);
-
         if (!idResult || idResult.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const userId = idResult[0].id; 
+        const userId = idResult[0].id;
 
         if (tests.length === 0) {
             return res.status(400).json({ message: "Empty file or invalid format" });
@@ -288,26 +304,74 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
                     resolve(results.map(row => row.id));
                 });
             });
-            console.log(classIds);
 
             const startDate = parseExcelDate(start_time);
             const endDate = parseExcelDate(end_time);
             const totalMarks = parseInt(total_marks, 10);
 
-            for (const classId of classIds) {
-                const query = "INSERT INTO tests (test_name, start_time, end_time, total_marks, class_id, created_by) VALUES (?, ?, ?, ?, ?, ?)";
-                db.query(query, [test_name, startDate, endDate, totalMarks, classId, userId], (err, result) => {
+            const testInsertQuery = "INSERT INTO tests (test_name, start_time, end_time, total_marks, created_by) VALUES (?, ?, ?, ?, ?)";
+            const testInsertResult = await new Promise((resolve, reject) => {
+                db.query(testInsertQuery, [test_name, startDate, endDate, totalMarks, userId], (err, result) => {
                     if (err) {
                         console.error(`Error inserting test ${test_name}:`, err);
+                        return reject(err);
                     }
+                    resolve(result);
+                });
+            });
+            const testId = testInsertResult.insertId;
+            
+            const classTestQuery = "INSERT INTO class_test (class_id, test_id) VALUES (?, ?)";
+            for (const classId of classIds) {
+                await new Promise((resolve, reject) => {
+                    db.query(classTestQuery, [classId, testId], (err, result) => {
+                        if (err) {
+                            console.error(`Error inserting test-class relationship:`, err);
+                            return reject(err);
+                        }
+                        resolve(result);
+                    });
                 });
             }
         }
 
+        // Remove the uploaded file after processing
         fs.unlinkSync(filePath);
-
-        res.status(201).json({ message: `Tests added successfully.` });
+        res.status(201).json({ message: "Tests added successfully." });
     } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+app.post("upload-questions", upload.single("file"), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+    }
+    try {
+        const { getQuestionsFromDoc } = require("./utils");
+        const { classId, testId } = req.body;
+        const filePath = path.join(__dirname, "uploads", req.file.filename);
+        const questions = getQuestionsFromDoc(filePath);
+
+        for (const question of questions) {
+            const query = `
+                INSERT INTO questions (test_id, section_id, ques_text, ques_img_url, ques_type, 
+                correct_answer, positive_marks, negative_marks) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            `;
+            const { section_id, ques_text, ques_img_url, ques_type, correct_answer, positive_marks, negative_marks } = question;
+            db.query(query, [testId, section_id, ques_text, ques_img_url, ques_type, correct_answer, positive_marks, negative_marks], (err, result) => {
+                if (err) {
+                    console.error(`Error inserting question:`, err);
+                }
+            });
+        }
+
+        fs.unlinkSync(filePath);
+        res.status(201).json({ message: `Questions added successfully.` });
+    }
+    catch (error) {
         console.error(error);
         res.status(500).json({ message: "Server error" });
     }
@@ -837,9 +901,6 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
         res.status(500).json({ message: "Server error" });
     }
 });
-
-
-
 
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

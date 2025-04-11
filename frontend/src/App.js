@@ -14,6 +14,7 @@ import TeacherManagementPage from './components/pages/TeacherManagementPage';
 import TestManagementPage from './components/pages/TestManagementPage';
 import InterviewPage from './components/pages/InterviewPage';
 import ProfilePage from './components/pages/ProfilePage';
+
 window.process = process;
 
 function App() {

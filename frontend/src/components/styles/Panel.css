@@ -1,5 +1,5 @@
 .panel {
-    background-color: #144884; /* Dark Blue */
+    background-color: #144884;
     color: white;
     display: flex;
     justify-content: space-between;
@@ -11,8 +11,6 @@
     box-sizing: border-box;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
-
 
 .left-options {
     display: flex;

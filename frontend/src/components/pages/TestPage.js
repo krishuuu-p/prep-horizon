@@ -1,264 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useUser } from '../../UserContext';
+import { formatDateTime } from "../utils";
 import "../styles/TestPage.css";
 import Panel from "./Panel";
 import "../styles/StudentHomePage.css";
 
 const TestsPage = () => {
+    const { user } = useUser();
     const [activePage, setActivePage] = useState("Tests");
     const [activeTab, setActiveTab] = useState("Active Tests");
+    const [activeTests, setActiveTests] = useState([]);
+    const [upcomingTests, setUpcomingTests] = useState([]);
+    const [recentTests, setRecentTests] = useState([]);
 	// const [tests, setTests] = useState({ past: [], active: [], upcoming: [] });
 
-	// Hardcoded test data
+    useEffect(() => {
+        fetch(`${process.env.REACT_APP_BACKEND_URL}/api/tests/${user.userName}`)
+            .then(response => response.json())
+            .then(data => {
+                setActiveTests(data.activeTests);
+                setUpcomingTests(data.upcomingTests);
+                setRecentTests(data.recentTests);
+            })
+            .catch(error => console.error("Error fetching test data:", error));
+    }, [user]);
+
     const testData = {
-        pasttests: [
-            {
-                name: "Math Test",
-                id: "T001",
-                startDate: "2025-03-01",
-                startTime: "10:00 AM",
-                endDate: "2025-03-01",
-                endTime: "12:00 PM",
-                details: "Final term exam for mathematics."
-            },
-            {
-                name: "Physics Quiz",
-                id: "T002",
-                startDate: "2025-03-02",
-                startTime: "02:00 PM",
-                endDate: "2025-03-02",
-                endTime: "03:00 PM",
-                details: "Quiz on Newton's laws and kinematics."
-            },
-            {
-                name: "History Exam",
-                id: "T003",
-                startDate: "2025-03-03",
-                startTime: "09:00 AM",
-                endDate: "2025-03-03",
-                endTime: "11:00 AM",
-                details: "Medieval history test."
-            },
-            {
-                name: "Math Test",
-                id: "T001",
-                startDate: "2025-03-01",
-                startTime: "10:00 AM",
-                endDate: "2025-03-01",
-                endTime: "12:00 PM",
-                details: "Final term exam for mathematics."
-            },
-            {
-                name: "Physics Quiz",
-                id: "T002",
-                startDate: "2025-03-02",
-                startTime: "02:00 PM",
-                endDate: "2025-03-02",
-                endTime: "03:00 PM",
-                details: "Quiz on Newton's laws and kinematics."
-            },
-            {
-                name: "History Exam",
-                id: "T003",
-                startDate: "2025-03-03",
-                startTime: "09:00 AM",
-                endDate: "2025-03-03",
-                endTime: "11:00 AM",
-                details: "Medieval history test."
-            },
-            {
-                name: "Math Test",
-                id: "T001",
-                startDate: "2025-03-01",
-                startTime: "10:00 AM",
-                endDate: "2025-03-01",
-                endTime: "12:00 PM",
-                details: "Final term exam for mathematics."
-            },
-            {
-                name: "Physics Quiz",
-                id: "T002",
-                startDate: "2025-03-02",
-                startTime: "02:00 PM",
-                endDate: "2025-03-02",
-                endTime: "03:00 PM",
-                details: "Quiz on Newton's laws and kinematics."
-            },
-            {
-                name: "History Exam",
-                id: "T003",
-                startDate: "2025-03-03",
-                startTime: "09:00 AM",
-                endDate: "2025-03-03",
-                endTime: "11:00 AM",
-                details: "Medieval history test."
-            },
-            {
-                name: "Math Test",
-                id: "T001",
-                startDate: "2025-03-01",
-                startTime: "10:00 AM",
-                endDate: "2025-03-01",
-                endTime: "12:00 PM",
-                details: "Final term exam for mathematics."
-            },
-            {
-                name: "Physics Quiz",
-                id: "T002",
-                startDate: "2025-03-02",
-                startTime: "02:00 PM",
-                endDate: "2025-03-02",
-                endTime: "03:00 PM",
-                details: "Quiz on Newton's laws and kinematics."
-            },
-            {
-                name: "History Exam",
-                id: "T003",
-                startDate: "2025-03-03",
-                startTime: "09:00 AM",
-                endDate: "2025-03-03",
-                endTime: "11:00 AM",
-                details: "Medieval history test."
-            },
-            {
-                name: "Math Test",
-                id: "T001",
-                startDate: "2025-03-01",
-                startTime: "10:00 AM",
-                endDate: "2025-03-01",
-                endTime: "12:00 PM",
-                details: "Final term exam for mathematics."
-            },
-            {
-                name: "Physics Quiz",
-                id: "T002",
-                startDate: "2025-03-02",
-                startTime: "02:00 PM",
-                endDate: "2025-03-02",
-                endTime: "03:00 PM",
-                details: "Quiz on Newton's laws and kinematics."
-            },
-            {
-                name: "History Exam",
-                id: "T003",
-                startDate: "2025-03-03",
-                startTime: "09:00 AM",
-                endDate: "2025-03-03",
-                endTime: "11:00 AM",
-                details: "Medieval history test."
-            },
-            {
-                name: "Math Test",
-                id: "T001",
-                startDate: "2025-03-01",
-                startTime: "10:00 AM",
-                endDate: "2025-03-01",
-                endTime: "12:00 PM",
-                details: "Final term exam for mathematics."
-            },
-            {
-                name: "Physics Quiz",
-                id: "T002",
-                startDate: "2025-03-02",
-                startTime: "02:00 PM",
-                endDate: "2025-03-02",
-                endTime: "03:00 PM",
-                details: "Quiz on Newton's laws and kinematics."
-            },
-            {
-                name: "History Exam",
-                id: "T003",
-                startDate: "2025-03-03",
-                startTime: "09:00 AM",
-                endDate: "2025-03-03",
-                endTime: "11:00 AM",
-                details: "Medieval history test."
-            },
-            {
-                name: "Math Test",
-                id: "T001",
-                startDate: "2025-03-01",
-                startTime: "10:00 AM",
-                endDate: "2025-03-01",
-                endTime: "12:00 PM",
-                details: "Final term exam for mathematics."
-            },
-            {
-                name: "Physics Quiz",
-                id: "T002",
-                startDate: "2025-03-02",
-                startTime: "02:00 PM",
-                endDate: "2025-03-02",
-                endTime: "03:00 PM",
-                details: "Quiz on Newton's laws and kinematics."
-            },
-            {
-                name: "History Exam",
-                id: "T003",
-                startDate: "2025-03-03",
-                startTime: "09:00 AM",
-                endDate: "2025-03-03",
-                endTime: "11:00 AM",
-                details: "Medieval history test."
-            }
-        ],
-        activetests: [
-            {
-                name: "Chemistry Test",
-                id: "T004",
-                startDate: "2025-03-30",
-                startTime: "10:00 AM",
-                endDate: "2025-03-30",
-                endTime: "12:00 PM",
-                details: "Organic chemistry test."
-            },
-            {
-                name: "Computer Science Quiz",
-                id: "T005",
-                startDate: "2025-03-30",
-                startTime: "03:00 PM",
-                endDate: "2025-03-30",
-                endTime: "04:00 PM",
-                details: "Data structures and algorithms quiz."
-            },
-            {
-                name: "Economics Exam",
-                id: "T006",
-                startDate: "2025-03-30",
-                startTime: "06:00 PM",
-                endDate: "2025-03-30",
-                endTime: "08:00 PM",
-                details: "Macroeconomics final test."
-            }
-        ],
-        upcomingtests: [
-            {
-                name: "Biology Test",
-                id: "T007",
-                startDate: "2025-04-05",
-                startTime: "11:00 AM",
-                endDate: "2025-04-05",
-                endTime: "01:00 PM",
-                details: "Cell biology and genetics test."
-            },
-            {
-                name: "English Literature Exam",
-                id: "T008",
-                startDate: "2025-04-06",
-                startTime: "09:00 AM",
-                endDate: "2025-04-06",
-                endTime: "11:00 AM",
-                details: "Shakespeare and modern literature."
-            },
-            {
-                name: "Statistics Quiz",
-                id: "T009",
-                startDate: "2025-04-07",
-                startTime: "02:00 PM",
-                endDate: "2025-04-07",
-                endTime: "03:00 PM",
-                details: "Probability and regression analysis."
-            }
-        ]
+        active_tests: activeTests,
+        upcoming_tests: upcomingTests,
+        recent_tests: recentTests,
     };
 
 	return (
@@ -266,7 +36,7 @@ const TestsPage = () => {
             <div className="panel"><Panel activePage={activePage} setActivePage={setActivePage} /></div>
             <div className="main-container">
                 <div className="sidebar">
-                    {["Past Tests", "Active Tests", "Upcoming Tests"].map((tab) => (
+                    {["Active Tests", "Upcoming Tests", "Recent Tests"].map((tab) => (
                         <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? "active" : ""}>
                             {tab}
                         </button>
@@ -274,15 +44,18 @@ const TestsPage = () => {
                 </div>
                 
                 <div className="test-display">
-                    {testData[activeTab.toLowerCase().replace(" ", "")].map((test, index) => (
-                        <div key={index} className="test-box">
-                            <h3>{test.name}</h3>
-                            <p><strong>Test ID:</strong> {test.id}</p>
-                            <p><strong>Start:</strong> {test.startDate} {test.startTime}</p>
-                            <p><strong>End:</strong> {test.endDate} {test.endTime}</p>
-                            <p className="test-details"><strong>Details:</strong> {test.details}</p>
-                        </div>
-                    ))}
+                    {testData[activeTab.toLowerCase().replace(" ", "_")].map((test, index) => {
+                        const { date: startDate, time: startTime } = formatDateTime(test.start_time);
+                        const { date: endDate, time: endTime } = formatDateTime(test.end_time);
+                        return (
+                            <div key={index} className="test-box">
+                                <h3>{test.name}</h3>
+                                <p><strong>Test Name:</strong> {test.test_name}</p>
+                                <p><strong>Start:</strong> {startDate} {startTime}</p>
+                                <p><strong>End:</strong> {endDate} {endTime}</p>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 

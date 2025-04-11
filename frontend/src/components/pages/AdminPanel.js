@@ -4,12 +4,13 @@ import '../styles/AdminPanel.css';
 
 function AdminPanel({ activePage, setActivePage }) {
     const navigate = useNavigate();
-    // const { userType, userId } = useParams();
-    const { user } = useUser();
+    const { user, setUser } = useUser();
     const userType = user.userType;
     const userName = user.userName;
 
     const handleLogout = () => {
+        setUser({ userType: null, userName: '', name: '' });
+        localStorage.removeItem("user");
         navigate('/');
     };
 

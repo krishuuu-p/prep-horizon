@@ -1,12 +1,12 @@
 .classes-page {
     display: flex;
-    flex-direction: column; /* Ensures top panel stays on top */
+    flex-direction: column;
     height: 100vh;
     background-color: white;
 }
 
 .main-container-classes {
-    display: flex; /* Sidebar and content appear side-by-side */
+    display: flex;
     flex: 1;
 }
 .admin-sidebar {

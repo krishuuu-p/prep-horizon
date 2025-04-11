@@ -98,3 +98,33 @@
     text-align: center;
     font-size: 26px;
 }
+
+.dropdown-label {
+    display: block;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.dropdown-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f8f8f8;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.dropdown-select::-ms-expand {
+    display: none;
+}
+
+.user-content input[type="file"] {
+    margin-top: 15px;
+}
+

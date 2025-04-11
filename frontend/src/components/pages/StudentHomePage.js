@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Panel from './Panel';
 import { useUser } from '../../UserContext';
+import { formatDateTime } from '../utils';
 import '../styles/StudentHomePage.css';
 
 function StudentHomePage() {
@@ -17,12 +18,29 @@ function StudentHomePage() {
     const userName = user.userName;
 
     useEffect(() => {
+        console.log(user);
         fetch(`${process.env.REACT_APP_BACKEND_URL}/api/tests/${user.userName}`)
             .then(response => response.json())
             .then(data => {
+                const currentDate = new Date();
+                const weekFromNow = new Date();
+                const weekBeforeNow = new Date();
+                weekBeforeNow.setDate(currentDate.getDate() - 7);
+                weekFromNow.setDate(currentDate.getDate() + 7);
+
                 setActiveTests(data.activeTests);
-                setUpcomingTests(data.upcomingTests);
-                setRecentTests(data.recentTests);
+                setUpcomingTests(
+                    data.upcomingTests.filter(test => {
+                        const testDate = new Date(test.start_time);
+                        return testDate >= currentDate && testDate <= weekFromNow;
+                    })
+                );
+                setRecentTests(
+                    data.recentTests.filter(test => {
+                        const testDate = new Date(test.start_time);
+                        return testDate <= currentDate && testDate >= weekBeforeNow;
+                    })
+                );
             })
             .catch(error => console.error("Error fetching test data:", error));
     }, [user]);
@@ -44,7 +62,6 @@ function StudentHomePage() {
                 </div>
 
                 <div className="test-sections">
-                    {/* Active Tests Section */}
                     <div className="section">
                         <h2>Active Tests</h2>
                         <div className="test-list">
@@ -52,13 +69,8 @@ function StudentHomePage() {
                                 <p className='caption'>No active tests at the moment.</p>
                             )}
                             {activeTests.map((test, index) => {
-                                const startdateObj = new Date(test.start_time);
-                                const startdate = startdateObj.toISOString().split("T")[0];
-                                const starttime = startdateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-                                const enddateObj = new Date(test.end_time);
-                                const enddate = enddateObj.toISOString().split("T")[0];
-                                const endtime = enddateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                const {date: startdate, time: starttime} = formatDateTime(test.start_time);
+                                const {date: enddate, time: endtime} = formatDateTime(test.end_time);
 
                                 return (
                                     <div className="test-card active-test" key={index}>
@@ -72,7 +84,6 @@ function StudentHomePage() {
                         </div>
                     </div>
 
-                    {/* Upcoming Tests Section */}
                     <div className="section">
                         <h2>Upcoming Tests</h2>
                         <div className="test-list">
@@ -80,13 +91,9 @@ function StudentHomePage() {
                                 <p className='caption'>No upcoming tests this week.</p>
                             )}
                             {upcomingTests.map((test, index) => {
-                                const startdateObj = new Date(test.start_time);
-                                const startdate = startdateObj.toISOString().split("T")[0];
-                                const starttime = startdateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                const {date: startdate, time: starttime} = formatDateTime(test.start_time);
+                                const {date: enddate, time: endtime} = formatDateTime(test.end_time);
 
-                                const enddateObj = new Date(test.end_time);
-                                const enddate = enddateObj.toISOString().split("T")[0];
-                                const endtime = enddateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                                 return (
                                     <div className="test-card upcoming-test" key={index}>
                                         <h3>{test.test_name}</h3>
@@ -98,21 +105,16 @@ function StudentHomePage() {
                         </div>
                     </div>
 
-                    {/* Recent Tests Section */}
                     <div className="section">
                         <h2>Recent Tests</h2>
                         <div className="test-list">
                             {recentTests.length === 0 && (
                                 <p className='caption'>No tests given this week.</p>
                             )}
-                            {recentTests.map((test, index) => { 
-                                const startdateObj = new Date(test.start_time);
-                                const startdate = startdateObj.toISOString().split("T")[0];
-                                const starttime = startdateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-                                const enddateObj = new Date(test.end_time);
-                                const enddate = enddateObj.toISOString().split("T")[0];
-                                const endtime = enddateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            {recentTests.map((test, index) => {
+                                const {date: startdate, time: starttime} = formatDateTime(test.start_time);
+                                const {date: enddate, time: endtime} = formatDateTime(test.end_time); 
+                                
                                 return (
                                     <div className="test-card recent-test" key={index}>
                                         <h3>{test.test_name}</h3>

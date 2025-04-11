@@ -4,14 +4,13 @@ import '../styles/Panel.css';
 
 function Panel({ activePage, setActivePage }) {
     const navigate = useNavigate();
-    const { user } = useUser();
+    const { user, setUser } = useUser();
     const userType = user.userType;
     const userName = user.userName;
-    // const { userType, userId } = useParams();
-    // const location = useLocation();
-
 
     const handleLogout = () => {
+        setUser({ userType: null, userName: '', name: '' });
+        localStorage.removeItem("user");
         navigate('/');
     };
 

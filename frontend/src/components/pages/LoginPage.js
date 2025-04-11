@@ -37,7 +37,7 @@ function WelcomeText() {
 }
 
 function LoginPage() {
-    const { user, setUser } = useUser();  // Access global state
+    const { user, setUser } = useUser();
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();

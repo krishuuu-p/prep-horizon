@@ -8,13 +8,13 @@ function PdfToQuizPage() {
   const [url, setUrl] = useState("");
   const [manualText, setManualText] = useState("");
   const [files, setFiles] = useState(null);
-  const [quiz, setQuiz] = useState(""); // Quiz output is a single string
+  const [quiz, setQuiz] = useState("");
   const [loading, setLoading] = useState(false);
-  const [numQuestions, setNumQuestions] = useState("5"); // Default number of questions
+  const [numQuestions, setNumQuestions] = useState("5");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start the loading UI
+    setLoading(true);
 
     const formData = new FormData();
     if (files && files.length > 0) {
@@ -25,7 +25,6 @@ function PdfToQuizPage() {
     formData.append("num_questions", numQuestions);
 
     try {
-      // Ensure the endpoint URL matches your Flask server settings.
       const response = await axios.post(`${process.env.REACT_APP_FLASK_URL}/process-pdf`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });

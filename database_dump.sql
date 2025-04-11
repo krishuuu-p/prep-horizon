@@ -7,7 +7,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -16,12 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `prep_horizon`
+-- Table structure for table `class_test`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `prep_horizon` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+DROP TABLE IF EXISTS `class_test`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `class_test` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `class_id` int NOT NULL,
+  `test_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `class_id` (`class_id`,`test_id`),
+  KEY `test_id` (`test_id`),
+  CONSTRAINT `class_test_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `class_test_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-USE `prep_horizon`;
+--
+-- Dumping data for table `class_test`
+--
+
+LOCK TABLES `class_test` WRITE;
+/*!40000 ALTER TABLE `class_test` DISABLE KEYS */;
+INSERT INTO `class_test` VALUES (12,1,1),(14,1,2),(16,1,3),(18,1,4),(20,1,5),(21,1,6),(22,1,7),(13,2,1),(15,2,2),(17,2,3),(19,2,4);
+/*!40000 ALTER TABLE `class_test` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `classes`
@@ -240,19 +261,15 @@ DROP TABLE IF EXISTS `tests`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tests` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `class_id` int NOT NULL,
   `test_name` varchar(100) NOT NULL,
-  `status` enum('upcoming','active','completed') NOT NULL,
   `start_time` datetime DEFAULT NULL,
   `end_time` datetime DEFAULT NULL,
   `total_marks` int NOT NULL,
   `created_by` int DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `class_id` (`class_id`),
   KEY `created_by` (`created_by`),
-  CONSTRAINT `tests_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `tests_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -261,7 +278,7 @@ CREATE TABLE `tests` (
 
 LOCK TABLES `tests` WRITE;
 /*!40000 ALTER TABLE `tests` DISABLE KEYS */;
-INSERT INTO `tests` VALUES (1,1,'FTS01- Mains','upcoming','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(2,2,'FTS01- Mains','upcoming','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(3,1,'FTS02- Mains','upcoming','2025-04-04 10:00:00','2025-04-04 17:00:00',300,1),(4,2,'FTS02- Mains','upcoming','2025-04-04 10:00:00','2025-04-04 17:00:00',300,1),(5,1,'FTS02- Advanced Paper 1','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(6,2,'FTS02- Advanced Paper 1','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(7,1,'FTS02- Advanced Paper 2','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(8,2,'FTS02- Advanced Paper 2','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(9,2,'FTS03- Mains','upcoming','2025-04-19 10:00:00','2025-04-20 13:00:00',300,1),(10,2,'FTS03- Advanced Paper 1','upcoming','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(11,2,'FTS03- Advanced Paper 2','upcoming','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1);
+INSERT INTO `tests` VALUES (1,'FTS01- Mains','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(2,'FTS02- Mains','2025-04-06 10:00:00','2025-04-06 13:00:00',300,1),(3,'FTS02- Advanced Paper 1','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(4,'FTS02- Advanced Paper 2','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(5,'FTS03- Mains','2025-04-15 10:00:00','2025-04-16 13:00:00',300,1),(6,'FTS03- Advanced Paper 1','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(7,'FTS03- Advanced Paper 2','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1);
 /*!40000 ALTER TABLE `tests` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -304,4 +321,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-10 21:50:56
+-- Dump completed on 2025-04-11 11:57:59

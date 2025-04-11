@@ -13,13 +13,11 @@ function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     
-    // Basic front-end validation
     if (!username || !email || !password || !confirmPassword) {
       setError("All fields are required.");
       return;
     }
 
-    // Simple email check (for demonstration). For production, consider a more robust regex or library.
     const emailRegex = /\S+@\S+\.\S+/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email.");
@@ -32,7 +30,6 @@ function Register() {
     }
     
     try {
-      // POST request to your backend /register endpoint
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/register`, {
         username,
         email,
@@ -40,7 +37,7 @@ function Register() {
       });
       if (response.status === 201) {
         alert("Registration successful. Please login.");
-        navigate('/'); // Redirect to login page
+        navigate('/');
       }
     } catch (err) {
       console.error(err);

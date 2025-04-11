@@ -1,4 +1,3 @@
-/* Wrapper for the entire student page */
 .quiz-container {
   background-color: #f9f9f9;
   padding: 15px;
@@ -9,18 +8,16 @@
   font-size: 1rem;
   color: #333;
   line-height: 1.5;
-  white-space: pre-wrap; /* Preserve line breaks */
-  word-wrap: break-word; /* Break long words if needed */
-  max-height: 400px;      /* Constrain height */
-  overflow-y: auto;       /* Enable vertical scrolling */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
-/* Ensure each immediate child takes full width */
 .pdf-to-quiz-page > * {
   width: 100%;
 }
 
-/* Container styling for the main content area */
 .pdf-container {
   display: flex;
   flex-direction: column;
@@ -32,7 +29,6 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Headings and paragraph */
 .pdf-container h1 {
   font-size: 1.75rem;
   margin-bottom: 10px;
@@ -44,25 +40,21 @@
   margin-bottom: 20px;
 }
 
-/* Form styling */
 form {
   display: flex;
   flex-direction: column;
 }
 
-/* Form group spacing */
 .form-group {
   margin-bottom: 15px;
 }
 
-/* Labels styling */
 .form-group label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
 
-/* Standard input, textarea and select styling */
 .form-control,
 .form-control-file,
 textarea.form-control,
@@ -75,12 +67,10 @@ select.form-control {
   box-sizing: border-box;
 }
 
-/* File input specific styling */
 .form-control-file {
   padding: 4px 0;
 }
 
-/* Button styling */
 .btn {
   display: inline-block;
   padding: 10px 20px;
@@ -93,7 +83,6 @@ select.form-control {
   transition: background-color 0.3s ease;
 }
 
-/* Secondary button style */
 .btn.btn-secondary {
   background-color: #6c757d;
   color: #fff;
@@ -103,7 +92,6 @@ select.form-control {
   background-color: #5a6268;
 }
 
-/* Spinner Styles */
 .loading-container {
   margin-top: 20px;
   text-align: center;
@@ -119,22 +107,19 @@ select.form-control {
   animation: spin 1s linear infinite;
 }
 
-/* Animation for spinner */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* Updated styling for quiz output to match the rest of the page */
 .quiz-container {
   background-color: #f9f9f9;
   padding: 15px;
   margin-top: 20px;
   border: 1px solid #eee;
   border-radius: 4px;
-  /* Use the same font and styling as the rest of the page */
   font-family: inherit;
   font-size: 1rem;
   color: #333;
   line-height: 1.5;
-  white-space: pre-wrap; /* Preserve line breaks */
+  white-space: pre-wrap;
 }
