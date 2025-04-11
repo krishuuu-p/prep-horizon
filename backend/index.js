@@ -334,8 +334,7 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
                 });
             }
         }
-
-        // Remove the uploaded file after processing
+        
         fs.unlinkSync(filePath);
         res.status(201).json({ message: "Tests added successfully." });
     } catch (error) {

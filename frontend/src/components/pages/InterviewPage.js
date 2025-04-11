@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
+import Panel from "./Panel";
 
 // Connect to the backend (make sure your server is running on port 5000)
 const socket = io("http://10.81.65.73:5000", { transports: ["websocket"] });
 function InterviewPage() {
+  const [activePage, setActivePage] = useState("Interview Practice");
   const [stream, setStream] = useState(null);
   const [receivingCall, setReceivingCall] = useState(false);
   const [caller, setCaller] = useState("");
@@ -148,6 +150,7 @@ function InterviewPage() {
 
   return (
     <div>
+      <Panel activePage={activePage} setActivePage={setActivePage} />
       <h1>Interview Page</h1>
       <button onClick={joinRoom}>Join Room</button>
       <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
