@@ -39,14 +39,14 @@ function TestManagementPage() {
         <div className="user-management">
             <AdminPanel activePage={activePage} setActivePage={setActivePage} />
             <div className="main-container">
-                <div className="sidebar">
+                <div className="admin-sidebar">
                     {["Add Tests"].map((tab) => (
                         <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? "active" : ""}>
                             {tab}
                         </button>
                     ))}
                 </div>
-                <div className="content">
+                <div className="user-content">
                     {activeTab === "Add Tests" && (
                         <>
                             <h2>Add Tests</h2>

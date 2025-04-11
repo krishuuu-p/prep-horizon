@@ -49,7 +49,7 @@ function StudentManagementPage() {
         <div className="user-management">
             <AdminPanel activePage={activePage} setActivePage={setActivePage} />
             <div className="main-container">
-                <div className="sidebar">
+                <div className="admin-sidebar">
                     {["Add Students", "Edit Students", "Delete Students"].map((tab) => (
                         <button key={tab} onClick={() => setActiveTab(tab)} className={activeTab === tab ? "active" : ""}>
                             {tab}

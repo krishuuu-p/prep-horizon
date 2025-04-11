@@ -9,7 +9,7 @@
     display: flex;
     flex: 1;
 }
-.sidebar {
+.admin-sidebar {
     width: 250px;
     background-color: rgba(221, 221, 221, 0.639);
     background-color: rgba(231, 231, 231, 0.639);
@@ -20,7 +20,7 @@
     border-radius: 15px;
 }
 
-.sidebar button {
+.admin-sidebar button {
     background-color: rgba(221, 221, 221, 0.781);
     margin: 5px;
     border-radius: 10px;
@@ -34,11 +34,11 @@
     transition: background 0.3s;
 }
   
-.sidebar button:hover, .sidebar button.active {
+.admin-sidebar button:hover, .sidebar button.active {
     background-color: #c4c4c4;
 }
 
-.sidebar button:hover {
+.admin-sidebar button:hover {
     text-decoration: underline;
 }
 

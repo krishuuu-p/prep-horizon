@@ -1,5 +1,4 @@
 import process from 'process';
-window.process = process;
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './components/pages/LoginPage';
 import ForgotPassword from './components/pages/ForgotPassword';
@@ -15,6 +14,7 @@ import TeacherManagementPage from './components/pages/TeacherManagementPage';
 import TestManagementPage from './components/pages/TestManagementPage';
 import InterviewPage from './components/pages/InterviewPage';
 import ProfilePage from './components/pages/ProfilePage';
+window.process = process;
 
 function App() {
   return (

@@ -637,6 +637,247 @@ app.post("/upload-delete-users", uploadUsers.single("file"), async (req, res) =>
     }
 });
 
+
+app.post("/add-class", async (req, res) => {
+    const { class_code, class_name, description } = req.body;
+  
+    if (!class_code || !class_name) {
+        return res.status(400).json({ message: "Class Code and Class Name fields are required" });
+    }
+  
+    try {
+        
+        const query = "INSERT INTO classes (class_code, class_name, description) VALUES (?, ?, ?)";
+        db.query(query, [class_code, class_name, description], (err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error creating class." });
+            }
+            res.status(201).json({ message: "Class created successfully" });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+  });
+
+  app.post("/edit-class/:class_code", async (req, res) => {
+    const {class_code} = req.params;
+    const {class_name, description} = req.body;
+
+    if(!class_code || (!class_name && !description)){
+        return res.status(400).json({message: "Provide at least one field to update"})
+    }
+
+    try{
+        let updates = [];
+        let values = [];
+
+        if(class_name){
+            updates.push("class_name = ?");
+            values.push(class_name);
+        }
+
+        if(description){
+            updates.push("description = ?");
+            values.push(description);
+        }
+
+        values.push(class_code);
+        const query = `UPDATE classes SET ${updates.join(", ")} WHERE class_code = ?`;
+
+        db.query(query, values, (err, result) => {
+            if(err) {
+                console.error(err);
+                return res.status(500).json({message: "Error updating class"});
+            }
+            if (result.affectedRows === 0){
+                return res.status(404).json({message: "Class not found"});
+            }
+            res.json({message: "Class updated successfully"});
+        });
+    } catch (error){
+        console.error(error);
+        res.status(500).json({message: "Server Error"});
+    }
+  });
+
+
+  app.post("/delete-class/:class_code", async (req,res) => {
+    const {class_code} = req.params;
+    
+    if(!class_code) {
+        return res.status(400).json({message: "Class code is required"});
+    }
+
+    const query = `DELETE FROM classes WHERE class_code = ?`;
+    db.query(query, [class_code], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({message: "Error deleting class"});
+        }
+        if (result.affectedRows === 0) {
+            return res.status(500).json({message: "Class not found"});
+        }
+        res.json({message: "Class deleted successfully"});
+    });
+  });
+
+
+  app.post("/add-users-to-class", uploadUsers.single("file"), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    try {
+        const filePath = path.join(__dirname, "uploads", req.file.filename);
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const users = xlsx.utils.sheet_to_json(sheet);
+        const { class_code } = req.body;
+
+        if(!class_code){
+            return res.status(400).json({message: "Class Code is required"});
+        }
+
+        if (users.length === 0) {
+            return res.status(400).json({ message: "Empty file or invalid format" });
+        }
+
+        // Convert db.query() to promise-based
+        const dbQuery = (sql, params) => {
+            return new Promise((resolve, reject) => {
+                db.query(sql, params, (err, results) => {
+                    if (err) reject(err);
+                    else resolve(results);
+                });
+            });
+        };
+
+        // Fetch class_id
+        const classResults = await dbQuery("SELECT id FROM classes WHERE class_code = ?", [class_code]);
+
+        if (classResults.length === 0) {
+            return res.status(404).json({ message: "Class not found." });
+        }
+
+        const class_id = classResults[0].id;
+
+        // Process all users
+        for (const user of users) {
+            const { username } = user;
+
+            if (!username) {
+                return res.status(400).json({ message: "Missing field - username" });
+            }
+
+            // Fetch user_id
+            const userResults = await dbQuery("SELECT id FROM users WHERE username = ?", [username]);
+
+            if (userResults.length === 0) {
+                console.warn(`User not found: ${username}`);
+                continue; // Skip to next user
+            }
+
+            const user_id = userResults[0].id;
+
+            // Insert into enrollments
+            try {
+                await dbQuery("INSERT INTO enrollments (student_id, class_id) VALUES (?, ?)", [user_id, class_id]);
+            } catch (insertError) {
+                console.error(`Error adding ${username}:`, insertError);
+            }
+        }
+
+        fs.unlinkSync(filePath);
+        res.status(201).json({ message: "Users added successfully" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+
+app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    try {
+        const filePath = path.join(__dirname, "uploads", req.file.filename);
+        const workbook = xlsx.readFile(filePath);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const users = xlsx.utils.sheet_to_json(sheet);
+        const { class_code } = req.body;
+
+        if(!class_code){
+            return res.status(400).json({message: "Class Code is required"});
+        }
+
+        if (users.length === 0) {
+            return res.status(400).json({ message: "Empty file or invalid format" });
+        }
+
+        // Convert db.query() to a Promise-based function
+        const dbQuery = (sql, params) => {
+            return new Promise((resolve, reject) => {
+                db.query(sql, params, (err, results) => {
+                    if (err) reject(err);
+                    else resolve(results);
+                });
+            });
+        };
+
+        // Fetch class_id
+        const classResults = await dbQuery("SELECT id FROM classes WHERE class_code = ?", [class_code]);
+
+        if (classResults.length === 0) {
+            return res.status(404).json({ message: "Class not found." });
+        }
+
+        const class_id = classResults[0].id;
+
+        // Process all users for deletion
+        for (const user of users) {
+            const { username } = user;
+
+            if (!username) {
+                return res.status(400).json({ message: "Missing field - username" });
+            }
+
+            // Fetch user_id
+            const userResults = await dbQuery("SELECT id FROM users WHERE username = ?", [username]);
+
+            if (userResults.length === 0) {
+                console.warn(`User not found: ${username}`);
+                continue; // Skip to next user
+            }
+
+            const user_id = userResults[0].id;
+
+            // Delete from enrollments
+            try {
+                await dbQuery("DELETE FROM enrollments WHERE student_id = ? AND class_id = ?", [user_id, class_id]);
+            } catch (deleteError) {
+                console.error(`Error removing ${username} from class:`, deleteError);
+            }
+        }
+
+        fs.unlinkSync(filePath);
+        res.status(200).json({ message: "Users removed successfully" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+
+
+
 // Start the server
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

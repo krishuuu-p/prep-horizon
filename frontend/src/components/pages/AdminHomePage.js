@@ -12,9 +12,14 @@ function AdminHomePage() {
         <>
         <AdminPanel activePage={activePage} setActivePage={setActivePage} />
 
-        <div>
-            <h2>Admin Dashboard</h2>
-            <p>Welcome, {userName}!</p>
+        <div className="admin-homepage">
+            <div className="content">
+                <div className="user-greeting">
+                    <h1>Admin Dashboard</h1>
+                    <p>Welcome, {userName}!</p>
+                </div>
+
+            </div>
         </div>
         </>
     );

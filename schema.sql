@@ -7,21 +7,13 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Current Database: `prep_horizon`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `prep_horizon` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `prep_horizon`;
 
 --
 -- Table structure for table `classes`
@@ -40,16 +32,6 @@ CREATE TABLE `classes` (
   UNIQUE KEY `unique_class_code` (`class_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `classes`
---
-
-LOCK TABLES `classes` WRITE;
-/*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,'C1','Engg Class 1','Engg class for class 11th'),(2,'C2','Engg Class 2','Engg class for class 12th');
-/*!40000 ALTER TABLE `classes` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `enrollments`
@@ -71,16 +53,6 @@ CREATE TABLE `enrollments` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `enrollments`
---
-
-LOCK TABLES `enrollments` WRITE;
-/*!40000 ALTER TABLE `enrollments` DISABLE KEYS */;
-INSERT INTO `enrollments` VALUES (1,2,1),(2,2,2),(3,5,2);
-/*!40000 ALTER TABLE `enrollments` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `options`
 --
 
@@ -98,15 +70,6 @@ CREATE TABLE `options` (
   CONSTRAINT `options_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `options`
---
-
-LOCK TABLES `options` WRITE;
-/*!40000 ALTER TABLE `options` DISABLE KEYS */;
-/*!40000 ALTER TABLE `options` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `questions`
@@ -134,15 +97,6 @@ CREATE TABLE `questions` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `questions`
---
-
-LOCK TABLES `questions` WRITE;
-/*!40000 ALTER TABLE `questions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `questions` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `sections`
 --
 
@@ -161,13 +115,23 @@ CREATE TABLE `sections` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `sections`
+-- Table structure for table `student_courses`
 --
 
-LOCK TABLES `sections` WRITE;
-/*!40000 ALTER TABLE `sections` DISABLE KEYS */;
-/*!40000 ALTER TABLE `sections` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `student_courses`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `student_courses` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int NOT NULL,
+  `class_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
+  KEY `class_id` (`class_id`),
+  CONSTRAINT `student_courses_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `student_responses`
@@ -195,15 +159,6 @@ CREATE TABLE `student_responses` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `student_responses`
---
-
-LOCK TABLES `student_responses` WRITE;
-/*!40000 ALTER TABLE `student_responses` DISABLE KEYS */;
-/*!40000 ALTER TABLE `student_responses` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `student_tests`
 --
 
@@ -221,15 +176,6 @@ CREATE TABLE `student_tests` (
   CONSTRAINT `student_tests_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `student_tests`
---
-
-LOCK TABLES `student_tests` WRITE;
-/*!40000 ALTER TABLE `student_tests` DISABLE KEYS */;
-/*!40000 ALTER TABLE `student_tests` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tests`
@@ -252,18 +198,8 @@ CREATE TABLE `tests` (
   KEY `created_by` (`created_by`),
   CONSTRAINT `tests_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `tests_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tests`
---
-
-LOCK TABLES `tests` WRITE;
-/*!40000 ALTER TABLE `tests` DISABLE KEYS */;
-INSERT INTO `tests` VALUES (1,1,'FTS01- Mains','upcoming','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(2,2,'FTS01- Mains','upcoming','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(3,1,'FTS02- Mains','upcoming','2025-04-04 10:00:00','2025-04-04 17:00:00',300,1),(4,2,'FTS02- Mains','upcoming','2025-04-04 10:00:00','2025-04-04 17:00:00',300,1),(5,1,'FTS02- Advanced Paper 1','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(6,2,'FTS02- Advanced Paper 1','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(7,1,'FTS02- Advanced Paper 2','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(8,2,'FTS02- Advanced Paper 2','upcoming','2025-04-14 10:00:00','2025-04-15 13:00:00',180,1),(9,2,'FTS03- Mains','upcoming','2025-04-19 10:00:00','2025-04-20 13:00:00',300,1),(10,2,'FTS03- Advanced Paper 1','upcoming','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(11,2,'FTS03- Advanced Paper 2','upcoming','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1);
-/*!40000 ALTER TABLE `tests` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
@@ -284,16 +220,6 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'A1','$2b$10$W2amF2fmf/cza662x.uUnuLr.lb2wfRoLz02BR4yP5pXRPMGSct1q','Admin 1','admin1@gmail.com','admin'),(2,'S1','$2b$10$mVpyvddhPVSMRQ7vp./HxOrPdQaw2FzwlP45zPQfPSsRngwaC9GxG','Student 1','student1@gamil.com','student'),(5,'S2','$2b$10$xPkjQwc5ivd0u08phkupg.TO6YWmQlaIwmptzefTFVsGl6S5YxUNC','Student 2','student2@gmail.com','student'),(66,'S3','$2b$10$OpCrbpm75zztnYK3Zi2hsuHziTgHQnCSCKIkOpDxreWL9x3fQWUUu','Student 3','student3@gmail.com','student'),(67,'S4','$2b$10$jKcn1VwzXeUcZJmLZxwkJuXJOMrH4gMxiBtslR7jp9KdXHsFoP51m','Student 4','student4@gmail.com','student'),(68,'S5','$2b$10$5VcTxjUT4Kpdu1hz7qNRmemFW4FBLsy/Z8OIlbT..iBYhuR3kyF5O','Student 5','student5@gmail.com','student'),(69,'T1','$2b$10$N.SucYRIl68WOd5kZb0fReIKlzXShA3l671Vn0EpdEsZRoLuZFqLm','Teacher 1','teacher1@gmail.com','teacher'),(71,'T2','$2b$10$GtmqsMv1rlN/hJQW1p3aCegV2diiOdDQ19mdZU6/ZkgBb.j0rHL2C','Teacher 2','teacher2@gmail.com','teacher'),(72,'T3','$2b$10$yEJi/hpXXF3G5rCqnlRb5./a7U8mkuv4lL1FLr5.NJ2Kc52Yw6CbO','Teacher 3','teacher3@gmail.com','teacher'),(73,'T4','$2b$10$8JmR3v3mlJx2lluZjeAuz.a5EtmD3lFKpjRYJb930XsFZ1o5O/QZG','Teacher 4','teacher4@gmail.com','teacher'),(74,'T5','$2b$10$.DuQaE5nvwJ8q0tjIlaNheY/uPJ9iRCyumbyQ/VsvvUYFjwrnQ/0C','Teacher 5','teacher5@gmail.com','teacher');
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -304,4 +230,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-10 21:50:56
+-- Dump completed on 2025-04-03 16:24:23
