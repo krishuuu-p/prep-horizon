@@ -3,7 +3,6 @@ import io from "socket.io-client";
 import Peer from "simple-peer";
 import Panel from "./Panel";
 
-// Connect to the backend (make sure your server is running on port 5000)
 const socket = io("http://10.81.65.73:5000", { transports: ["websocket"] });
 function InterviewPage() {
   const [activePage, setActivePage] = useState("Interview Practice");
@@ -17,9 +16,7 @@ function InterviewPage() {
   const userVideo = useRef(null);
   const connectionRef = useRef(null);
 
-  // Set up local video stream and socket events when component mounts.
   useEffect(() => {
-    // Get local camera & audio stream
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then((currentStream) => {
         setStream(currentStream);
@@ -29,10 +26,8 @@ function InterviewPage() {
       })
       .catch((err) => console.error("Error accessing media devices.", err));
 
-    // When another user joins the room, this user (as caller) initiates a call.
     socket.on("user-joined", (id) => {
       console.log("User joined event received, id:", id);
-      // Only attempt to call if we already have our own stream ready.
       if (stream) {
         callUser(id);
       } else {
@@ -40,7 +35,6 @@ function InterviewPage() {
       }
     });
 
-    // When receiving a signal, this means someone is calling you.
     socket.on("user-signal", (data) => {
       console.log("Receiving call from:", data.callerID);
       setReceivingCall(true);
@@ -48,7 +42,6 @@ function InterviewPage() {
       setCallerSignal(data.signal);
     });
 
-    // When caller receives the returned signal (callees response)
     socket.on("receiving-returned-signal", (data) => {
       console.log("Caller received returned signal");
       if (connectionRef.current) {
@@ -74,14 +67,12 @@ function InterviewPage() {
 
   const callUser = (userID) => {
     console.log("Initiating call to user:", userID);
-    // Create a new Peer as initiator with the local stream.
     const peer = new Peer({
       initiator: true,
       trickle: false,
       stream: stream
     });
 
-    // When the peer generates a signal (SDP offer), send it to the callee.
     peer.on("signal", (signalData) => {
       console.log("Caller sending signal to callee");
       socket.emit("sending-signal", {
@@ -91,7 +82,6 @@ function InterviewPage() {
       });
     });
 
-    // When the peer receives the callee’s remote stream, display it.
     peer.on("stream", (remoteStream) => {
       console.log("Caller received remote stream");
       if (userVideo.current) {
@@ -99,10 +89,8 @@ function InterviewPage() {
       }
     });
 
-    // Log errors for debugging.
     peer.on("error", (err) => console.error("Caller peer error:", err));
 
-    // Save the peer connection for further signaling.
     connectionRef.current = peer;
   };
 
@@ -110,20 +98,17 @@ function InterviewPage() {
     console.log("Accepting call from:", caller);
     setCallAccepted(true);
 
-    // Create a new Peer as callee with the local stream.
     const peer = new Peer({
       initiator: false,
       trickle: false,
       stream: stream
     });
 
-    // When the callee peer generates a signal (SDP answer), send it to the caller.
     peer.on("signal", (signalData) => {
       console.log("Callee returning signal to caller");
       socket.emit("returning-signal", { signal: signalData, callerID: caller });
     });
 
-    // When the callee peer receives the caller’s stream, display it.
     peer.on("stream", (remoteStream) => {
       console.log("Callee received remote stream");
       if (userVideo.current) {
@@ -131,10 +116,8 @@ function InterviewPage() {
       }
     });
 
-    // Log errors.
     peer.on("error", (err) => console.error("Callee peer error:", err));
 
-    // Apply the caller's signal once.
     if (callerSignal) {
       try {
         peer.signal(callerSignal);
