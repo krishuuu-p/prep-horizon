@@ -3,8 +3,8 @@ import '../styles/ActiveTest.css';
 
 const ActiveTestPage = () => {
     const [sections, setSections] = useState({
-        Maths: [
-            {
+            Maths: [
+              {
                 type: "MCQ",
                 question: "What is 2 + 2?",
                 options: { A: "3", B: "4", C: "5", D: "6" },
@@ -12,29 +12,93 @@ const ActiveTestPage = () => {
                 image: "q1.png",
                 useranswer: null,
                 status: "Not Visited",
-            },
-            {
+              },
+              {
                 type: "Numerical",
                 question: "Solve for x: 2x = 10",
                 answer: "5",
                 image: "q2.png",
                 useranswer: null,
                 status: "Not Visited",
-            },
-        ],
-        Physics: [
-            {
+              },
+              {
                 type: "MCQ",
-                question: "What is the unit of force?",
-                options: { A: "Newton", B: "Tesla", C: "Metre", D: "Watt" },
+                question: "What is the derivative of x²?",
+                options: { A: "x", B: "2x", C: "x²", D: "2" },
                 answer: "B",
                 image: null,
                 useranswer: null,
                 status: "Not Visited",
-            },
-        ],
-        Chemistry: [
-            {
+              },
+              {
+                type: "Numerical",
+                question: "If sin(θ) = 0.5, what is θ in degrees (0 < θ < 90)?",
+                answer: "30",
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              },
+              {
+                type: "Multiple Correct MCQ",
+                question: "Which of the following are prime numbers?",
+                options: { A: "2", B: "3", C: "4", D: "5" },
+                answer: ["A", "B", "D"],
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              },
+            ],
+          
+            Physics: [
+              {
+                type: "MCQ",
+                question: "What is the unit of force?",
+                options: { A: "Newton", B: "Tesla", C: "Metre", D: "Watt" },
+                answer: "A",
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              },
+              {
+                type: "Numerical",
+                question: "A car accelerates from 0 to 20 m/s in 5 seconds. What is its acceleration?",
+                answer: "4",
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              },
+              {
+                type: "MCQ",
+                question: "What is the speed of light in vacuum?",
+                options: {
+                  A: "3×10^8 m/s",
+                  B: "1.5×10^8 m/s",
+                  C: "3×10^6 m/s",
+                  D: "None of the above"
+                },
+                answer: "A",
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              },
+              {
+                type: "Multiple Correct MCQ",
+                question: "Which of the following are vector quantities?",
+                options: {
+                  A: "Velocity",
+                  B: "Speed",
+                  C: "Acceleration",
+                  D: "Force"
+                },
+                answer: ["A", "C", "D"],
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              }
+            ],
+          
+            Chemistry: [
+              {
                 type: "Multiple Correct MCQ",
                 question: "Which of the following are noble gases?",
                 options: { A: "Xe", B: "Ne", C: "Ar", D: "Kr" },
@@ -42,8 +106,40 @@ const ActiveTestPage = () => {
                 image: null,
                 useranswer: null,
                 status: "Not Visited",
-            },
-        ],
+              },
+              {
+                type: "MCQ",
+                question: "What is the atomic number of Carbon?",
+                options: { A: "6", B: "12", C: "14", D: "8" },
+                answer: "A",
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              },
+              {
+                type: "Numerical",
+                question: "How many moles are there in 18 grams of water (H₂O)? (Molar mass = 18 g/mol)",
+                answer: "1",
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              },
+              {
+                type: "Multiple Correct MCQ",
+                question: "Which elements are diatomic in nature?",
+                options: {
+                  A: "Oxygen",
+                  B: "Nitrogen",
+                  C: "Chlorine",
+                  D: "Helium"
+                },
+                answer: ["A", "B", "C"],
+                image: null,
+                useranswer: null,
+                status: "Not Visited",
+              }
+            ],
+          
     });
 
     const [currentSubject, setCurrentSubject] = useState("Maths");
