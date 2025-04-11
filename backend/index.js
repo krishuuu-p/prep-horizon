@@ -696,9 +696,9 @@ app.post("/add-class", async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Server error" });
     }
-  });
+});
 
-  app.post("/edit-class/:class_code", async (req, res) => {
+app.post("/edit-class/:class_code", async (req, res) => {
     const {class_code} = req.params;
     const {class_name, description} = req.body;
 
@@ -737,10 +737,9 @@ app.post("/add-class", async (req, res) => {
         console.error(error);
         res.status(500).json({message: "Server Error"});
     }
-  });
+});
 
-
-  app.post("/delete-class/:class_code", async (req,res) => {
+app.post("/delete-class/:class_code", async (req,res) => {
     const {class_code} = req.params;
     
     if(!class_code) {
@@ -761,7 +760,7 @@ app.post("/add-class", async (req, res) => {
   });
 
 
-  app.post("/add-users-to-class", uploadUsers.single("file"), async (req, res) => {
+app.post("/add-users-to-class", uploadUsers.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
     }
