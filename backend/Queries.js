@@ -121,20 +121,123 @@ async function saveStudentResponses(student_id, test_id, responses) {
     }
 }
 
-async function getQuestionsForTest(test_id) {
-    const query = `
-        SELECT q.question_id, q.question_text, q.options, q.correct_answer
-        FROM questions q
-        WHERE q.test_id = ?;
+async function getTestState(studentId, testId) {
+    const questionsQuery = `
+        SELECT * FROM questions
+        WHERE test_id = ?;
     `;
 
-    const [rows] = await pool.query(query, [test_id]);
-    return rows;
+    const [questionRows] = await pool.query(questionsQuery, [testId]);
+    if (!questionRows || questionRows.length === 0) {
+        throw new Error(`No questions found for the test with ID ${testId}`);
+    }
+
+    const questionIds = questionRows.map(row => row.id);
+    const placeholders = questionIds.map(() => '?').join(', ');
+
+    let responseRows = [];
+    let allOptionRows = [];
+    if (questionIds.length > 0) {
+        const responsesQuery = `
+            SELECT * FROM student_responses
+            WHERE student_id = ? AND question_id IN (${placeholders});
+        `;
+        [responseRows] = await pool.query(responsesQuery, [studentId, ...questionIds]);
+
+        const allOptionsQuery = `
+            SELECT * FROM options
+            WHERE question_id IN (${placeholders});
+        `;
+        [allOptionRows] = await pool.query(allOptionsQuery, questionIds);
+    }
+
+    const sectionsQuery = `
+        SELECT * FROM sections
+        WHERE test_id = ?;
+    `;
+    const [sectionRows] = await pool.query(sectionsQuery, [testId]);
+
+    let testState = {};
+    for (const row of sectionRows) {
+        const sectionName = row.section_name;
+        const sectionQuestions = questionRows.filter(question => question.section_id === row.id);
+        testState[sectionName] = [];
+    }
+
+    for (const sectionName in testState) {
+        const sectionRow = sectionRows.find(row => row.section_name === sectionName);
+        const sectionId = sectionRow.id;
+        const sectionQuestions = questionRows.filter(question => question.section_id === sectionId);
+
+        testState[sectionName] = sectionQuestions.map(question => {
+            const response = responseRows.find(res => res.question_id === question.id);
+
+            if (question.ques_type === "numerical") {
+                return {
+                    type: question.ques_type,
+                    question: question.ques_text,
+                    options: null,
+                    answer: question.numerical_answer,
+                    image: question.ques_img,
+                    useranswer: response ? response.numerical_answer : null,
+                    status: response ? response.status : "Not Visited",
+                };
+            }
+
+            const questionOptions = allOptionRows.filter(opt => opt.question_id === question.id);
+            const options = questionOptions.reduce((acc, opt) => {
+                acc[opt.option_key] = opt.option_text;
+                return acc;
+            }, {});
+
+            const correctAnswer = questionOptions.filter(opt => opt.is_correct === 1).map(opt => opt.option_key);
+
+            let answer = null;
+            if (question.ques_type === "single_correct") {
+                answer = correctAnswer[0];
+            } else if (question.ques_type === "multiple_correct") {
+                answer = correctAnswer;
+            }
+
+            let userAnswer = [];
+            if (response) {
+                for (let i = 1; i <= 4; i++) {
+                    const optionIdField = `selected_option_id_${i}`;
+                    if (response[optionIdField]) {
+                        const selectedOption = questionOptions.find(opt => opt.id === response[optionIdField]);
+                        if (selectedOption) {
+                            userAnswer.push(selectedOption.option_key);
+                        }
+                    }
+                }
+            }
+
+            if (userAnswer.length === 0) {
+                userAnswer = null;
+            }
+            else if (userAnswer.length === 1) {
+                userAnswer = userAnswer[0];
+            }
+
+            return {
+                type: question.ques_type,
+                question: question.ques_text,
+                options: options,
+                answer: answer,
+                image: question.ques_img,
+                useranswer: userAnswer,
+                status: response ? response.status : "Not Visited"
+            };
+        });
+    }
+
+    return testState;
 }
 
 module.exports = {
     getTestsForStudent,
     getClasses,
     getTestsForClass,
-    insertQuestion
+    insertQuestion,
+    getTestState
 };

@@ -439,6 +439,17 @@ app.post("/upload-questions", upload.single("file"), async (req, res) => {
     }
 });
 
+app.get("/get-test-state/:studentId/:testId", async (req, res) => {
+    try {
+        const { studentId, testId } = req.params;
+        const testState = await queries.getTestState(studentId, testId);
+        res.json(testState);
+    } catch (error) {
+        console.error("Error fetching test state:", error);
+        res.status(500).json({ message: "Error fetching test state" });
+    }
+});
+
 app.post("/add-student", async (req, res) => {
     const { username, password, name, email } = req.body;
 

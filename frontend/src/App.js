@@ -29,7 +29,7 @@ function App() {
         <Route path="/:userType/:userName/tests" element={<TestPage />} />
         <Route path="/:userType/:userName/interview-practice" element={<InterviewPage />} />
         <Route path="/:userType/:userName/profile" element={<ProfilePage />} />
-        <Route path="/:userType/:userName/start-test" element={<ActiveTestPage />} />
+        <Route path="/:userType/:userName/start-test/:testName/:testId" element={<ActiveTestPage />} />
         <Route path="/:userType/:userName/pdf-to-quiz" element={<PdfToQuizPage />} />
         <Route path="/:userType/:userName/classes" element={<ClassesPage />} />
         <Route path="/admin/:userName/student-management" element={<StudentManagementPage />} />

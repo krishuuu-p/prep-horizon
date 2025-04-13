@@ -45,8 +45,9 @@ function StudentHomePage() {
             .catch(error => console.error("Error fetching test data:", error));
     }, [user]);
 
-    const handleStartTest = () => {
-        navigate(`/${userType}/${userName}/start-test`);
+    const handleStartTest = (testId,testName) => {
+        testName = testName.replace(/\s+/g, '');
+        navigate(`/${userType}/${userName}/start-test/${testName}/${testId}`);
     }
     
 
@@ -77,7 +78,7 @@ function StudentHomePage() {
                                         <h3>{test.test_name}</h3>
                                         <p><strong>Start:</strong> {startdate} at {starttime}</p>
                                         <p><strong>End:</strong> {enddate} at {endtime}</p>
-                                        <button className="start-btn" onClick={handleStartTest}>Start Test</button>
+                                        <button className="start-btn" onClick={() => handleStartTest(test.id,test.test_name)}>Start Test</button>
                                     </div>
                                 );
                             })}

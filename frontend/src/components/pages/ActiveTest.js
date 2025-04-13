@@ -1,155 +1,60 @@
 import { useState, useEffect, useCallback } from "react";
+import { useParams } from 'react-router-dom';
 import '../styles/ActiveTest.css';
+import axios from "axios";
 
 const ActiveTestPage = () => {
-    const [sections, setSections] = useState({
-            Maths: [
-              {
-                type: "single_correct",
-                question: "What is 2 + 2?",
-                options: { A: "3", B: "4", C: "5", D: "6" },
-                answer: "B",
-                image: "q1.png",
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "numerical",
-                question: "Solve for x: 2x = 10",
-                answer: "5",
-                image: "q2.png",
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "single_correct",
-                question: "What is the derivative of x²?",
-                options: { A: "x", B: "2x", C: "x²", D: "2" },
-                answer: "B",
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "numerical",
-                question: "If sin(θ) = 0.5, what is θ in degrees (0 < θ < 90)?",
-                answer: "30",
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "multi_correct",
-                question: "Which of the following are prime numbers?",
-                options: { A: "2", B: "3", C: "4", D: "5" },
-                answer: ["A", "B", "D"],
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-            ],
-          
-            Physics: [
-              {
-                type: "single_correct",
-                question: "What is the unit of force?",
-                options: { A: "Newton", B: "Tesla", C: "Metre", D: "Watt" },
-                answer: "A",
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "numerical",
-                question: "A car accelerates from 0 to 20 m/s in 5 seconds. What is its acceleration?",
-                answer: "4",
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "single_correct",
-                question: "What is the speed of light in vacuum?",
-                options: {
-                  A: "3×10^8 m/s",
-                  B: "1.5×10^8 m/s",
-                  C: "3×10^6 m/s",
-                  D: "None of the above"
-                },
-                answer: "A",
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "multi_correct",
-                question: "Which of the following are vector quantities?",
-                options: {
-                  A: "Velocity",
-                  B: "Speed",
-                  C: "Acceleration",
-                  D: "Force"
-                },
-                answer: ["A", "C", "D"],
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              }
-            ],
-          
-            Chemistry: [
-              {
-                type: "multi_correct",
-                question: "Which of the following are noble gases?",
-                options: { A: "Xe", B: "Ne", C: "Ar", D: "Kr" },
-                answer: ["A", "B", "C", "D"],
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "single_correct",
-                question: "What is the atomic number of Carbon?",
-                options: { A: "6", B: "12", C: "14", D: "8" },
-                answer: "A",
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "numerical",
-                question: "How many moles are there in 18 grams of water (H₂O)? (Molar mass = 18 g/mol)",
-                answer: "1",
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              },
-              {
-                type: "multi_correct",
-                question: "Which elements are diatomic in nature?",
-                options: {
-                  A: "Oxygen",
-                  B: "Nitrogen",
-                  C: "Chlorine",
-                  D: "Helium"
-                },
-                answer: ["A", "B", "C"],
-                image: null,
-                useranswer: null,
-                status: "Not Visited",
-              }
-            ],
-          
-    });
+    const { userName, testName,testId } = useParams();
+    const [loading, setLoading] = useState(true);
+    const [sections, setSections] = useState({});
+        const [currentSubject, setCurrentSubject] = useState();
+        const [currentQuestionIndex, setCurrentQuestionIndex] = useState({
+        });
+        const [timer, setTimer] = useState(600);
+        const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-    const [currentSubject, setCurrentSubject] = useState("Maths");
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState({
-        Maths: 0,
-        Physics: 0,
-        Chemistry: 0,
-    });
-    const [timer, setTimer] = useState(600);
-    const [selectedAnswer, setSelectedAnswer] = useState(null);
+        useEffect(() => {
+            // Fetch sections from backend
+            const fetchSections = async () => {
+              try {
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/get-test-state/${userName}/${testId}`);
+                const data = response.data; // assuming response.data is the full sections object
+          
+                setSections(data);
+                setLoading(false);
+          
+                const firstSubject = Object.keys(data)[0];
+                setCurrentSubject(firstSubject);
+          
+                const defaultIndexes = Object.keys(data).reduce((acc, subject) => {
+                  acc[subject] = 0;
+                  return acc;
+                }, {});
+                setCurrentQuestionIndex(defaultIndexes);
+          
+                console.log("Fetched sections and initialized state.");
+              } catch (error) {
+                console.error("Error fetching sections:", error);
+                setLoading(false);
+              }
+            };
+          
+            fetchSections();
+          }, [testId, userName]);
+          
+
+    const postSectionsToBackend = async (studentName, testId, updatedSections) => {
+    try {
+        await axios.post(
+        `http://${process.env.REACT_APP_BACKEND_URL}/save-test-state/${studentName}/${testId}`,
+        { sections: updatedSections }
+        );
+        console.log("Sections saved successfully");
+        } catch (error) {
+            console.error("Error saving sections:", error);
+        }
+    };
+
 
     useEffect(() => {
         const countdown = setInterval(() => {
@@ -172,14 +77,7 @@ const ActiveTestPage = () => {
         const seconds = timer % 60;
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     };
-    
-    const updateSingleQuestionStatus = (index) => {
-        const updatedSections = { ...sections };
-        const q = updatedSections[currentSubject][index];
-        
-        if (q.status === "Not Visited") q.status = "Visited but Not Answered";
-        setSections(updatedSections);
-    };
+
     const checkFirstQ=()=>{
         const q = sections[currentSubject][currentQuestionIndex[currentSubject]];
         if(q.status==="Not Visited"){
@@ -265,6 +163,7 @@ const ActiveTestPage = () => {
         console.log("I am handle Save and Next.")
         console.log("This is useranswer",q.useranswer);
         setSections(updatedSections);
+        postSectionsToBackend(userName,testId,updatedSections);
         if (index + 1 < updatedSections[currentSubject].length) {
             console.log("this");
             loadQuestion(index + 1);
@@ -291,6 +190,7 @@ const ActiveTestPage = () => {
         q.status = "Visited but Not Answered";
     
         setSections(updatedSections);
+        postSectionsToBackend(userName,testId,updatedSections);
     };
     
     
@@ -310,6 +210,7 @@ const ActiveTestPage = () => {
     q.status = "Marked for Review";
 
     setSections(updatedSections);
+    postSectionsToBackend(userName,testId,updatedSections);
 
     if (index + 1 < updatedSections[currentSubject].length) {
         loadQuestion(index + 1);
@@ -318,29 +219,36 @@ const ActiveTestPage = () => {
 
 
 useEffect(() => {
-    const question = sections[currentSubject][currentQuestionIndex[currentSubject]];
-    
-    let savedAnswer;
-    
-    if (question.type === "single_correct") {
-        savedAnswer = question.useranswer || null;
-    } else if (question.type === "multi_correct") {
-        savedAnswer = question.useranswer || [];
-    } else if (question.type === "numerical") {
-        savedAnswer = question.useranswer || "";  
+    try {
+        const question = sections[currentSubject][currentQuestionIndex[currentSubject]];
+
+        let savedAnswer;
+
+        if (question.type === "single_correct") {
+            savedAnswer = question.useranswer || null;
+        } else if (question.type === "multi_correct") {
+            savedAnswer = question.useranswer || [];
+        } else if (question.type === "numerical") {
+            savedAnswer = question.useranswer || "";  
+        }
+        console.log("This is saved answer", savedAnswer);
+        console.log("I am use effect.");
+        setSelectedAnswer(savedAnswer);
+    } catch (error) {
+        console.error("Error in useEffect:", error);
     }
-    console.log("This is saved answer",savedAnswer);
-    console.log("I am use effect.")
-    setSelectedAnswer(savedAnswer);
 }, [currentSubject, currentQuestionIndex, sections]);
     
     
+    if (loading) {
+        return <div>Loading questions...</div>;
+    }
 
     return (
         <div>
             <header style={{ textAlign: "center", padding: "10px", background: "white" }}>
                 <strong>Time Remaining: </strong> <span style={{ color: "red" }}>{formatTime()}</span> |
-                <strong> Student Name:</strong> ABCD | <strong>Test Name:</strong> WXYZ
+                <strong> Student Name:</strong> {userName} | <strong>Test Name:</strong> {testName}
             </header>
 
             <div className="Subject pallete">

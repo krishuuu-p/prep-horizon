@@ -213,17 +213,27 @@ CREATE TABLE `student_responses` (
   `id` int NOT NULL AUTO_INCREMENT,
   `student_id` int NOT NULL,
   `question_id` int NOT NULL,
-  `selected_option_id` int DEFAULT NULL,
+  `selected_option_1_id` int DEFAULT NULL,
+  `selected_option_2_id` int DEFAULT NULL,
+  `selected_option_3_id` int DEFAULT NULL,
+  `selected_option_4_id` int DEFAULT NULL,
   `numerical_answer` float DEFAULT NULL,
-  `is_correct` tinyint(1) NOT NULL,
-  `marks_obtained` float NOT NULL,
+  `is_correct` tinyint(1) DEFAULT '0',
+  `marks_obtained` float DEFAULT '0',
+  `status` enum('Not Visited','Visited but Not Answered','Answered','Marked for Review') DEFAULT 'Not Visited',
   PRIMARY KEY (`id`),
-  KEY `student_id` (`student_id`),
-  KEY `question_id` (`question_id`),
-  KEY `selected_option_id` (`selected_option_id`),
-  CONSTRAINT `student_responses_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `student_responses_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `student_responses_ibfk_3` FOREIGN KEY (`selected_option_id`) REFERENCES `options` (`id`) ON DELETE SET NULL
+  KEY `fk_student` (`student_id`),
+  KEY `fk_question` (`question_id`),
+  KEY `fk_option1` (`selected_option_1_id`),
+  KEY `fk_option2` (`selected_option_2_id`),
+  KEY `fk_option3` (`selected_option_3_id`),
+  KEY `fk_option4` (`selected_option_4_id`),
+  CONSTRAINT `fk_option1` FOREIGN KEY (`selected_option_1_id`) REFERENCES `options` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_option2` FOREIGN KEY (`selected_option_2_id`) REFERENCES `options` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_option3` FOREIGN KEY (`selected_option_3_id`) REFERENCES `options` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_option4` FOREIGN KEY (`selected_option_4_id`) REFERENCES `options` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_question` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -290,7 +300,7 @@ CREATE TABLE `tests` (
 
 LOCK TABLES `tests` WRITE;
 /*!40000 ALTER TABLE `tests` DISABLE KEYS */;
-INSERT INTO `tests` VALUES (1,'FTS01- Mains','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(2,'FTS02- Mains','2025-04-06 10:00:00','2025-04-06 13:00:00',300,1),(3,'FTS02- Advanced Paper 1','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(4,'FTS02- Advanced Paper 2','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(5,'FTS03- Mains','2025-04-15 10:00:00','2025-04-16 13:00:00',300,1),(6,'FTS03- Advanced Paper 1','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(7,'FTS03- Advanced Paper 2','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(8,'FTS04 - AIATS','2025-04-15 10:00:00','2025-04-16 10:00:00',720,1),(9,'FTS05 - AIATS','2025-04-15 10:00:00','2025-04-16 10:00:00',720,1);
+INSERT INTO `tests` VALUES (1,'FTS01- Mains','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(2,'FTS02- Mains','2025-04-06 10:00:00','2025-04-06 13:00:00',300,1),(3,'FTS02- Advanced Paper 1','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(4,'FTS02- Advanced Paper 2','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(5,'FTS03- Mains','2025-04-13 10:00:00','2025-04-17 13:00:00',300,1),(6,'FTS03- Advanced Paper 1','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(7,'FTS03- Advanced Paper 2','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(8,'FTS04 - AIATS','2025-04-15 10:00:00','2025-04-16 10:00:00',720,1),(9,'FTS05 - AIATS','2025-04-15 10:00:00','2025-04-16 10:00:00',720,1);
 /*!40000 ALTER TABLE `tests` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -333,4 +343,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-13 20:34:47
+-- Dump completed on 2025-04-13 23:12:15
