@@ -5,7 +5,7 @@ const ActiveTestPage = () => {
     const [sections, setSections] = useState({
             Maths: [
               {
-                type: "MCQ",
+                type: "single_correct",
                 question: "What is 2 + 2?",
                 options: { A: "3", B: "4", C: "5", D: "6" },
                 answer: "B",
@@ -14,7 +14,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "Numerical",
+                type: "numerical",
                 question: "Solve for x: 2x = 10",
                 answer: "5",
                 image: "q2.png",
@@ -22,7 +22,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "MCQ",
+                type: "single_correct",
                 question: "What is the derivative of x²?",
                 options: { A: "x", B: "2x", C: "x²", D: "2" },
                 answer: "B",
@@ -31,7 +31,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "Numerical",
+                type: "numerical",
                 question: "If sin(θ) = 0.5, what is θ in degrees (0 < θ < 90)?",
                 answer: "30",
                 image: null,
@@ -39,7 +39,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "Multiple Correct MCQ",
+                type: "multi_correct",
                 question: "Which of the following are prime numbers?",
                 options: { A: "2", B: "3", C: "4", D: "5" },
                 answer: ["A", "B", "D"],
@@ -51,7 +51,7 @@ const ActiveTestPage = () => {
           
             Physics: [
               {
-                type: "MCQ",
+                type: "single_correct",
                 question: "What is the unit of force?",
                 options: { A: "Newton", B: "Tesla", C: "Metre", D: "Watt" },
                 answer: "A",
@@ -60,7 +60,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "Numerical",
+                type: "numerical",
                 question: "A car accelerates from 0 to 20 m/s in 5 seconds. What is its acceleration?",
                 answer: "4",
                 image: null,
@@ -68,7 +68,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "MCQ",
+                type: "single_correct",
                 question: "What is the speed of light in vacuum?",
                 options: {
                   A: "3×10^8 m/s",
@@ -82,7 +82,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "Multiple Correct MCQ",
+                type: "multi_correct",
                 question: "Which of the following are vector quantities?",
                 options: {
                   A: "Velocity",
@@ -99,7 +99,7 @@ const ActiveTestPage = () => {
           
             Chemistry: [
               {
-                type: "Multiple Correct MCQ",
+                type: "multi_correct",
                 question: "Which of the following are noble gases?",
                 options: { A: "Xe", B: "Ne", C: "Ar", D: "Kr" },
                 answer: ["A", "B", "C", "D"],
@@ -108,7 +108,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "MCQ",
+                type: "single_correct",
                 question: "What is the atomic number of Carbon?",
                 options: { A: "6", B: "12", C: "14", D: "8" },
                 answer: "A",
@@ -117,7 +117,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "Numerical",
+                type: "numerical",
                 question: "How many moles are there in 18 grams of water (H₂O)? (Molar mass = 18 g/mol)",
                 answer: "1",
                 image: null,
@@ -125,7 +125,7 @@ const ActiveTestPage = () => {
                 status: "Not Visited",
               },
               {
-                type: "Multiple Correct MCQ",
+                type: "multi_correct",
                 question: "Which elements are diatomic in nature?",
                 options: {
                   A: "Oxygen",
@@ -150,7 +150,6 @@ const ActiveTestPage = () => {
     });
     const [timer, setTimer] = useState(600);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
-
 
     useEffect(() => {
         const countdown = setInterval(() => {
@@ -190,13 +189,13 @@ const ActiveTestPage = () => {
         }
 
         setTimeout(() => {
-            if (q.type === "MCQ") {
+            if (q.type === "single_correct") {
                 if (q.useranswer) {
                     const selectedOption = document.querySelector(`input[name='answer'][value='${q.useranswer}']`);
                     if (selectedOption) selectedOption.checked = true;
                 }
             } 
-            else if (q.type === "Multiple Correct MCQ") {
+            else if (q.type === "multi_correct") {
                 if (q.useranswer) {
                     q.useranswer.forEach((answer) => {
                         const checkbox = document.querySelector(`input[name='answer'][value='${answer}']`);
@@ -204,7 +203,7 @@ const ActiveTestPage = () => {
                     });
                 }
             } 
-            else if (q.type === "Numerical") {
+            else if (q.type === "numerical") {
                 const numericalInput = document.querySelector("input[name='numerical-answer']");
                 if (numericalInput && q.useranswer) {
                     numericalInput.value = q.useranswer;
@@ -224,13 +223,13 @@ const ActiveTestPage = () => {
         }
 
         setTimeout(() => {
-            if (q.type === "MCQ") {
+            if (q.type === "single_correct") {
                 if (q.useranswer) {
                     const selectedOption = document.querySelector(`input[name='answer'][value='${q.useranswer}']`);
                     if (selectedOption) selectedOption.checked = true;
                 }
             } 
-            else if (q.type === "Multiple Correct MCQ") {
+            else if (q.type === "multi_correct") {
                 if (q.useranswer) {
                     q.useranswer.forEach((answer) => {
                         const checkbox = document.querySelector(`input[name='answer'][value='${answer}']`);
@@ -238,7 +237,7 @@ const ActiveTestPage = () => {
                     });
                 }
             } 
-            else if (q.type === "Numerical") {
+            else if (q.type === "numerical") {
                 const numericalInput = document.querySelector("input[name='numerical-answer']");
                 if (numericalInput && q.useranswer) {
                     numericalInput.value = q.useranswer;
@@ -254,11 +253,11 @@ const ActiveTestPage = () => {
         const updatedSections = { ...sections };
         const q = updatedSections[currentSubject][index];
         console.log("This is selected answer",selectedAnswer);
-        if (q.type === "MCQ") {
+        if (q.type === "single_correct") {
             q.useranswer = selectedAnswer; 
-        } else if (q.type === "Multiple Correct MCQ") {
+        } else if (q.type === "multi_correct") {
             q.useranswer = [...selectedAnswer]; 
-        } else if (q.type === "Numerical") {
+        } else if (q.type === "numerical") {
             q.useranswer = selectedAnswer ? selectedAnswer.trim() : null; 
         }
     
@@ -278,13 +277,13 @@ const ActiveTestPage = () => {
         const updatedSections = { ...sections };
         const q = updatedSections[currentSubject][index];
     
-        if (q.type === "MCQ") {
+        if (q.type === "single_correct") {
             q.useranswer = null; 
             setSelectedAnswer(null);
-        } else if (q.type === "Multiple Correct MCQ") {
+        } else if (q.type === "multi_correct") {
             q.useranswer = []; 
             setSelectedAnswer([]);
-        } else if (q.type === "Numerical") {
+        } else if (q.type === "numerical") {
             q.useranswer = ""; 
             setSelectedAnswer("");
         }
@@ -300,11 +299,11 @@ const ActiveTestPage = () => {
     const index = currentQuestionIndex[currentSubject];
     const updatedSections = { ...sections };
     const q = updatedSections[currentSubject][index];
-    if (q.type === "MCQ") {
+    if (q.type === "single_correct") {
         q.useranswer = selectedAnswer;
-    } else if (q.type === "Multiple Correct MCQ") {
+    } else if (q.type === "multi_correct") {
         q.useranswer = [...selectedAnswer];
-    } else if (q.type === "Numerical") {
+    } else if (q.type === "numerical") {
         q.useranswer = selectedAnswer ? selectedAnswer.trim() : null;
     }
 
@@ -323,11 +322,11 @@ useEffect(() => {
     
     let savedAnswer;
     
-    if (question.type === "MCQ") {
+    if (question.type === "single_correct") {
         savedAnswer = question.useranswer || null;
-    } else if (question.type === "Multiple Correct MCQ") {
+    } else if (question.type === "multi_correct") {
         savedAnswer = question.useranswer || [];
-    } else if (question.type === "Numerical") {
+    } else if (question.type === "numerical") {
         savedAnswer = question.useranswer || "";  
     }
     console.log("This is saved answer",savedAnswer);
@@ -366,7 +365,7 @@ useEffect(() => {
 
 
                     <div className="options">
-                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "MCQ" &&
+                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "single_correct" &&
                             Object.entries(sections[currentSubject][currentQuestionIndex[currentSubject]].options).map(([key, value]) => (
                                 <label key={key}>
                                     <input
@@ -380,7 +379,7 @@ useEffect(() => {
                                 </label>
                             ))}
 
-                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "Multiple Correct MCQ" &&
+                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "multi_correct" &&
                             Object.entries(sections[currentSubject][currentQuestionIndex[currentSubject]].options).map(([key, value]) => (
                                 <label key={key}>
                                     <input
@@ -403,7 +402,7 @@ useEffect(() => {
                                 </label>
                             ))}
 
-                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "Numerical" && (
+                        {sections[currentSubject][currentQuestionIndex[currentSubject]].type === "numerical" && (
                             <input
                                 type="text"
                                 name="numerical-answer"

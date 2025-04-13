@@ -8,6 +8,7 @@ const fs = require('fs');
 const { Server } = require('socket.io');
 const FormData = require('form-data');
 const queries = require("./Queries");
+const extractQues = require("./extractQuestions");
 const path = require("path");
 const app = express();
 require('dotenv').config();
@@ -25,7 +26,7 @@ const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 const io = new Server(server, {
     cors: {
-     origin: ['http://localhost:3000', 'http://10.81.65.73:3000'],
+     origin: "*",
       methods: ["GET", "POST"]
     }
   });
@@ -343,28 +344,90 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
     }
 });
 
-app.post("upload-questions", upload.single("file"), async (req, res) => {
+app.post("/upload-questions", upload.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
     }
     try {
-        const { getQuestionsFromDoc } = require("./utils");
         const { classId, testId } = req.body;
         const filePath = path.join(__dirname, "uploads", req.file.filename);
-        const questions = getQuestionsFromDoc(filePath);
+        const sections = await extractQues.extractQuestionsWithImages(filePath, testId);
+        
+        const sectionInsertQuery = `
+            INSERT INTO sections (test_id, section_name, max_marks)
+            VALUES (?, ?, ?);
+        `;
 
-        for (const question of questions) {
-            const query = `
-                INSERT INTO questions (test_id, section_id, ques_text, ques_img_url, ques_type, 
-                correct_answer, positive_marks, negative_marks) 
+        for (const [sectionName, questions] of Object.entries(sections)) {
+            const sectionInsertResult = await new Promise((resolve, reject) => {    
+                db.query(sectionInsertQuery, [testId, sectionName, 0], (err, result) => {
+                    if (err) {
+                        console.error(`Error inserting section ${sectionName}:`, err);
+                        return reject(err);
+                    }
+                    resolve(result);
+                });
+            });
+            const sectionId = sectionInsertResult.insertId;
+
+            const questionInsertQuery = `
+                INSERT INTO questions (test_id, section_id, ques_text, ques_img, ques_type, 
+                numerical_answer, positive_marks, negative_marks) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
             `;
-            const { section_id, ques_text, ques_img_url, ques_type, correct_answer, positive_marks, negative_marks } = question;
-            db.query(query, [testId, section_id, ques_text, ques_img_url, ques_type, correct_answer, positive_marks, negative_marks], (err, result) => {
-                if (err) {
-                    console.error(`Error inserting question:`, err);
+
+            for (const question of questions) {
+                const { 
+                    question: quesText, 
+                    image: quesImage, 
+                    type: quesType, 
+                    answer,
+                    options, 
+                    positiveMarks, 
+                    negativeMarks 
+                } = question;
+
+                let correctOptionKeys = [];
+                let numericalAnswer = null;
+                if (quesType === "single_correct") {
+                    correctOptionKeys = [answer];
                 }
-            });
+                else if (quesType === "multi_correct") {
+                    correctOptionKeys = answer;
+                }
+                else {
+                    correctOptionKeys = null;
+                    numericalAnswer = answer;
+                }
+
+                const questionInsertResult = await new Promise((resolve, reject) => { 
+                    db.query(questionInsertQuery, [testId, sectionId, quesText, quesImage, quesType, numericalAnswer, positiveMarks, negativeMarks], (err, result) => {
+                        if (err) {
+                            console.error(`Error inserting question:`, err);
+                            return reject(err);
+                        }
+                        resolve(result);
+                    });
+                });
+
+                const questionId = questionInsertResult.insertId;
+
+                if (quesType === "single_correct" || quesType === "multi_correct") {
+                    const optionInsertQuery = `
+                        INSERT INTO options (question_id, option_key, option_text, option_img, is_correct)
+                        VALUES (?, ?, ?, ?, ?);
+                    `;
+
+                    for (const [optionKey, optionText] of Object.entries(options)) {
+                        const isCorrect = correctOptionKeys.includes(optionKey) ? 1 : 0;
+                        db.query(optionInsertQuery, [questionId, optionKey, optionText, null, isCorrect], (err, result) => {
+                            if (err) {
+                                console.error(`Error inserting options:`, err);
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         fs.unlinkSync(filePath);
