@@ -37,7 +37,8 @@ cd backend
 
 2. Install dependencies
 npm install
-Run the Node.js backend
+
+3. Run the Node.js backend
 node index.js
 ✅ Node.js backend running on http://localhost:5000
 
