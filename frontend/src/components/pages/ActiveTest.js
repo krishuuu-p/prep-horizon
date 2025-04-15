@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from 'react-router-dom';
+import Webcam from "react-webcam";
 import '../styles/ActiveTest.css';
 import axios from "axios";
 
@@ -7,11 +8,16 @@ const ActiveTestPage = () => {
     const { userName, testName,testId } = useParams();
     const [loading, setLoading] = useState(true);
     const [sections, setSections] = useState({});
-        const [currentSubject, setCurrentSubject] = useState();
-        const [currentQuestionIndex, setCurrentQuestionIndex] = useState({
-        });
-        const [timer, setTimer] = useState(600);
-        const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [currentSubject, setCurrentSubject] = useState();
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState({ });
+    const [timer, setTimer] = useState(600);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    // Proctoring state
+    const [testStarted, setTestStarted] = useState(false);
+    const [tabSwitchCount, setTabSwitchCount] = useState(0);
+    const [isFullscreen, setIsFullscreen] = useState(true);
+    const [testSubmitted, setTestSubmitted] = useState(false);
+    const [webcamAllowed, setWebcamAllowed] = useState(null);
 
         useEffect(() => {
             // Fetch sections from backend
@@ -70,7 +76,81 @@ const ActiveTestPage = () => {
 
         return () => clearInterval(countdown);
     }, []);
+    const requestWebcamAccess = async () => {
+        try { await navigator.mediaDevices.getUserMedia({ video: true }); setWebcamAllowed(true); return true; }
+        catch { setWebcamAllowed(false); return false; }
+    };
 
+    // Start test
+    const startTest = async () => {
+        if (!(await requestWebcamAccess())) { alert("Please allow webcam to proceed"); return; }
+        document.documentElement.requestFullscreen();
+        setTestStarted(true);
+    };
+
+    // Auto-submit
+    const SubmitTest = () => 
+    {
+        setTestSubmitted(true);
+        setTestStarted(false);
+        // To check if fullscreen exists and the document is active before exiting
+        if (document.fullscreenElement && document.hasFocus()) {
+          document.exitFullscreen().catch((err) => {
+            console.warn("Failed to exit fullscreen:", err);
+          });
+        }
+        alert("Test has been submitted due to multiple tab switches.");
+    };
+
+    // Proctoring effects
+    useEffect(() => 
+        {
+            if (!testStarted) return;
+            const handleVis = () => 
+            { 
+                if (document.hidden && !testSubmitted) 
+                { 
+                    setTabSwitchCount(c => c+1); 
+                    alert("⚠ Tab switching is not allowed"); 
+                } 
+            };
+            document.addEventListener("visibilitychange", handleVis);
+            return () => document.removeEventListener("visibilitychange", handleVis);
+        }, [testStarted, testSubmitted]);
+    useEffect(() => 
+    {
+        if (tabSwitchCount > 3 && testStarted && !testSubmitted) 
+        {
+            SubmitTest();
+        }
+
+    }, [tabSwitchCount]);
+    useEffect(() => 
+    { 
+        const d = e=>e.preventDefault(); 
+        document.addEventListener("contextmenu", d); 
+        window.addEventListener("keydown", e=>e.ctrlKey&&e.preventDefault()); 
+        return ()=>document.removeEventListener("contextmenu", d);
+    }, []);
+    useEffect(() => {
+        if (!testStarted) return;
+        const checkFs = () => setIsFullscreen(!!(document.fullscreenElement));
+        document.addEventListener("fullscreenchange", checkFs);
+        checkFs();
+        return () => document.removeEventListener("fullscreenchange", checkFs);
+    }, [testStarted]);
+
+    // Timer
+    useEffect(() => {
+        if (!testStarted || testSubmitted) return;
+        const id = setInterval(() => {
+            setTimer(t=>{
+                if (t<=1) { clearInterval(id); alert("Time's up"); SubmitTest(); return 0; }
+                return t-1;
+            });
+        },1000);
+        return ()=>clearInterval(id);
+    }, [testStarted, testSubmitted]);
     
     const formatTime = () => {
         const minutes = Math.floor(timer / 60);
@@ -243,7 +323,23 @@ useEffect(() => {
     if (loading) {
         return <div>Loading questions...</div>;
     }
-
+    if (!testStarted || testSubmitted) {
+        return (
+        <div style={{textAlign:'center', marginTop:50}}>
+            {!testSubmitted ? (
+            <><h2>📝 Start Test</h2>
+            <button onClick={startTest}>
+                Start
+            </button>
+            {webcamAllowed===false&&<p style={{color:'red'}}>
+                Allow webcam</p>}
+            </>
+            ) : (
+            <h2>✅ Test has been submitted</h2>
+            )}
+        </div>
+        );
+    }
     return (
         <div>
             <header style={{ textAlign: "center", padding: "10px", background: "white" }}>
@@ -366,6 +462,37 @@ useEffect(() => {
                     </div>
                 </div>
             </div>
+            
+            <div style={{textAlign:'center', margin:20}}>
+                <Webcam width={300} height={200} />
+            </div>
+            {!isFullscreen && <div 
+                style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    backgroundColor: "black",
+                    color: "white",
+                    fontSize: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 9999,
+                    flexDirection: "column",
+                }}
+                >
+                    <p>⚠ Fullscreen mode is required for the test</p>
+                <button
+                    onClick={() => {
+                    document.documentElement.requestFullscreen();
+                    }}
+                    style={{ padding: "10px 20px", marginTop: "20px", fontSize: "18px" }}
+                >
+                    Re-enter Fullscreen
+                </button>
+            </div>}
         </div>
     );
 };
