@@ -14,13 +14,14 @@ Each part of the application should run in a separate terminal.
 
 🖥️ Terminal 1 (Flask Backend)
 1. Navigate to the backend folder
-   
 cd flask_backend
-2. Create a virtual environment (only once)
 
+2. Create a virtual environment (only once)
 python -m venv venv
+
 3. Activate the virtual environment:
 venv\Scripts\Activate
+
 Mac/Linux
 source venv/bin/activate
 
@@ -29,6 +30,7 @@ pip install -r requirements.txt
 
 5. Run Flask server
 python flask_backend.py
+
 ✅ Flask backend running on http://localhost:5001
 
 🖥️ Terminal 2 (Node.js Backend)
@@ -40,6 +42,7 @@ npm install
 
 3. Run the Node.js backend
 node index.js
+
 ✅ Node.js backend running on http://localhost:5000
 
 🖥️ Terminal 3 (Frontend - React)
