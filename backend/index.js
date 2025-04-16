@@ -259,14 +259,16 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
         return res.status(400).json({ message: "No file uploaded" });
     }
 
+    const filePath = path.join(__dirname, "uploads", req.file.filename);
     try {
-        const filePath = path.join(__dirname, "uploads", req.file.filename);
         const workbook = xlsx.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const tests = xlsx.utils.sheet_to_json(sheet, { raw: false });
         const username = req.body.username;
+        console.log(username);
 
+        // Get user ID based on username
         const idResult = await new Promise((resolve, reject) => {
             const query = `SELECT id FROM users WHERE username = ?;`;
             db.query(query, [username], (err, results) => {
@@ -281,20 +283,31 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
         if (!idResult || idResult.length === 0) {
             return res.status(404).json({ message: "User not found" });
         }
-
         const userId = idResult[0].id;
 
         if (tests.length === 0) {
             return res.status(400).json({ message: "Empty file or invalid format" });
         }
 
+        // Begin transaction
+        await new Promise((resolve, reject) => {
+            db.beginTransaction((err) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+
+        // Process each test from the Excel data
         for (const test of tests) {
             const { test_name, start_time, end_time, total_marks, classes } = test;
             if (!test_name || !classes || !start_time || !end_time || !total_marks) {
-                return res.status(400).json({ message: "Missing fields in uploaded file" });
+                throw new Error("Missing fields in uploaded file");
             }
 
             const class_codes = classes.split(",").map(c => c.trim());
+            // Get class IDs from the database
             const classIds = await new Promise((resolve, reject) => {
                 const query = "SELECT id FROM classes WHERE class_code IN (?)";
                 db.query(query, [class_codes], (err, results) => {
@@ -305,11 +318,13 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
                     resolve(results.map(row => row.id));
                 });
             });
+            console.log(classIds);
 
             const startDate = parseExcelDate(start_time);
             const endDate = parseExcelDate(end_time);
             const totalMarks = parseInt(total_marks, 10);
 
+            // Insert test record
             const testInsertQuery = "INSERT INTO tests (test_name, start_time, end_time, total_marks, created_by) VALUES (?, ?, ?, ?, ?)";
             const testInsertResult = await new Promise((resolve, reject) => {
                 db.query(testInsertQuery, [test_name, startDate, endDate, totalMarks, userId], (err, result) => {
@@ -322,12 +337,13 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
             });
             const testId = testInsertResult.insertId;
             
+            // Insert test-class relationships
             const classTestQuery = "INSERT INTO class_test (class_id, test_id) VALUES (?, ?)";
             for (const classId of classIds) {
                 await new Promise((resolve, reject) => {
                     db.query(classTestQuery, [classId, testId], (err, result) => {
                         if (err) {
-                            console.error(`Error inserting test-class relationship:`, err);
+                            console.error("Error inserting test-class relationship:", err);
                             return reject(err);
                         }
                         resolve(result);
@@ -335,10 +351,23 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
                 });
             }
         }
-         
+
+        // Commit transaction if everything is successful
+        await new Promise((resolve, reject) => {
+            db.commit((err) => {
+                if (err) {
+                    db.rollback(() => reject(err));
+                } else {
+                    resolve();
+                }
+            });
+        });
+
         fs.unlinkSync(filePath);
         res.status(201).json({ message: "Tests added successfully." });
     } catch (error) {
+        // Rollback transaction in case of any error
+        await new Promise((resolve) => db.rollback(() => resolve()));
         console.error(error);
         res.status(500).json({ message: "Server error" });
     }
@@ -348,27 +377,51 @@ app.post("/upload-questions", upload.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
     }
+    const filePath = path.join(__dirname, "uploads", req.file.filename);
     try {
+        // Begin transaction
+        await new Promise((resolve, reject) => {
+            db.beginTransaction(err => {
+                if (err) return reject(err);
+                resolve();
+            });
+        });
+
         const { classId, testId } = req.body;
-        const filePath = path.join(__dirname, "uploads", req.file.filename);
         const sections = await extractQues.extractQuestionsWithImages(filePath, testId);
-        
         const sectionInsertQuery = `
             INSERT INTO sections (test_id, section_name, max_marks)
             VALUES (?, ?, ?);
         `;
 
         for (const [sectionName, questions] of Object.entries(sections)) {
-            const sectionInsertResult = await new Promise((resolve, reject) => {    
-                db.query(sectionInsertQuery, [testId, sectionName, 0], (err, result) => {
+            // Check if section already exists for the test
+            const checkSectionQuery = `SELECT * FROM sections WHERE section_name = ? AND test_id = ?`;
+            const checkSectionResult = await new Promise((resolve, reject) => {
+                db.query(checkSectionQuery, [sectionName, testId], (err, result) => {
                     if (err) {
-                        console.error(`Error inserting section ${sectionName}:`, err);
+                        console.error("Error checking section existence:", err);
                         return reject(err);
                     }
                     resolve(result);
                 });
             });
-            const sectionId = sectionInsertResult.insertId;
+
+            let sectionId = null;
+            if (checkSectionResult.length === 0) {
+                const sectionInsertResult = await new Promise((resolve, reject) => {    
+                    db.query(sectionInsertQuery, [testId, sectionName, 0], (err, result) => {
+                        if (err) {
+                            console.error(`Error inserting section ${sectionName}:`, err);
+                            return reject(err);
+                        }
+                        resolve(result);
+                    });
+                });
+                sectionId = sectionInsertResult.insertId;
+            } else {
+                sectionId = checkSectionResult[0].id;
+            }
 
             const questionInsertQuery = `
                 INSERT INTO questions (test_id, section_id, ques_text, ques_img, ques_type, 
@@ -377,7 +430,7 @@ app.post("/upload-questions", upload.single("file"), async (req, res) => {
             `;
 
             for (const question of questions) {
-                const { 
+                let { 
                     question: quesText, 
                     image: quesImage, 
                     type: quesType, 
@@ -386,6 +439,24 @@ app.post("/upload-questions", upload.single("file"), async (req, res) => {
                     positiveMarks, 
                     negativeMarks 
                 } = question;
+                // Normalize the question text (trim and lower-case it)
+                const normalizedQuesText = quesText.trim().toLowerCase();
+
+                // Check if question already exists (normalize in SQL as well)
+                const checkQuestionQuery = `SELECT * FROM questions WHERE LOWER(TRIM(ques_text)) = ? AND section_id = ?`;
+                const checkQuestionResult = await new Promise((resolve, reject) => {
+                    db.query(checkQuestionQuery, [normalizedQuesText, sectionId], (err, result) => {
+                        if (err) {
+                            console.error("Error checking question existence:", err);
+                            return reject(err);
+                        }
+                        resolve(result);
+                    });
+                });
+                if (checkQuestionResult.length > 0) {
+                    console.log(`Question "${quesText}" already exists in section "${sectionName}". Skipping...`);
+                    continue;
+                }
 
                 let correctOptionKeys = [];
                 let numericalAnswer = null;
@@ -403,13 +474,12 @@ app.post("/upload-questions", upload.single("file"), async (req, res) => {
                 const questionInsertResult = await new Promise((resolve, reject) => { 
                     db.query(questionInsertQuery, [testId, sectionId, quesText, quesImage, quesType, numericalAnswer, positiveMarks, negativeMarks], (err, result) => {
                         if (err) {
-                            console.error(`Error inserting question:`, err);
+                            console.error("Error inserting question:", err);
                             return reject(err);
                         }
                         resolve(result);
                     });
                 });
-
                 const questionId = questionInsertResult.insertId;
 
                 if (quesType === "single_correct" || quesType === "multi_correct") {
@@ -417,36 +487,64 @@ app.post("/upload-questions", upload.single("file"), async (req, res) => {
                         INSERT INTO options (question_id, option_key, option_text, option_img, is_correct)
                         VALUES (?, ?, ?, ?, ?);
                     `;
-
-                    for (const [optionKey, optionText] of Object.entries(options)) {
+                    const optionInsertPromises = Object.entries(options).map(([optionKey, optionText]) => {
                         const isCorrect = correctOptionKeys.includes(optionKey) ? 1 : 0;
-                        db.query(optionInsertQuery, [questionId, optionKey, optionText, null, isCorrect], (err, result) => {
-                            if (err) {
-                                console.error(`Error inserting options:`, err);
-                            }
+                        return new Promise((resolve, reject) => {
+                            db.query(optionInsertQuery, [questionId, optionKey, optionText, null, isCorrect], (err, result) => {
+                                if (err) {
+                                    console.error("Error inserting options:", err);
+                                    return reject(err);
+                                }
+                                resolve(result);
+                            });
                         });
-                    }
+                    });
+                    await Promise.all(optionInsertPromises);                
                 }
             }
         }
-
+        
+        // Commit transaction if everything goes well
+        await new Promise((resolve, reject) => {
+            db.commit(err => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            });
+        });
+        
         fs.unlinkSync(filePath);
-        res.status(201).json({ message: `Questions added successfully.` });
-    }
-    catch (error) {
+        res.status(201).json({ message: "Questions added successfully." });
+    } catch (error) {
+        // Rollback transaction in case of error
+        await new Promise((resolve) => db.rollback(() => resolve()));
         console.error(error);
         res.status(500).json({ message: "Server error" });
     }
 });
 
-app.get("/get-test-state/:studentId/:testId", async (req, res) => {
+app.get("/get-test-state/:studentUsername/:testId", async (req, res) => {
     try {
-        const { studentId, testId } = req.params;
-        const testState = await queries.getTestState(studentId, testId);
+        const { studentUsername, testId } = req.params;
+        const testState = await queries.getTestState(studentUsername, testId);
         res.json(testState);
     } catch (error) {
         console.error("Error fetching test state:", error);
         res.status(500).json({ message: "Error fetching test state" });
+    }
+});
+
+app.post("/save-test-state/:studentId/:testId", async (req, res) => {
+    try {
+        console.log("Saving test state:", req.body);
+        const { studentId, testId } = req.params;
+        const { sections } = req.body;
+        await queries.saveTestState(studentId, testId, sections);
+        res.json({ message: "Test state saved successfully" });
+    } catch (error) {
+        console.error("Error saving test state:", error);
+        res.status(500).json({ message: "Error saving test state" });
     }
 });
 
