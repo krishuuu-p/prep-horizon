@@ -66,20 +66,163 @@ body {
     text-align: center;
     margin-top: 20px;
 }
-.Subject{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
+
+.question-button{
+    height: 25px;
+    width: 25px;
+    border: 1px solid black;
 }
-.Subject button{
-    background-color: green;
-    border: 2px solid black;
-    padding: 2px;
-    border-radius: 8px;
-    font-size:medium;
+.terms-container {
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+  }
+
+  .proceed-button {
+    margin-top: 20px;
+    padding: 10px 30px;
+    background-color: #4CAF50;
     color: white;
-}
-.Subject button:hover{
-    background-color: blue;
-}
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .proceed-button:disabled {
+    background-color: grey;
+    cursor: not-allowed;
+  }
+  .subject-palette {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .subject-list {
+    display: flex;
+    gap: 16px;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .subject-button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 2px solid #ccc;
+    background-color: #f9f9f9;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  
+  .subject-button:hover {
+    background-color: #eaeaea;
+    border-color: #999;
+  }
+  
+  .subject-button.active {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+    color: white;
+  }
+  .top-palette {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: #f9f9f9;
+    border-bottom: 2px solid #ddd;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .candidate-info {
+    display: flex;
+    align-items: center;
+    background-color: #f5f7fa;
+    padding: 15px 25px;
+    border-bottom: 1px solid #dcdcdc;
+  }
+  
+  .avatar {
+    width: 60px;
+    height: 60px;
+    background-color: #d3d3d3;
+    border-radius: 50%;
+    margin-right: 20px;
+  }
+  
+  .detailsCandidate p {
+    margin: 2px 0;
+    font-size: 18px;
+    color: #f7931e;
+  }
+  .detailsCandidate strong {
+    color: #2c3e50;
+  }
+  
+  .detailsCandidate span {
+    color: #d35400;
+    font-weight: 500;
+  }
+  
+  .timer {
+    background-color: #2e8bc0;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: bold;
+  }
+  
+  .language-select select {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .prep-header {
+    background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .logo {
+    font-size: 36px;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: fadeIn 1.2s ease-in-out;
+  }
+  
+  .logo-glow {
+    color: #ffcc00;
+    text-shadow: 0 0 8px #ffcc00, 0 0 15px #ff9900;
+  }
+  
+  .logo-text {
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
+  }
+  
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  

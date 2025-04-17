@@ -88,6 +88,9 @@ const storage = multer.diskStorage({
 
 const uploadUsers = multer({ storage: storage });
 
+
+app.use('/extracted_images', express.static(path.join(__dirname, 'extracted_images')));
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',

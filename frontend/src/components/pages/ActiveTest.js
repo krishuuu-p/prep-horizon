@@ -19,13 +19,16 @@ const ActiveTestPage = () => {
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [webcamAllowed, setWebcamAllowed] = useState(null);
 
+    const [canProceed, setCanProceed] = useState(false);
+
     useEffect(() => {
         // Fetch sections from backend
+        console.log("Hi")
         const fetchSections = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/get-test-state/${userName}/${testId}`);
                 const data = response.data; // assuming response.data is the full sections object
-
+                console.log(data);
                 setSections(data);
                 setLoading(false);
 
@@ -82,6 +85,7 @@ const ActiveTestPage = () => {
 
     // Start test
     const startTest = async () => {
+        console.log("Starting test");
         if (!(await requestWebcamAccess())) { alert("Please allow webcam to proceed"); return; }
         document.documentElement.requestFullscreen();
         setTestStarted(true);
@@ -223,15 +227,32 @@ const ActiveTestPage = () => {
         const updatedSections = { ...sections };
         const q = updatedSections[currentSubject][index];
         console.log("This is selected answer", selectedAnswer);
+        // console.log(typeof(selectedAnswer));
         if (q.type === "single_correct") {
             q.useranswer = selectedAnswer;
         } else if (q.type === "multi_correct") {
             q.useranswer = [...selectedAnswer];
         } else if (q.type === "numerical") {
-            q.useranswer = selectedAnswer ? selectedAnswer.trim() : null;
+            q.useranswer = selectedAnswer ? selectedAnswer : null;
         }
-
-        q.status = selectedAnswer && selectedAnswer.length > 0 ? "Answered" : "Visited but Not Answered";
+        if(selectedAnswer){
+            if(typeof(selectedAnswer)===String||Array.isArray(selectedAnswer)){
+                if(selectedAnswer.length>0){
+                    q.status="Answered";
+                }
+                else{
+                    q.status="Visited but Not Answered";
+                }
+            }
+            else{
+                console.log("Yes");
+                q.status="Answered";
+            }
+        }
+        else{
+            q.status="Visited but Not Answered";
+        }
+        // q.status = selectedAnswer && selectedAnswer.length > 0 ? "Answered" : "Visited but Not Answered";
         console.log("I am handle Save and Next.")
         console.log("This is useranswer", q.useranswer);
         postSectionsToBackend(userName, testId, updatedSections);
@@ -275,7 +296,7 @@ const ActiveTestPage = () => {
         } else if (q.type === "multi_correct") {
             q.useranswer = [...selectedAnswer];
         } else if (q.type === "numerical") {
-            q.useranswer = selectedAnswer ? selectedAnswer.trim() : null;
+            q.useranswer = selectedAnswer ? selectedAnswer : null;
         }
 
         q.status = "Marked for Review";
@@ -288,13 +309,14 @@ const ActiveTestPage = () => {
         }
     };
 
-
+    
+    
     useEffect(() => {
         try {
             const question = sections[currentSubject][currentQuestionIndex[currentSubject]];
-
+            
             let savedAnswer;
-
+            
             if (question.type === "single_correct") {
                 savedAnswer = question.useranswer || null;
             } else if (question.type === "multi_correct") {
@@ -309,22 +331,137 @@ const ActiveTestPage = () => {
             console.error("Error in useEffect:", error);
         }
     }, [currentSubject, currentQuestionIndex, sections]);
-
+    
+    
+    const toggleProceed=(e)=>{
+        setCanProceed(e.target.checked);
+    }
 
     if (loading) {
         return <div>Loading questions...</div>;
     }
     if (!testStarted || testSubmitted) {
         return (
-            <div style={{ textAlign: 'center', marginTop: 50 }}>
+            <div style={{ marginTop: 50, fontFamily:"Roboto"}}>
                 {!testSubmitted ? (
-                    <><h2>📝 Start Test</h2>
-                        <button onClick={startTest}>
-                            Start
+                    <div style={{marginLeft: "10px"}}>
+                    <div className="heading" style={{textAlign: 'center'}}>
+                    <h2><b>Please read the instructions carefully.</b></h2>
+                  </div>
+                  
+                  <div>
+                    <h4>General Instructions:</h4>
+                    <ol>
+                      <li>Total duration of <b>{`${testName}`}</b> is {``}.</li>
+                      <li>
+                        The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination. When the timer reaches zero, the examination will end by itself. You will not be required to end or submit your examination.
+                      </li>
+                      <li>
+                        The Questions Palette displayed on the right side of screen will show the status of each question using one of the following symbols:
+                        <ol>
+                          <li>
+                            <button className="question-button" style={{ backgroundColor: 'white' }}></button>
+                            You have not visited the question yet.
+                          </li>
+                          <li>
+                            <button className="question-button" style={{ backgroundColor: 'red' }}></button>
+                            You have not answered the question.
+                          </li>
+                          <li>
+                            <button className="question-button" style={{ backgroundColor: 'lightgreen' }}></button>
+                            You have answered the question.
+                          </li>
+                          <li>
+                            <button className="question-button" style={{ backgroundColor: 'purple' }}></button>
+                            You have marked the question for Review.
+                          </li>
+                        </ol>
+                      </li>
+                    </ol>
+                  
+                    <h4>Navigating a Question:</h4>
+                    <ol start={4}>
+                      <li>
+                        To answer a question, do the following:
+                        <ol>
+                          <li>
+                            Click on the question number in the Question Palette at the right of your screen to go to that numbered question directly. Note that using this option does NOT save your answer to the current question.
+                          </li>
+                          <li>
+                            Click on <b>Save & Next</b> to save your answer for the current question and then go to the next question.
+                          </li>
+                          <li>
+                            Click on <b>Mark for Review & Next</b> to save your answer for the current question, mark it for review, and then go to the next question.
+                          </li>
+                        </ol>
+                      </li>
+                    </ol>
+                  
+                    <h4>Answering a Question:</h4>
+                    <ol start={5}>
+                      <li>
+                        Procedure for answering a multiple choice type question:
+                        <ol>
+                          <li>To select your answer, click on the button of one of the options.</li>
+                          <li>To deselect your chosen answer, click on the Clear Response button.</li>
+                          <li>To change your chosen answer, click on the button of another option.</li>
+                          <li>To save your answer, you MUST click on the Save & Next button.</li>
+                          <li>To mark the question for review, click on the Mark for Review & Next button.</li>
+                        </ol>
+                      </li>
+                      <li>
+                        To change your answer to a question that has already been answered, first select that question for answering and then follow the procedure for answering that type of question.
+                      </li>
+                    </ol>
+                  
+                    <h4>Navigating through sections:</h4>
+                    <ol start={7}>
+                      <li>
+                        Sections in this question paper are displayed on the top bar of the screen. Questions in a section can be viewed by clicking on the section name. The section you are currently viewing is highlighted.
+                      </li>
+                      <li>
+                        You can shuffle between sections and questions at any time during the examination as per your convenience only during the time stipulated.
+                      </li>
+                      <li>
+                        Candidate can view the corresponding section summary as part of the legend that appears in every section above the question palette.
+                      </li>
+                    </ol>
+                  </div>
+                  
+                  <div className="terms-container">
+                    <input type="checkbox" id="accept" onClick={toggleProceed} />
+                    <label htmlFor="accept">
+                      I have read and understood the instructions. All computer hardware allotted to me are in proper working condition.
+                      I declare that I am not in possession of / not wearing / not carrying any prohibited gadget like mobile phone,
+                      bluetooth devices etc. / any prohibited material with me into the Examination Hall. I agree that in case of not
+                      adhering to the instructions, I shall be liable to be debarred from this Test and/or to disciplinary action, which
+                      may include ban from future Tests / Examinations.
+                    </label>
+                    <br />
+                  </div>
+                  
+                    
+                  <>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+                        <h2>📝 Start Test</h2>
+                        <button
+                        className="proceed-button"
+                        id="proceed"
+                        disabled={!canProceed}
+                        onClick={startTest}
+                        style={{marginBottom:'100px'}}
+                        >
+                        Proceed
                         </button>
-                        {webcamAllowed === false && <p style={{ color: 'red' }}>
-                            Allow webcam</p>}
-                    </>
+                        {webcamAllowed === false && (
+                        <p style={{ color: 'red', marginTop: '10px' }}>
+                            Allow webcam
+                        </p>
+                        )}
+                    </div>
+                </>
+
+                    </div>
                 ) : (
                     <h2>✅ Test has been submitted</h2>
                 )}
@@ -333,30 +470,57 @@ const ActiveTestPage = () => {
     }
     return (
         <div>
-            <header style={{ textAlign: "center", padding: "10px", background: "white" }}>
-                <strong>Time Remaining: </strong> <span style={{ color: "red" }}>{formatTime()}</span> |
-                <strong> Student Name:</strong> {userName} | <strong>Test Name:</strong> {testName}
+            <header className="prep-header">
+            <div className="logo">
+                <span className="logo-glow">Prep</span><span className="logo-text">Horizon</span>
+            </div>
             </header>
 
-            <div className="Subject pallete">
-                <li className="Subject">
-                    {Object.keys(sections).map((subject) => (
-                        <button key={subject} className="subj"
-                            onClick={() => {
-                                setCurrentSubject(subject);
-                            }
-                            }
-                        >
-                            {subject}
-                        </button>
-                    ))}
-                </li>
+
+            <div className="top-palette">
+            <div className="candidate-info">
+                <div className="avatar" />
+                <div className="detailsCandidate">
+                <p><strong>Candidate Name :</strong> {`${userName}`}</p>
+                <p><strong>Exam Name :</strong> {`${testName}`}</p>
+                <p><strong>Remaining Time :</strong> <span className="timer">{formatTime()}</span></p>
+                </div>
             </div>
+
+            <div className="language-select">
+                <select>
+                <option>English</option>
+                <option>Hindi</option>
+                </select>
+            </div>
+            </div>
+
+
+            <div className="subject-palette">
+                <ul className="subject-list">
+                    {Object.keys(sections).map((subject) => (
+                    <li key={subject}>
+                        <button
+                        onClick={() => setCurrentSubject(subject)}
+                        className={`subject-button ${currentSubject === subject ? 'active' : ''}`}
+                        >
+                        {subject}
+                        </button>
+                    </li>
+                    ))}
+                </ul>
+            </div>
+
 
             <div className="container">
                 <div className="question-section">
                     <h3 className="question-heading">Question {currentQuestionIndex[currentSubject] + 1}</h3>
                     <p className="question-text">{sections[currentSubject][currentQuestionIndex[currentSubject]].question}</p>
+                    {sections[currentSubject][currentQuestionIndex[currentSubject]].image&&
+                    
+                        <img src={`${process.env.REACT_APP_BACKEND_URL}/extracted_images/${sections[currentSubject][currentQuestionIndex[currentSubject]].image}`} alt="Question" width="500vw"/>
+                    }
+
 
 
                     <div className="options">
