@@ -117,13 +117,13 @@ const ActiveTestPage = () => {
             SubmitTest();
         }
 
-    }, [tabSwitchCount]);
-
-    useEffect(() => {
-        const d = e => e.preventDefault();
-        document.addEventListener("contextmenu", d);
-        window.addEventListener("keydown", e => e.ctrlKey && e.preventDefault());
-        return () => document.removeEventListener("contextmenu", d);
+    }, [tabSwitchCount,testStarted,testSubmitted]);
+    useEffect(() => 
+    { 
+        const d = e=>e.preventDefault(); 
+        document.addEventListener("contextmenu", d); 
+        window.addEventListener("keydown", e=>e.ctrlKey&&e.preventDefault()); 
+        return ()=>document.removeEventListener("contextmenu", d);
     }, []);
 
     useEffect(() => {
