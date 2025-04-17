@@ -1,6 +1,6 @@
 const pool = require('./db');
 
-async function getTestsForStudent(studentId) { 
+async function getTestsForStudent(studentId) {
     try {
         const idQuery = `SELECT id FROM users WHERE username = ?;`;
         const [idResult] = await pool.query(idQuery, [studentId]);
@@ -87,157 +87,348 @@ async function insertQuestion(testId, sectionId, question) {
             correct_answer, positive_marks, negative_marks) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?);
         `;
-        const [result] = await pool.query(query, 
-            [testId, sectionId, question.ques_text, question.ques_img_url, question.ques_type, question.correct_answer, 
-            question.positive_marks, question.negative_marks]);
+        const [result] = await pool.query(query,
+            [testId, sectionId, question.ques_text, question.ques_img_url, question.ques_type, question.correct_answer,
+                question.positive_marks, question.negative_marks]);
         return result.insertId;
     } catch (error) {
         throw new Error("Error inserting question: " + error.message);
     }
 }
 
-async function saveStudentResponses(student_id, test_id, responses) {
-    const client = await pool.connect();
+async function getUserId (username) {
     try {
-        await client.query("BEGIN");
-
-        for (const { question_id, answer } of responses) {
-            await client.query(
-                `INSERT INTO student_responses (student_id, test_id, question_id, response)
-                 VALUES ($1, $2, $3, $4)
-                 ON CONFLICT (student_id, test_id, question_id)
-                 DO UPDATE SET response = EXCLUDED.response;`,
-                [student_id, test_id, question_id, answer]
-            );
+        const query = `SELECT id FROM users WHERE username = ?;`;
+        const [rows] = await pool.query(query, [username]);
+        if (rows.length === 0) {
+            throw new Error("User not found");
         }
-
-        await client.query("COMMIT");
-        return { success: true };
+        return rows[0].id;
     } catch (error) {
-        await client.query("ROLLBACK");
-        throw error;
-    } finally {
-        client.release();
+        throw new Error("Error fetching user ID: " + error.message);
     }
 }
 
-async function getTestState(studentId, testId) {
-    const questionsQuery = `
+
+async function getTestState(studentUsername, testId) {
+    try {
+        const studentId = await getUserId(studentUsername);
+        const questionsQuery = `
         SELECT * FROM questions
         WHERE test_id = ?;
     `;
 
-    const [questionRows] = await pool.query(questionsQuery, [testId]);
-    if (!questionRows || questionRows.length === 0) {
-        throw new Error(`No questions found for the test with ID ${testId}`);
-    }
+        const [questionRows] = await pool.query(questionsQuery, [testId]);
+        if (!questionRows || questionRows.length === 0) {
+            throw new Error(`No questions found for the test with ID ${testId}`);
+        }
 
-    const questionIds = questionRows.map(row => row.id);
-    const placeholders = questionIds.map(() => '?').join(', ');
+        const questionIds = questionRows.map(row => row.id);
+        const placeholders = questionIds.map(() => '?').join(', ');
 
-    let responseRows = [];
-    let allOptionRows = [];
-    if (questionIds.length > 0) {
-        const responsesQuery = `
+        let responseRows = [];
+        let allOptionRows = [];
+        if (questionIds.length > 0) {
+            const responsesQuery = `
             SELECT * FROM student_responses
             WHERE student_id = ? AND question_id IN (${placeholders});
         `;
-        [responseRows] = await pool.query(responsesQuery, [studentId, ...questionIds]);
+            [responseRows] = await pool.query(responsesQuery, [studentId, ...questionIds]);
+            if (!responseRows || responseRows.length === 0) {
+                await initializeTest(studentId, testId);
+            }
 
-        const allOptionsQuery = `
+            const allOptionsQuery = `
             SELECT * FROM options
             WHERE question_id IN (${placeholders});
         `;
-        [allOptionRows] = await pool.query(allOptionsQuery, questionIds);
-    }
+            [allOptionRows] = await pool.query(allOptionsQuery, questionIds);
+        }
 
-    const sectionsQuery = `
+        const sectionsQuery = `
         SELECT * FROM sections
         WHERE test_id = ?;
     `;
-    const [sectionRows] = await pool.query(sectionsQuery, [testId]);
+        const [sectionRows] = await pool.query(sectionsQuery, [testId]);
 
-    let testState = {};
-    for (const row of sectionRows) {
-        const sectionName = row.section_name;
-        const sectionQuestions = questionRows.filter(question => question.section_id === row.id);
-        testState[sectionName] = [];
-    }
+        let testState = {};
+        for (const row of sectionRows) {
+            const sectionName = row.section_name;
+            testState[sectionName] = [];
+        }
 
-    for (const sectionName in testState) {
-        const sectionRow = sectionRows.find(row => row.section_name === sectionName);
-        const sectionId = sectionRow.id;
-        const sectionQuestions = questionRows.filter(question => question.section_id === sectionId);
+        for (const sectionName in testState) {
+            const sectionRow = sectionRows.find(row => row.section_name === sectionName);
+            const sectionId = sectionRow.id;
+            const sectionQuestions = questionRows.filter(question => question.section_id === sectionId);
 
-        testState[sectionName] = sectionQuestions.map(question => {
-            const response = responseRows.find(res => res.question_id === question.id);
+            testState[sectionName] = sectionQuestions.map(question => {
+                const response = responseRows.find(res => res.question_id === question.id);
 
-            if (question.ques_type === "numerical") {
+                if (question.ques_type === "numerical") {
+                    return {
+                        type: question.ques_type,
+                        question: question.ques_text,
+                        options: null,
+                        answer: question.numerical_answer,
+                        image: question.ques_img,
+                        useranswer: response ? response.numerical_answer : null,
+                        status: response ? response.status : "Not Visited",
+                    };
+                }
+
+                const questionOptions = allOptionRows.filter(opt => opt.question_id === question.id);
+                const options = questionOptions.reduce((acc, opt) => {
+                    acc[opt.option_key] = opt.option_text;
+                    return acc;
+                }, {});
+
+                const correctAnswer = questionOptions.filter(opt => opt.is_correct === 1).map(opt => opt.option_key);
+
+                let answer = null;
+                if (question.ques_type === "single_correct") {
+                    answer = correctAnswer[0];
+                } else if (question.ques_type === "multi_correct") {
+                    answer = correctAnswer;
+                }
+
+                let userAnswer = [];
+                if (response) {
+                    for (let i = 1; i <= 4; i++) {
+                        const optionIdField = `selected_option_id_${i}`;
+                        if (response[optionIdField]) {
+                            const selectedOption = questionOptions.find(opt => opt.id === response[optionIdField]);
+                            if (selectedOption) {
+                                userAnswer.push(selectedOption.option_key);
+                            }
+                        }
+                    }
+                }
+
+                if (userAnswer.length === 0) {
+                    userAnswer = null;
+                }
+                else if (userAnswer.length === 1) {
+                    userAnswer = userAnswer[0];
+                }
+
                 return {
                     type: question.ques_type,
                     question: question.ques_text,
-                    options: null,
-                    answer: question.numerical_answer,
+                    options: options,
+                    answer: answer,
                     image: question.ques_img,
-                    useranswer: response ? response.numerical_answer : null,
-                    status: response ? response.status : "Not Visited",
+                    useranswer: userAnswer,
+                    status: response ? response.status : "Not Visited"
                 };
-            }
+            });
+        }
 
-            const questionOptions = allOptionRows.filter(opt => opt.question_id === question.id);
-            const options = questionOptions.reduce((acc, opt) => {
-                acc[opt.option_key] = opt.option_text;
-                return acc;
-            }, {});
+        return testState;
+    }
+    catch (error) {
+        throw new Error("Error fetching test state: " + error.message);
+    }
+}
 
-            const correctAnswer = questionOptions.filter(opt => opt.is_correct === 1).map(opt => opt.option_key);
+async function saveTestState(studentUsername, testId, sections) {
+    try {
+        const studentId = await getUserId(studentUsername);
+        const questionsQuery = `
+            SELECT * FROM questions
+            WHERE test_id = ?;
+        `;
 
-            let answer = null;
-            if (question.ques_type === "single_correct") {
-                answer = correctAnswer[0];
-            } else if (question.ques_type === "multiple_correct") {
-                answer = correctAnswer;
-            }
+        const [questionRows] = await pool.query(questionsQuery, [testId]);
+        if (!questionRows || questionRows.length === 0) {
+            throw new Error(`No questions found for the test with ID ${testId}`);
+        }
 
-            let userAnswer = [];
-            if (response) {
-                for (let i = 1; i <= 4; i++) {
-                    const optionIdField = `selected_option_id_${i}`;
-                    if (response[optionIdField]) {
-                        const selectedOption = questionOptions.find(opt => opt.id === response[optionIdField]);
-                        if (selectedOption) {
-                            userAnswer.push(selectedOption.option_key);
+        const questionIds = questionRows.map(row => row.id);
+        const placeholders = questionIds.map(() => '?').join(', ');
+
+        let responseRows = [];
+        if (questionIds.length > 0) {
+            const responsesQuery = `
+                SELECT * FROM student_responses
+                WHERE student_id = ? AND question_id IN (${placeholders});
+            `;
+            [responseRows] = await pool.query(responsesQuery, [studentId, ...questionIds]);
+        }
+
+        for (const sectionName in sections) {
+            const sectionQuestions = sections[sectionName];
+            for (const question of sectionQuestions) {
+                const questionRow = questionRows.find(q => q.ques_text === question.question);
+                if (!questionRow) continue; // Skip if the question is not found
+
+                const responseRow = responseRows.find(res => res.question_id === questionRow.id);
+                if (responseRow) {
+                    // Update existing response
+                    if (question.type === "numerical") {
+                        const updateQuery = `
+                            UPDATE student_responses SET 
+                            status = ?, numerical_answer = ? , is_correct = ?, marks_obtained = ?
+                            WHERE student_id = ? AND question_id = ?;
+                        `;
+                        const isCorrect = question.answer === question.useranswer ? 1 : 0;
+                        const marksObtained = isCorrect ? questionRow.positive_marks : (-1 * questionRow.negative_marks);
+                        await pool.query(updateQuery, [
+                            question.status,
+                            question.useranswer,
+                            isCorrect,
+                            marksObtained,
+                            studentId,
+                            questionRow.id
+                        ]);
+                    }
+                    else if (question.type === "single_correct") {
+                        const updateQuery = `
+                            UPDATE student_responses SET 
+                            status = ?, 
+                            selected_option_id_1 = ?, 
+                            is_correct = ?,
+                            marks_obtained = ?
+                            WHERE student_id = ? AND question_id = ?;
+                        `;
+                        if (!question.useranswer) {
+                            // set selected_option_id_1 to null if useranswer is null
+                            await pool.query(updateQuery, [
+                                question.status,
+                                null,
+                                0,
+                                0,
+                                studentId,
+                                questionRow.id
+                            ]);
+                        }
+                        else {
+                            // get new option's id from the options table, useranswer will contain the option key
+                            const optionQuery = `
+                                SELECT id FROM options WHERE question_id = ? AND option_key = ?;
+                            `;
+                            const [optionRows] = await pool.query(optionQuery, [questionRow.id, question.useranswer]);
+                            const selectedOptionId = optionRows.length > 0 ? optionRows[0].id : null;
+                            // check the answer
+                            const isCorrect = question.answer === question.useranswer ? 1 : 0;
+                            const marksObtained = isCorrect ? questionRow.positive_marks : (-1 * questionRow.negative_marks);
+                            // set selected_option_id_1 to the new option's id
+                            await pool.query(updateQuery, [
+                                question.status,
+                                selectedOptionId,
+                                isCorrect,
+                                marksObtained,
+                                studentId,
+                                questionRow.id
+                            ]);
+                        }
+                    }
+                    else if (question.type === "multi_correct") {
+                        const updateQuery = `
+                            UPDATE student_responses SET 
+                            status = ?, 
+                            selected_option_id_1 = ?, 
+                            selected_option_id_2 = ?, 
+                            selected_option_id_3 = ?, 
+                            selected_option_id_4 = ?,
+                            is_correct = ?,
+                            marks_obtained = ?
+                            WHERE student_id = ? AND question_id = ?;
+                        `;
+                        if (!question.useranswer) {
+                            // set all selected_option_ids to null if useranswer is null
+                            await pool.query(updateQuery, [
+                                question.status,
+                                null,
+                                null,
+                                null,
+                                null,
+                                0,
+                                0,
+                                studentId,
+                                questionRow.id
+                            ]);
+                        }
+                        else {
+                            // get new options' ids from the options table, useranswer will contain the array of option keys
+                            const optionQuery = `
+                                SELECT id FROM options WHERE question_id = ? AND option_key IN (?);
+                            `;
+                            const [optionRows] = await pool.query(optionQuery, [questionRow.id, question.useranswer]);
+                            const selectedOptionIds = optionRows.map(opt => opt.id);
+                            while (selectedOptionIds.length < 4) {
+                                selectedOptionIds.push(null);
+                            }
+                            
+                            // check the answer
+                            const correctAnswers = question.answer;
+                            console.log("These are correct answers", correctAnswers);
+                            console.log("These are selected answers", question.useranswer);
+                            const isCorrect = correctAnswers.every(ans => question.useranswer.includes(ans)) ? 1 : 0;
+                            const marksObtained = isCorrect ? questionRow.positive_marks : (-1 * questionRow.negative_marks);
+                            // set selected_option_ids to the new options' ids
+                            await pool.query(updateQuery, [
+                                question.status,
+                                selectedOptionIds[0],
+                                selectedOptionIds[1],
+                                selectedOptionIds[2],
+                                selectedOptionIds[3],
+                                isCorrect,
+                                marksObtained,
+                                studentId,
+                                questionRow.id
+                            ]);
                         }
                     }
                 }
             }
-
-            if (userAnswer.length === 0) {
-                userAnswer = null;
-            }
-            else if (userAnswer.length === 1) {
-                userAnswer = userAnswer[0];
-            }
-
-            return {
-                type: question.ques_type,
-                question: question.ques_text,
-                options: options,
-                answer: answer,
-                image: question.ques_img,
-                useranswer: userAnswer,
-                status: response ? response.status : "Not Visited"
-            };
-        });
+        }
     }
-
-    return testState;
+    catch (error) {
+        throw new Error("Error saving test state: " + error.message);
+    }
 }
+
+async function initializeTest (studentId, testId) {
+    // for each question in the test, insert a row in student_responses table with default values
+    try {
+        const questionsQuery = `
+            SELECT * FROM questions
+            WHERE test_id = ?;
+        `;
+
+        const [questionRows] = await pool.query(questionsQuery, [testId]);
+        if (!questionRows || questionRows.length === 0) {
+            throw new Error(`No questions found for the test with ID ${testId}`);
+        }
+
+        for (const question of questionRows) {
+            const insertQuery = `
+                INSERT INTO student_responses (student_id, question_id, status, numerical_answer, selected_option_id_1, selected_option_id_2, selected_option_id_3, selected_option_id_4)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            `;
+            await pool.query(insertQuery, [
+                studentId,
+                question.id,
+                "Not Visited",
+                null,
+                null,
+                null,
+                null,
+                null
+            ]);
+        }
+    } catch (error) {
+        throw new Error("Error initializing test: " + error.message);
+    }
+}
+
 
 module.exports = {
     getTestsForStudent,
     getClasses,
     getTestsForClass,
     insertQuestion,
-    getTestState
+    getTestState,
+    saveTestState
 };
