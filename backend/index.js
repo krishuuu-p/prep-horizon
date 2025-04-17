@@ -1072,6 +1072,47 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
     }
 });
 
+app.get("/get-all-students", async (req, res) => {
+    try {
+        const students = await new Promise((resolve, reject) => {
+            const query = "SELECT username, name, email FROM users WHERE role = 'student'";
+            db.query(query, (err, results) => {
+                if (err) {
+                    console.error("Error fetching students:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+
+        res.json({ students });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch students." });
+    }
+});
+
+
+app.get("/get-all-teachers", async (req, res) => {
+    try {
+        const teachers = await new Promise((resolve, reject) => {
+            const query = "SELECT username, name, email FROM users WHERE role = 'teacher'";
+            db.query(query, (err, results) => {
+                if (err) {
+                    console.error("Error fetching teachers:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+
+        res.json({ teachers });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch teachers." });
+    }
+});
+
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
