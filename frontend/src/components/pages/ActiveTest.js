@@ -124,7 +124,7 @@ const ActiveTestPage = () => {
             SubmitTest();
         }
 
-    }, [tabSwitchCount]);
+    }, [tabSwitchCount,testStarted,testSubmitted]);
     useEffect(() => 
     { 
         const d = e=>e.preventDefault(); 
