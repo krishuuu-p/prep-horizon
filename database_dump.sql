@@ -39,7 +39,7 @@ CREATE TABLE `class_test` (
   KEY `test_id` (`test_id`),
   CONSTRAINT `class_test_ibfk_1` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `class_test_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -48,7 +48,7 @@ CREATE TABLE `class_test` (
 
 LOCK TABLES `class_test` WRITE;
 /*!40000 ALTER TABLE `class_test` DISABLE KEYS */;
-INSERT INTO `class_test` VALUES (12,1,1),(14,1,2),(16,1,3),(18,1,4),(20,1,5),(21,1,6),(22,1,7),(13,2,1),(15,2,2),(17,2,3),(19,2,4),(23,3,8),(24,4,9);
+INSERT INTO `class_test` VALUES (25,1,10),(27,1,11),(29,1,12),(31,1,13),(33,1,14),(34,1,15),(35,1,16),(26,2,10),(28,2,11),(30,2,12),(32,2,13),(36,3,17),(37,4,17);
 /*!40000 ALTER TABLE `class_test` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -126,7 +126,7 @@ CREATE TABLE `options` (
   PRIMARY KEY (`id`),
   KEY `question_id` (`question_id`),
   CONSTRAINT `options_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,7 +135,7 @@ CREATE TABLE `options` (
 
 LOCK TABLES `options` WRITE;
 /*!40000 ALTER TABLE `options` DISABLE KEYS */;
-INSERT INTO `options` VALUES (85,33,'A','3',NULL,0),(86,33,'B','4',NULL,1),(87,33,'C','5',NULL,0),(88,33,'D','6',NULL,0),(89,35,'A','Joule',NULL,0),(90,35,'B','Newton',NULL,1),(91,35,'C','Pascal',NULL,0),(92,35,'D','Watt',NULL,0),(93,36,'A','Oxygen',NULL,0),(94,36,'B','Helium',NULL,1),(95,36,'C','Argon',NULL,1),(96,36,'D','Nitrogen',NULL,0);
+INSERT INTO `options` VALUES (97,37,'A','3',NULL,0),(98,37,'B','4',NULL,1),(99,37,'C','5',NULL,0),(100,37,'D','6',NULL,0),(101,39,'A','Joule',NULL,0),(102,39,'B','Newton',NULL,1),(103,39,'C','Pascal',NULL,0),(104,39,'D','Watt',NULL,0),(105,40,'A','Oxygen',NULL,0),(106,40,'B','Helium',NULL,1),(107,40,'C','Argon',NULL,1),(108,40,'D','Nitrogen',NULL,0);
 /*!40000 ALTER TABLE `options` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -161,7 +161,7 @@ CREATE TABLE `questions` (
   KEY `section_id` (`section_id`),
   CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
   CONSTRAINT `questions_ibfk_2` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -170,7 +170,7 @@ CREATE TABLE `questions` (
 
 LOCK TABLES `questions` WRITE;
 /*!40000 ALTER TABLE `questions` DISABLE KEYS */;
-INSERT INTO `questions` VALUES (33,5,27,'What is 2 + 2?','test5_q1.png','single_correct',NULL,4,1),(34,5,27,'Solve for x: 2x = 10',NULL,'numerical',5,4,1),(35,5,28,'What is the unit of force?',NULL,'single_correct',NULL,4,1),(36,5,29,'Which of the following are noble gases?','test5_q2.png','multi_correct',NULL,4,1);
+INSERT INTO `questions` VALUES (37,14,30,'What is 2 + 2?','test14_q1.png','single_correct',NULL,4,1),(38,14,30,'Solve for x: 2x = 10',NULL,'numerical',5,4,1),(39,14,31,'What is the unit of force?',NULL,'single_correct',NULL,4,1),(40,14,32,'Which of the following are noble gases?','test14_q2.png','multi_correct',NULL,4,1);
 /*!40000 ALTER TABLE `questions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -189,7 +189,7 @@ CREATE TABLE `sections` (
   PRIMARY KEY (`id`),
   KEY `test_id` (`test_id`),
   CONSTRAINT `sections_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -198,7 +198,7 @@ CREATE TABLE `sections` (
 
 LOCK TABLES `sections` WRITE;
 /*!40000 ALTER TABLE `sections` DISABLE KEYS */;
-INSERT INTO `sections` VALUES (27,5,'Maths',0),(28,5,'Physics',0),(29,5,'Chemistry',0);
+INSERT INTO `sections` VALUES (30,14,'Maths',0),(31,14,'Physics',0),(32,14,'Chemistry',0);
 /*!40000 ALTER TABLE `sections` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -234,7 +234,7 @@ CREATE TABLE `student_responses` (
   CONSTRAINT `fk_option4` FOREIGN KEY (`selected_option_id_4`) REFERENCES `options` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_question` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -243,7 +243,7 @@ CREATE TABLE `student_responses` (
 
 LOCK TABLES `student_responses` WRITE;
 /*!40000 ALTER TABLE `student_responses` DISABLE KEYS */;
-INSERT INTO `student_responses` VALUES (9,2,33,86,NULL,NULL,NULL,NULL,1,4,'Answered'),(10,2,34,NULL,NULL,NULL,NULL,5,1,4,'Answered'),(11,2,35,90,NULL,NULL,NULL,NULL,1,4,'Marked for Review'),(12,2,36,94,95,NULL,NULL,NULL,1,4,'Answered');
+INSERT INTO `student_responses` VALUES (13,2,37,99,NULL,NULL,NULL,NULL,0,-1,'Answered'),(14,2,38,NULL,NULL,NULL,NULL,5,1,4,'Answered'),(15,2,39,102,NULL,NULL,NULL,NULL,1,4,'Answered'),(16,2,40,106,107,NULL,NULL,NULL,1,4,'Answered');
 /*!40000 ALTER TABLE `student_responses` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -258,12 +258,13 @@ CREATE TABLE `student_tests` (
   `id` int NOT NULL AUTO_INCREMENT,
   `student_id` int NOT NULL,
   `test_id` int NOT NULL,
+  `start_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `student_id` (`student_id`),
   KEY `test_id` (`test_id`),
   CONSTRAINT `student_tests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `student_tests_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,6 +273,7 @@ CREATE TABLE `student_tests` (
 
 LOCK TABLES `student_tests` WRITE;
 /*!40000 ALTER TABLE `student_tests` DISABLE KEYS */;
+INSERT INTO `student_tests` VALUES (1,2,14,'2025-04-18 18:00:00');
 /*!40000 ALTER TABLE `student_tests` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -289,10 +291,11 @@ CREATE TABLE `tests` (
   `end_time` datetime DEFAULT NULL,
   `total_marks` int NOT NULL,
   `created_by` int DEFAULT NULL,
+  `duration` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `created_by` (`created_by`),
   CONSTRAINT `tests_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -301,7 +304,7 @@ CREATE TABLE `tests` (
 
 LOCK TABLES `tests` WRITE;
 /*!40000 ALTER TABLE `tests` DISABLE KEYS */;
-INSERT INTO `tests` VALUES (1,'FTS01- Mains','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1),(2,'FTS02- Mains','2025-04-06 10:00:00','2025-04-06 13:00:00',300,1),(3,'FTS02- Advanced Paper 1','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(4,'FTS02- Advanced Paper 2','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1),(5,'FTS03- Mains','2025-04-15 10:00:00','2025-04-24 13:00:00',300,1),(6,'FTS03- Advanced Paper 1','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(7,'FTS03- Advanced Paper 2','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1),(8,'FTS04 - AIATS','2025-04-15 10:00:00','2025-04-16 10:00:00',720,1),(9,'FTS05 - AIATS','2025-04-15 10:00:00','2025-04-16 10:00:00',720,1);
+INSERT INTO `tests` VALUES (10,'FTS01- Mains','2025-03-25 10:00:00','2025-03-26 13:00:00',300,1,10800),(11,'FTS02- Mains','2025-04-06 10:00:00','2025-04-06 13:00:00',300,1,10800),(12,'FTS02- Advanced Paper 1','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1,10800),(13,'FTS02- Advanced Paper 2','2025-04-10 10:00:00','2025-04-12 13:00:00',180,1,10800),(14,'FTS03- Mains','2025-04-15 10:00:00','2025-04-26 13:00:00',300,1,10800),(15,'FTS03- Advanced Paper 1','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1,10800),(16,'FTS03- Advanced Paper 2','2025-04-25 10:00:00','2025-04-26 13:00:00',180,1,10800),(17,'FTS04 - AIATS','2025-04-15 10:00:00','2025-04-15 10:00:00',720,1,10800);
 /*!40000 ALTER TABLE `tests` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -344,4 +347,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-16 22:49:10
+-- Dump completed on 2025-04-18 18:44:04

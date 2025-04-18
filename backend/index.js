@@ -304,8 +304,8 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
 
         // Process each test from the Excel data
         for (const test of tests) {
-            const { test_name, start_time, end_time, total_marks, classes } = test;
-            if (!test_name || !classes || !start_time || !end_time || !total_marks) {
+            const { test_name, start_time, end_time, total_marks, classes, duration } = test;
+            if (!test_name || !classes || !start_time || !end_time || !total_marks || !duration) {
                 throw new Error("Missing fields in uploaded file");
             }
 
@@ -326,11 +326,17 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
             const startDate = parseExcelDate(start_time);
             const endDate = parseExcelDate(end_time);
             const totalMarks = parseInt(total_marks, 10);
+            // convert duration to time format
+            const durationParts = duration.split(":");
+            const hours = parseInt(durationParts[0], 10);
+            const minutes = parseInt(durationParts[1], 10);
+            const seconds = parseInt(durationParts[2], 10);
+            const durationInSeconds = (hours * 3600) + (minutes * 60) + seconds;
 
             // Insert test record
-            const testInsertQuery = "INSERT INTO tests (test_name, start_time, end_time, total_marks, created_by) VALUES (?, ?, ?, ?, ?)";
+            const testInsertQuery = "INSERT INTO tests (test_name, start_time, end_time, total_marks, created_by, duration) VALUES (?, ?, ?, ?, ?, ?)";
             const testInsertResult = await new Promise((resolve, reject) => {
-                db.query(testInsertQuery, [test_name, startDate, endDate, totalMarks, userId], (err, result) => {
+                db.query(testInsertQuery, [test_name, startDate, endDate, totalMarks, userId, durationInSeconds], (err, result) => {
                     if (err) {
                         console.error(`Error inserting test ${test_name}:`, err);
                         return reject(err);
@@ -530,8 +536,8 @@ app.post("/upload-questions", upload.single("file"), async (req, res) => {
 app.get("/get-test-state/:studentUsername/:testId", async (req, res) => {
     try {
         const { studentUsername, testId } = req.params;
-        const testState = await queries.getTestState(studentUsername, testId);
-        res.json(testState);
+        const { testState, remainingTime } = await queries.getTestState(studentUsername, testId);
+        res.json({ testState, remainingTime });
     } catch (error) {
         console.error("Error fetching test state:", error);
         res.status(500).json({ message: "Error fetching test state" });

@@ -135,7 +135,16 @@ async function getTestState(studentUsername, testId) {
         `;
             [responseRows] = await pool.query(responsesQuery, [studentId, ...questionIds]);
             if (!responseRows || responseRows.length === 0) {
+                // student is clicking on start test for the first time, so we need to initialize the test
                 await initializeTest(studentId, testId);
+                // get the start time of the test and store it in the many to many table between students and tests
+                const startTime = new Date();
+                const insertQuery = `
+                    INSERT INTO student_tests (student_id, test_id, start_time)
+                    VALUES (?, ?, ?);
+                `;
+                await pool.query(insertQuery, [studentId, testId, startTime]);
+
             }
 
             const allOptionsQuery = `
@@ -145,6 +154,31 @@ async function getTestState(studentUsername, testId) {
             [allOptionRows] = await pool.query(allOptionsQuery, questionIds);
         }
 
+        // get remaining time for the test by fetching the start time from the student_tests table, duration of the test from the tests table and subtracting the time elapsed from the start time to now
+        const startTimeQuery = `
+        SELECT start_time FROM student_tests
+        WHERE student_id = ? AND test_id = ?;
+    `;
+        const [startTimeRows] = await pool.query(startTimeQuery, [studentId, testId]);
+        if (!startTimeRows || startTimeRows.length === 0) {
+            throw new Error("Test not found for the student");
+        }
+        const startTime = new Date(startTimeRows[0].start_time);
+        const testDurationQuery = `
+        SELECT duration FROM tests
+        WHERE id = ?;
+    `;
+        const [testDurationRows] = await pool.query(testDurationQuery, [testId]);
+        if (!testDurationRows || testDurationRows.length === 0) {
+            throw new Error("Test not found");
+        }
+        const testDuration = testDurationRows[0].duration * 1000; // convert to milliseconds
+        const currentTime = new Date();
+        const timeElapsed = currentTime - startTime; 
+        // get remaining time in seconds
+        const remainingTime = Math.max(0, Math.floor((testDuration - timeElapsed) / 1000));
+
+        // get the sections for the test
         const sectionsQuery = `
         SELECT * FROM sections
         WHERE test_id = ?;
@@ -223,8 +257,8 @@ async function getTestState(studentUsername, testId) {
                 };
             });
         }
-
-        return testState;
+        // return the test state with remaining time
+        return {testState, remainingTime};
     }
     catch (error) {
         throw new Error("Error fetching test state: " + error.message);
@@ -233,6 +267,8 @@ async function getTestState(studentUsername, testId) {
 
 async function saveTestState(studentUsername, testId, sections) {
     try {
+        console.log("Saving test state for student:", studentUsername, "for test ID:", testId);
+        // console.log("Sections:", sections);
         const studentId = await getUserId(studentUsername);
         const questionsQuery = `
             SELECT * FROM questions
@@ -255,7 +291,7 @@ async function saveTestState(studentUsername, testId, sections) {
             `;
             [responseRows] = await pool.query(responsesQuery, [studentId, ...questionIds]);
         }
-
+        // console.log("Response rows:", responseRows);
         for (const sectionName in sections) {
             const sectionQuestions = sections[sectionName];
             for (const question of sectionQuestions) {
@@ -324,6 +360,7 @@ async function saveTestState(studentUsername, testId, sections) {
                         }
                     }
                     else if (question.type === "multi_correct") {
+                        // console.log("This is multi correct question", question);
                         const updateQuery = `
                             UPDATE student_responses SET 
                             status = ?, 
@@ -335,7 +372,7 @@ async function saveTestState(studentUsername, testId, sections) {
                             marks_obtained = ?
                             WHERE student_id = ? AND question_id = ?;
                         `;
-                        if (!question.useranswer) {
+                        if (!question.useranswer || question.useranswer.length === 0) {
                             // set all selected_option_ids to null if useranswer is null
                             await pool.query(updateQuery, [
                                 question.status,
@@ -362,8 +399,8 @@ async function saveTestState(studentUsername, testId, sections) {
                             
                             // check the answer
                             const correctAnswers = question.answer;
-                            console.log("These are correct answers", correctAnswers);
-                            console.log("These are selected answers", question.useranswer);
+                            // console.log("These are correct answers", correctAnswers);
+                            // console.log("These are selected answers", question.useranswer);
                             const isCorrect = correctAnswers.every(ans => question.useranswer.includes(ans)) ? 1 : 0;
                             const marksObtained = isCorrect ? questionRow.positive_marks : (-1 * questionRow.negative_marks);
                             // set selected_option_ids to the new options' ids

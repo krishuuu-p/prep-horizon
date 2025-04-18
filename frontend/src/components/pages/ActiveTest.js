@@ -27,15 +27,18 @@ const ActiveTestPage = () => {
         const fetchSections = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/get-test-state/${userName}/${testId}`);
-                const data = response.data; // assuming response.data is the full sections object
-                console.log(data);
-                setSections(data);
+                const data = response.data;
+                console.log("Fetched sections:", data.testState);
+                console.log("Fetched timer:", data.remainingTime);
+                const sections = data.testState;
+                setSections(sections);
+                setTimer(data.remainingTime);
                 setLoading(false);
 
-                const firstSubject = Object.keys(data)[0];
+                const firstSubject = Object.keys(sections)[0];
                 setCurrentSubject(firstSubject);
 
-                const defaultIndexes = Object.keys(data).reduce((acc, subject) => {
+                const defaultIndexes = Object.keys(sections).reduce((acc, subject) => {
                     acc[subject] = 0;
                     return acc;
                 }, {});
@@ -283,7 +286,6 @@ const ActiveTestPage = () => {
         q.status = "Visited but Not Answered";
 
         setSections(updatedSections);
-        postSectionsToBackend(userName, testId, updatedSections);
     };
 
 
@@ -313,6 +315,9 @@ const ActiveTestPage = () => {
     
     useEffect(() => {
         try {
+            console.log("This is current subject", currentSubject);
+            console.log("This is current question index", currentQuestionIndex);
+            console.log("This is sections", sections);
             const question = sections[currentSubject][currentQuestionIndex[currentSubject]];
             
             let savedAnswer;
