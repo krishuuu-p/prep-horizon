@@ -1122,6 +1122,113 @@ app.get("/get-all-teachers", async (req, res) => {
     }
 });
 
+app.get("/get-all-classes", async (req, res) => {
+    try {
+        const classes = await new Promise((resolve, reject) => {
+            const query = "SELECT class_code, class_name, description FROM classes";
+            db.query(query, (err, results) => {
+                if (err) {
+                    console.error("Error fetching classes:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+
+        res.json({ classes });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch classes." });
+    }
+});
+
+app.get("/get-students-in-class/:class_code", async (req, res) => {
+    try {
+        const classCode = req.params.class_code;
+
+        const classRow = await new Promise((resolve, reject) => {
+            db.query("SELECT id FROM classes WHERE class_code = ?", [classCode], (err, results) => {
+                if (err) {
+                    console.error("Error fetching class:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+
+        if (classRow.length === 0) {
+            return res.status(404).json({ message: "Class not found" });
+        }
+
+        const classId = classRow[0].id;
+
+        const students = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT u.id, u.name, u.username, u.email 
+                FROM enrollments e
+                JOIN users u ON e.student_id = u.id
+                WHERE e.class_id = ? AND u.role = 'student'
+            `;
+            db.query(query, [classId], (err, results) => {
+                if (err) {
+                    console.error("Error fetching students:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+
+        res.json({ students });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch students." });
+    }
+});
+
+app.get("/get-teachers-in-class/:class_code", async (req, res) => {
+    try {
+        const classCode = req.params.class_code;
+
+        const classRow = await new Promise((resolve, reject) => {
+            db.query("SELECT id FROM classes WHERE class_code = ?", [classCode], (err, results) => {
+                if (err) {
+                    console.error("Error fetching class:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+
+        if (classRow.length === 0) {
+            return res.status(404).json({ message: "Class not found" });
+        }
+
+        const classId = classRow[0].id;
+
+        const teachers = await new Promise((resolve, reject) => {
+            const query = `
+                SELECT u.id, u.name, u.username, u.email 
+                FROM enrollments e
+                JOIN users u ON e.student_id = u.id
+                WHERE e.class_id = ? AND u.role = 'teacher'
+            `;
+            db.query(query, [classId], (err, results) => {
+                if (err) {
+                    console.error("Error fetching teachers:", err);
+                    return reject(err);
+                }
+                resolve(results);
+            });
+        });
+
+        res.json({ teachers });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch teachers." });
+    }
+});
+
+
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
