@@ -9,7 +9,7 @@
     display: flex;
     flex: 1;
 }
-.sidebar {
+.test-page-sidebar {
     width: 250px;
     background-color: rgba(221, 221, 221, 0.639);
     display: flex;
@@ -19,7 +19,7 @@
     border-radius: 15px;
 }
 
-.sidebar button {
+.test-page-sidebar button {
     background-color: rgba(221, 221, 221, 0.781);
     margin: 5px;
     border-radius: 10px;
@@ -33,15 +33,16 @@
     transition: background 0.3s;
 }
   
-.sidebar button:hover, .sidebar button.active {
+.test-page-sidebar button:hover, .test-page-sidebar button.active {
     background-color: #c4c4c4;
 }
 
-.sidebar button:hover {
+.test-page-sidebar button:hover {
     text-decoration: underline;
 }
 
 .test-display {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     box-sizing: border-box;
     width: 80%;
     padding: 40px;
@@ -92,4 +93,19 @@
     display: block;
     font-size: 14px;
     color: #333;
+}
+
+.active-test {
+    background-color: #e0f2f1;
+    border-left: 5px solid #00796b;
+}
+
+.upcoming-test {
+    background-color: #fff3e0;
+    border-left: 5px solid #ff9800;
+}
+
+.recent-test {
+    background-color: #e3f2fd;
+    border-left: 5px solid #1976d2;
 }
