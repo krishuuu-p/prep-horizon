@@ -76,7 +76,8 @@ analytics = {}
 for subj in subject_columns:
     analytics[subj] = {
         "max": pivot[subj].max(),
-        "avg": pivot[subj].mean()
+        "avg": pivot[subj].mean(),
+        "median":pivot[subj].median()
     }
 # print(analytics)
 # print(pivot)
@@ -130,8 +131,8 @@ for _, row in pivot.iterrows():
         colors=[colors[0], "none"], startangle=90)
         
         ax.text(0,  0.1, f"{(row[subj]):.2f}",ha="center", va="center", fontweight="bold", fontsize=14, color=colors[1])
-        ax.text(0, -0.1, f"Avg:{analytics[subj]['avg']:.2f}", ha="center", va="center", fontsize=14, color=colors[2])
-        ax.text(0, -0.3, f"Max: {analytics[subj]['max']:.2f}",ha='center', va='center', fontsize=14,color=colors[0])
+        ax.text(0, -0.05, f"Avg:{analytics[subj]['avg']:.2f}", ha="center", va="center", fontsize=12, color=colors[2])
+        ax.text(0, -0.2, f"Max: {analytics[subj]['max']:.2f}",ha='center', va='center', fontsize=12,color=colors[0])
         ax.set(aspect="equal")
     
     for j in range(i+1, len(axes)):
@@ -164,3 +165,27 @@ for _, row in pivot.iterrows():
 # print(pivot.head())
 # print("Analytics:", analytics)
 # print("Top student:", top_student.to_dict())
+bar_labels = subject_columns
+bar_max = [analytics[subj]["max"] for subj in subject_columns]
+bar_avg = [analytics[subj]["avg"] for subj in subject_columns]
+bar_median = [analytics[subj]["median"] for subj in subject_columns]
+
+x = np.arange(len(subject_columns))  # the label locations
+width = 0.25  # the width of the bars
+
+fig, ax = plt.subplots(figsize=(12, 6))
+rects1 = ax.bar(x - width, bar_max, width, label='Max', color='#E94F37')
+rects2 = ax.bar(x, bar_avg, width, label='Mean', color='cyan')
+rects3 = ax.bar(x + width, bar_median, width, label='Median', color='#8F87F1')
+
+# Add labels and formatting
+ax.set_ylabel('Marks')
+ax.set_title('Test Analytics - Mean, Median, Max by Subject')
+ax.set_xticks(x)
+ax.set_xticklabels(subject_columns, rotation=45, ha='right')
+ax.legend()
+path =f"static/{given_test_id}summary.png"
+plt.tight_layout()
+plt.savefig(path)
+plt.close()
+    
