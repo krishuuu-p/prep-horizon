@@ -130,8 +130,8 @@ for _, row in pivot.iterrows():
         colors=[colors[0], "none"], startangle=90)
         
         ax.text(0,  0.1, f"{(row[subj]):.2f}",ha="center", va="center", fontweight="bold", fontsize=14, color=colors[1])
-        ax.text(0, -0.1, f"Avg:{analytics[subj]['avg']:.2f}", ha="center", va="center", fontsize=14, color=colors[2])
-        ax.text(0, -0.3, f"Max: {analytics[subj]['max']:.2f}",ha='center', va='center', fontsize=14,color=colors[0])
+        ax.text(0, -0.05, f"Avg:{analytics[subj]['avg']:.2f}", ha="center", va="center", fontsize=12, color=colors[2])
+        ax.text(0, -0.2, f"Max: {analytics[subj]['max']:.2f}",ha='center', va='center', fontsize=12,color=colors[0])
         ax.set(aspect="equal")
     
     for j in range(i+1, len(axes)):
