@@ -12,6 +12,7 @@ const extractQues = require("./extractQuestions");
 const path = require("path");
 const app = express();
 require('dotenv').config();
+app.use('/static', express.static(path.join(__dirname, 'static')));
 
 const PORT = process.env.PORT
 const EXCEL_FILE = 'users.xlsx'; 

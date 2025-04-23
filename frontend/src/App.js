@@ -14,7 +14,7 @@ import TeacherManagementPage from './components/pages/TeacherManagementPage';
 import TestManagementPage from './components/pages/TestManagementPage';
 import InterviewPage from './components/pages/InterviewPage';
 import ProfilePage from './components/pages/ProfilePage';
-
+import AnalysisPage from './components/pages/AnalysisPage';
 window.process = process;
 
 function App() {
@@ -35,6 +35,7 @@ function App() {
         <Route path="/admin/:userName/student-management" element={<StudentManagementPage />} />
         <Route path="/admin/:userName/teacher-management" element={<TeacherManagementPage />} />
         <Route path="/admin/:userName/tests-management" element={<TestManagementPage />} />
+        <Route path="/:userType/:userName/analysis/:testName/:testId" element={<AnalysisPage/>}/>
       </Routes>
     </Router>
   );

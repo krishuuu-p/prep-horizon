@@ -38,7 +38,9 @@ const TestsPage = () => {
 
     const handleViewAnalysis = (testId, testName) => {
         testName = testName.replace(/\s+/g, '');
-        navigate(`/${user.userType}/${user.userName}/analysis/${testName}/${testId}`);
+        navigate(`/${user.userType}/${user.userName}/analysis/${testName}/${testId}`,
+                    {state: { testId, testName }}
+                );
     };
 
     return (
