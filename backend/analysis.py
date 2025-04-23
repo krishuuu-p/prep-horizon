@@ -188,4 +188,15 @@ path =f"static/{given_test_id}summary.png"
 plt.tight_layout()
 plt.savefig(path)
 plt.close()
+for subj in subject_columns:
+    plt.figure(figsize=(8, 5))
+    plt.hist(pivot[subj], bins=10, color='skyblue', edgecolor='black')
+    plt.title(f"Marks Distribution in {subj}")
+    plt.xlabel("Marks")
+    plt.ylabel("Number of Students")
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
     
+    hist_path = f"static/hist_{given_test_id}_{subj.replace(' ', '_')}.png"
+    plt.tight_layout()
+    plt.savefig(hist_path)
+    plt.close()
