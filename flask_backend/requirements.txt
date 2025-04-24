@@ -3,3 +3,5 @@ flask-cors
 PyPDF2
 beautifulsoup4
 requests
+mysql.connector
+dotenv

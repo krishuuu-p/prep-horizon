@@ -5,10 +5,12 @@ from bs4 import BeautifulSoup  # For parsing HTML content from URLs
 from flask_cors import CORS
 import os
 import subprocess  # To call the local command-line tool
-
+import mysql.connector
+from dotenv import load_dotenv
 app = Flask(__name__)
 CORS(app)
 
+load_dotenv()
 def extract_text_from_url(url):
     try:
         response = requests.get(url)
@@ -97,6 +99,27 @@ def process_pdf_route():
 
     quiz_output = generate_questions(text, num_questions)
     return jsonify({"quiz": quiz_output})
+@app.route("/api/subjects/<int:test_id>")
+def get_subjects_by_test(test_id):
+    conn = mysql.connector.connect(
+        user='root',
+        password=os.getenv('MYSQL_PASSWORD'),
+        database='prep_horizon',
+    )
+    query = """
+        SELECT DISTINCT s.section_name
+        FROM sections s
+        JOIN questions q ON q.section_id = s.id
+        WHERE q.test_id = %s
+    """
+    cursor = conn.cursor()
+    cursor.execute(query, (test_id,))
+    rows = cursor.fetchall()
+    conn.close()
 
+    # Flatten and return
+    subjects = [row[0] for row in rows]
+    subjects.append("Total")  # if you want to include Total always
+    return jsonify(subjects)
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
