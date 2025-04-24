@@ -1,7 +1,14 @@
-flask
+Flask
 flask-cors
+Pillow
 PyPDF2
-beautifulsoup4
 requests
+beautifulsoup4
+torch
 mysql.connector
 dotenv
+opencv-python
+numpy
+onnxruntime
+torchvision
+scikit-learn
