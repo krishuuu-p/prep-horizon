@@ -446,8 +446,8 @@ async function getTestState(studentUsername, testId) {
                 // get the start time of the test and store it in the many to many table between students and tests
                 const startTime = new Date();
                 const insertQuery = `
-                    INSERT INTO student_tests (student_id, test_id, start_time)
-                    VALUES (?, ?, ?);
+                    INSERT INTO student_tests (student_id, test_id, start_time, is_submitted)
+                    VALUES (?, ?, ?, false);
                 `;
                 await pool.query(insertQuery, [studentId, testId, startTime]);
 

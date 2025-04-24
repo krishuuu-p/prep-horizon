@@ -64,22 +64,22 @@ const ActiveTestPage = () => {
         } catch (error) {
             console.error("Error saving sections:", error);
         }
+
+
+
+        
     };
 
     useEffect(() => {
-        const countdown = setInterval(() => {
-            setTimer((prev) => {
-                if (prev <= 1) {
-                    clearInterval(countdown);
-                    alert("Time's up! Submitting the test.");
-                    return 0;
-                }
-                return prev - 1;
+        if (!testStarted || testSubmitted) return;
+        const id = setInterval(() => {
+            setTimer(t => {
+                if (t <= 1) { clearInterval(id); alert("Time's up"); handleSubmitTest(); return 0; }
+                return t - 1;
             });
         }, 1000);
-
-        return () => clearInterval(countdown);
-    }, []);
+        return () => clearInterval(id);
+    }, [testStarted, testSubmitted]);
 
     const requestWebcamAccess = async () => {
         try { await navigator.mediaDevices.getUserMedia({ video: true }); setWebcamAllowed(true); return true; }
@@ -95,16 +95,23 @@ const ActiveTestPage = () => {
     };
 
     // Auto-submit
-    const SubmitTest = () => {
-        setTestSubmitted(true);
-        setTestStarted(false);
+    const SubmitTest = async () => {
+        try {
+            // First save the current state
+            await postSectionsToBackend(userName, testId, sections);
+            setTestSubmitted(true);
+            setTestStarted(false);
         // To check if fullscreen exists and the document is active before exiting
         if (document.fullscreenElement && document.hasFocus()) {
             document.exitFullscreen().catch((err) => {
                 console.warn("Failed to exit fullscreen:", err);
             });
         }
-        alert("Test has been submitted due to multiple tab switches.");
+            alert("Test has been submitted due to multiple tab switches.");
+        } catch (error) {
+            console.error("Error auto-submitting test:", error);
+            alert("Error submitting test. Please try again.");
+        }
     };
 
     // Proctoring effects
@@ -140,18 +147,6 @@ const ActiveTestPage = () => {
         checkFs();
         return () => document.removeEventListener("fullscreenchange", checkFs);
     }, [testStarted]);
-
-    // Timer
-    useEffect(() => {
-        if (!testStarted || testSubmitted) return;
-        const id = setInterval(() => {
-            setTimer(t => {
-                if (t <= 1) { clearInterval(id); alert("Time's up"); SubmitTest(); return 0; }
-                return t - 1;
-            });
-        }, 1000);
-        return () => clearInterval(id);
-    }, [testStarted, testSubmitted]);
 
     const formatTime = () => {
         const minutes = Math.floor(timer / 60);
@@ -311,7 +306,18 @@ const ActiveTestPage = () => {
         }
     };
 
-    
+    const handleSubmitTest = async () => {
+        try {
+            // First save the current state
+            await postSectionsToBackend(userName, testId, sections);
+            setTestSubmitted(true);
+            setTestStarted(false);
+            alert("Test submitted successfully!");
+        } catch (error) {
+            console.error("Error submitting test:", error);
+            alert("Error submitting test. Please try again.");
+        }
+    };
     
     useEffect(() => {
         try {
@@ -357,7 +363,6 @@ const ActiveTestPage = () => {
                   <div>
                     <h4>General Instructions:</h4>
                     <ol>
-                      <li>Total duration of <b>{`${testName}`}</b> is {``}.</li>
                       <li>
                         The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination. When the timer reaches zero, the examination will end by itself. You will not be required to end or submit your examination.
                       </li>
@@ -588,7 +593,7 @@ const ActiveTestPage = () => {
                         <button className="clear-response" onClick={handleClearResponse}>
                             Clear Response
                         </button>
-                        <button className="submit">Submit</button>
+                        <button className="submit" onClick={handleSubmitTest}>Submit</button>
                     </div>
                 </div>
 
