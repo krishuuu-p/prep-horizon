@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "../../UserContext";
 import Panel from "./StudentPanel";
 import "../styles/ProfilePage.css";
@@ -18,17 +18,30 @@ function ProfilePage() {
   const [activePage, setActivePage] = useState("Profile");
   const [hideRating, setHideRating] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || "/default-avatar.png");
+  const [testData, setTestData] = useState([{testName: "", score: 0}]);
   const userName = user.userName;
 
-  // Generate random marks for now; replace with real data later
-  const data = Array.from({ length: 8 }, (_, i) => ({
-    exam: `Exam ${i + 1}`,
-    score: Math.floor(Math.random() * 101),
-  }));
+  useEffect(() => {
+    // fetch all recent test scores for the user
+    fetch(`${process.env.REACT_APP_BACKEND_URL}/api/tests/${userName}/recent-scores`)
+      .then((response) => response.json())
+      .then((data) => {
+        setTestData(data);
+        console.log("Test data fetched:", data);
+      })
+      .catch((error) => console.error("Error fetching test data:", error));
+
+  }, [userName]);
+
+
+  // const testData = Array.from({ length: 8 }, (_, i) => ({
+  //   exam: `Exam ${i + 1}`,
+  //   score: Math.floor(Math.random() * 101),
+  // }));
 
   // Compute weighted average of last 5 marks (more weight to recent tests)
-  const lastFive = data.slice(-5);
-  const weights = [1, 2, 3, 4, 5];
+  const lastFive = testData.slice(-1);
+  const weights = [1];
   const weightedSum = lastFive.reduce(
     (sum, item, idx) => sum + item.score * weights[idx],
     0
@@ -52,7 +65,7 @@ function ProfilePage() {
       {/* Top navigation panel */}
       <Panel activePage={activePage} setActivePage={setActivePage} />
 
-      {}
+      { }
       <div className="profile-content">
         <div className="profile-header">
           <div className="avatar-upload-container">
@@ -85,11 +98,11 @@ function ProfilePage() {
         </div>
 
         <div className="chart-container">
-          <h3>Marks Over Exams</h3>
+          <h3>Marks Over Tests</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data}>
+            <LineChart testData={testData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="exam" />
+              <XAxis dataKey="test" />
               <YAxis domain={[0, 100]} />
               <Tooltip />
               <Line type="monotone" dataKey="score" stroke="#8884d8" />

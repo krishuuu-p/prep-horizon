@@ -304,6 +304,17 @@ app.get("/api/teacher/:username/test-performance", async (req, res) => {
     }
 });
 
+app.get("/api/tests/:userName/recent-scores", async (req, res) => {
+    try {
+        const { userName } = req.params;
+        const recentScores = await queries.getRecentTestScores(userName);
+        res.json(recentScores);
+    } catch (error) {
+        console.error("Error fetching recent test scores:", error);
+        res.status(500).json({ message: "Error fetching recent test scores" });
+    }
+});
+
 app.get("/get-classes", async (req, res) => {
     try {
         const classes = await queries.getClasses();
