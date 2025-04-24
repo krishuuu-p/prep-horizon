@@ -1,9 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
-import Panel from "./StudentPanel";
+import Panel from "./Panel";
 
-const socket = io("http://10.81.65.73:5000", { transports: ["websocket"] });
+// Server URLs
+const SOCKET_SERVER_URL = "http://localhost:5000"; // Update THIS to your socket server URL
+const EMOTION_SERVER_URL = "http://localhost:5001"; // Update THIS to your emotion server URL
+
+const socket = io(SOCKET_SERVER_URL, { transports: ["websocket"] });
+
 function InterviewPage() {
   const [activePage, setActivePage] = useState("Interview Practice");
   const [stream, setStream] = useState(null);
@@ -11,46 +16,33 @@ function InterviewPage() {
   const [caller, setCaller] = useState("");
   const [callerSignal, setCallerSignal] = useState(null);
   const [callAccepted, setCallAccepted] = useState(false);
+  const [emotion, setEmotion] = useState("");
 
   const myVideo = useRef(null);
   const userVideo = useRef(null);
   const connectionRef = useRef(null);
 
+  // Initialize media stream and socket listeners
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then((currentStream) => {
         setStream(currentStream);
-        if (myVideo.current) {
-          myVideo.current.srcObject = currentStream;
-        }
+        if (myVideo.current) myVideo.current.srcObject = currentStream;
       })
       .catch((err) => console.error("Error accessing media devices.", err));
 
     socket.on("user-joined", (id) => {
-      console.log("User joined event received, id:", id);
-      if (stream) {
-        callUser(id);
-      } else {
-        console.warn("Stream not ready when trying to call");
-      }
+      if (stream) callUser(id);
     });
 
     socket.on("user-signal", (data) => {
-      console.log("Receiving call from:", data.callerID);
       setReceivingCall(true);
       setCaller(data.callerID);
       setCallerSignal(data.signal);
     });
 
     socket.on("receiving-returned-signal", (data) => {
-      console.log("Caller received returned signal");
-      if (connectionRef.current) {
-        try {
-          connectionRef.current.signal(data.signal);
-        } catch (err) {
-          console.error("Error applying returned signal:", err);
-        }
-      }
+      if (connectionRef.current) connectionRef.current.signal(data.signal);
     });
 
     return () => {
@@ -60,21 +52,47 @@ function InterviewPage() {
     };
   }, [stream]);
 
+  // Capture a frame every 5 seconds and send for emotion analysis
+  useEffect(() => {
+    if (!stream) return;
+    const interval = setInterval(() => {
+      const video = myVideo.current;
+      if (!video) return;
+
+      // Draw video frame to canvas
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert to blob and send to backend
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const formData = new FormData();
+        formData.append("image", blob, "frame.png");
+
+        fetch(`${EMOTION_SERVER_URL}/emotion`, {
+          method: "POST",
+          body: formData
+        })
+          .then((res) => res.json())
+          .then((data) => setEmotion(data.emotion))
+          .catch((err) => console.error("Error sending emotion request:", err));
+      }, "image/png");
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [stream]);
+
   const joinRoom = () => {
-    console.log("Joining room interviewRoom1");
     socket.emit("join-room", "interviewRoom1");
   };
 
   const callUser = (userID) => {
-    console.log("Initiating call to user:", userID);
-    const peer = new Peer({
-      initiator: true,
-      trickle: false,
-      stream: stream
-    });
+    const peer = new Peer({ initiator: true, trickle: false, stream });
 
     peer.on("signal", (signalData) => {
-      console.log("Caller sending signal to callee");
       socket.emit("sending-signal", {
         userToSignal: userID,
         callerID: socket.id,
@@ -83,51 +101,25 @@ function InterviewPage() {
     });
 
     peer.on("stream", (remoteStream) => {
-      console.log("Caller received remote stream");
-      if (userVideo.current) {
-        userVideo.current.srcObject = remoteStream;
-      }
+      if (userVideo.current) userVideo.current.srcObject = remoteStream;
     });
-
-    peer.on("error", (err) => console.error("Caller peer error:", err));
 
     connectionRef.current = peer;
   };
 
   const acceptCall = () => {
-    console.log("Accepting call from:", caller);
     setCallAccepted(true);
-
-    const peer = new Peer({
-      initiator: false,
-      trickle: false,
-      stream: stream
-    });
+    const peer = new Peer({ initiator: false, trickle: false, stream });
 
     peer.on("signal", (signalData) => {
-      console.log("Callee returning signal to caller");
       socket.emit("returning-signal", { signal: signalData, callerID: caller });
     });
 
     peer.on("stream", (remoteStream) => {
-      console.log("Callee received remote stream");
-      if (userVideo.current) {
-        userVideo.current.srcObject = remoteStream;
-      }
+      if (userVideo.current) userVideo.current.srcObject = remoteStream;
     });
 
-    peer.on("error", (err) => console.error("Callee peer error:", err));
-
-    if (callerSignal) {
-      try {
-        peer.signal(callerSignal);
-      } catch (err) {
-        console.error("Error during callee signaling:", err);
-      }
-    } else {
-      console.warn("No caller signal available to accept call");
-    }
-
+    if (callerSignal) peer.signal(callerSignal);
     connectionRef.current = peer;
   };
 
@@ -140,6 +132,7 @@ function InterviewPage() {
         <div>
           <h3>Your Video</h3>
           <video playsInline muted ref={myVideo} autoPlay style={{ width: "300px" }} />
+          <div style={{ marginTop: "10px" }}><strong>Emotion:</strong> {emotion}</div>
         </div>
         <div>
           <h3>Remote Video</h3>
