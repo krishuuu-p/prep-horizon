@@ -7,21 +7,13 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Current Database: `prep_horizon`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `prep_horizon` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `prep_horizon`;
 
 --
 -- Table structure for table `class_test`
@@ -96,7 +88,7 @@ CREATE TABLE `enrollments` (
   KEY `class_id` (`class_id`),
   CONSTRAINT `enrollments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `enrollments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,7 +97,7 @@ CREATE TABLE `enrollments` (
 
 LOCK TABLES `enrollments` WRITE;
 /*!40000 ALTER TABLE `enrollments` DISABLE KEYS */;
-INSERT INTO `enrollments` VALUES (1,2,1),(2,2,2),(3,5,2),(4,83,3),(5,84,4);
+INSERT INTO `enrollments` VALUES (1,2,1),(2,2,2),(3,5,2),(4,83,3),(5,84,4),(6,69,3),(7,73,3),(8,74,3);
 /*!40000 ALTER TABLE `enrollments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -248,6 +240,38 @@ INSERT INTO `student_responses` VALUES (13,2,37,99,NULL,NULL,NULL,NULL,0,-1,'Ans
 UNLOCK TABLES;
 
 --
+-- Table structure for table `student_results`
+--
+
+DROP TABLE IF EXISTS `student_results`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `student_results` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `student_id` int NOT NULL,
+  `test_id` int NOT NULL,
+  `section_id` int NOT NULL,
+  `marks_obtained` float NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `student_id` (`student_id`),
+  KEY `test_id` (`test_id`),
+  KEY `section_id` (`section_id`),
+  CONSTRAINT `student_results_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `student_results_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `student_results_ibfk_3` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `student_results`
+--
+
+LOCK TABLES `student_results` WRITE;
+/*!40000 ALTER TABLE `student_results` DISABLE KEYS */;
+/*!40000 ALTER TABLE `student_results` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `student_tests`
 --
 
@@ -347,4 +371,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-18 18:44:04
+-- Dump completed on 2025-04-24 13:45:41
