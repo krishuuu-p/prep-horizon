@@ -449,6 +449,32 @@ app.post("/upload-test-data", upload.single("file"), async (req, res) => {
     }
 });
 
+app.post("/add-admin", async (req, res) => {
+    const { username, password, name, email } = req.body;
+
+    if (!username || !password || !name || !email) {
+    return res.status(400).json({ message: "All fields are required" });
+    }
+
+    try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const query = `
+        INSERT INTO users (username, password, name, email, role)
+        VALUES (?, ?, ?, ?, 'admin')
+    `;
+    db.query(query, [username, hashedPassword, name, email], (err, result) => {
+        if (err) {
+        console.error("Error adding administrator:", err);
+        return res.status(500).json({ message: "Error adding administrator" });
+        }
+        res.status(201).json({ message: "Administrator added successfully" });
+    });
+    } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+    }
+});
+
 app.post("/upload-questions", upload.single("file"), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
