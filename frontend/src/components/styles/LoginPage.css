@@ -12,14 +12,14 @@
 .welcome-container {
     flex: 1;
     text-align: left;
-    position:absolute;
+    position: absolute;
     left: 200px;
     opacity: 0;
     animation: fadeIn 2s ease-out forwards;
 }
 
 .typed-cursor {
-    font-size: 48px; 
+    font-size: 48px;
     color: white;
     animation: blink 0.7s infinite;
 }
@@ -50,14 +50,12 @@
     flex: 0.4;
     width: 350px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.8);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     text-align: center;
     color: white;
-    background-color: black;
     margin-left: auto;
-    opacity: 0.8;
     position: absolute;
     right: 100px;
 }
@@ -97,7 +95,6 @@
     width: 30px;
     height: auto;
     cursor: pointer;
-    margin-right: 10px;
     transition: 0.3s;
     filter: invert(33%) sepia(99%) saturate(745%) hue-rotate(200deg);
 }
@@ -108,6 +105,8 @@
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 5px;
+    background: rgba(255,255,255,0.1);
+    color: white;
 }
 
 .password-container {
@@ -123,10 +122,11 @@
     background: none;
     border: none;
     cursor: pointer;
-    color: #666;
+    color: #ddd;
 }
 
-.login-btn {
+.login-btn,
+.register-btn {
     width: 100%;
     padding: 10px;
     background-color: #28a745;
@@ -135,10 +135,16 @@
     border-radius: 5px;
     cursor: pointer;
     transition: 0.3s;
+    font-size: 1rem;
 }
 
-.login-btn:hover {
+.login-btn:hover,
+.register-btn:hover {
     background-color: #218838;
+}
+
+.login-slide {
+    animation: slideIn 0.8s ease-out forwards;
 }
 
 @keyframes slideIn {
@@ -152,17 +158,73 @@
     }
 }
 
-.login-slide {
-    animation: slideIn 0.8s ease-out forwards;
+/* Registration Inline Styles */
+.register-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    margin-top: 20px;
+}
+
+.register-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.reg-back-icon {
+    width: 24px;
+    height: auto;
+    cursor: pointer;
+    filter: invert(33%) sepia(99%) saturate(745%) hue-rotate(200deg);
+}
+
+.register-inline input {
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.form-actions button:first-child {
+    background: transparent;
+    color: #ddd;
+}
+
+.form-actions button:last-child {
+    background: #28a745;
+    color: white;
+}
+
+.form-actions button:first-child:hover {
+    color: white;
+}
+
+.form-actions button:last-child:hover {
+    background: #218838;
 }
 
 @media (max-width: 900px) {
-    .container {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
     .welcome-container {
         position: static;
         text-align: center;
@@ -176,3 +238,4 @@
         margin: 0 auto;
     }
 }
+
