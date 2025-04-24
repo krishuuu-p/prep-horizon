@@ -92,11 +92,12 @@ CREATE TABLE `enrollments` (
   `user_id` int NOT NULL,
   `class_id` int NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_user_class_pair` (`user_id`,`class_id`),
   KEY `student_id` (`user_id`),
   KEY `class_id` (`class_id`),
   CONSTRAINT `enrollments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `enrollments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,7 +106,7 @@ CREATE TABLE `enrollments` (
 
 LOCK TABLES `enrollments` WRITE;
 /*!40000 ALTER TABLE `enrollments` DISABLE KEYS */;
-INSERT INTO `enrollments` VALUES (1,2,1),(2,2,2),(3,5,2),(4,83,3),(5,84,4),(6,69,3),(7,73,3),(8,74,3),(9,69,1),(10,71,1),(11,72,2),(12,73,2);
+INSERT INTO `enrollments` VALUES (1,2,1),(2,2,2),(3,5,2),(9,69,1),(6,69,3),(10,71,1),(11,72,2),(12,73,2),(7,73,3),(8,74,3),(4,83,3),(13,84,1),(5,84,4),(15,85,1),(16,86,1),(17,87,1),(18,88,1),(19,89,1);
 /*!40000 ALTER TABLE `enrollments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -189,7 +190,7 @@ CREATE TABLE `sections` (
   PRIMARY KEY (`id`),
   KEY `test_id` (`test_id`),
   CONSTRAINT `sections_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -198,7 +199,7 @@ CREATE TABLE `sections` (
 
 LOCK TABLES `sections` WRITE;
 /*!40000 ALTER TABLE `sections` DISABLE KEYS */;
-INSERT INTO `sections` VALUES (30,14,'Maths',0),(31,14,'Physics',0),(32,14,'Chemistry',0);
+INSERT INTO `sections` VALUES (30,14,'Maths',0),(31,14,'Physics',0),(32,14,'Chemistry',0),(33,17,'Maths',0),(34,13,'Maths',0),(35,12,'Maths',0),(36,11,'Maths',0),(37,10,'Maths',0),(38,17,'Physics',0),(39,13,'Physics',0),(40,12,'Physics',0),(41,11,'Physics',0),(42,10,'Physics',0),(43,17,'Chemistry',0),(44,13,'Chemistry',0),(45,12,'Chemistry',0),(46,11,'Chemistry',0),(47,10,'Chemistry',0);
 /*!40000 ALTER TABLE `sections` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -267,7 +268,7 @@ CREATE TABLE `student_results` (
   CONSTRAINT `student_results_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `student_results_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `tests` (`id`) ON DELETE CASCADE,
   CONSTRAINT `student_results_ibfk_3` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -276,6 +277,7 @@ CREATE TABLE `student_results` (
 
 LOCK TABLES `student_results` WRITE;
 /*!40000 ALTER TABLE `student_results` DISABLE KEYS */;
+INSERT INTO `student_results` VALUES (1,2,17,33,22),(2,2,17,38,8),(3,2,17,43,74),(4,2,13,34,43),(5,2,13,39,94),(6,2,13,44,41),(7,2,12,35,21),(8,2,12,40,81),(9,2,12,45,44),(10,2,11,36,75),(11,2,11,41,45),(12,2,11,46,97),(13,2,10,37,48),(14,2,10,42,50),(15,2,10,47,7),(16,87,17,33,83),(17,87,17,38,94),(18,87,17,43,22),(19,87,13,34,28),(20,87,13,39,70),(21,87,13,44,68),(22,87,12,35,29),(23,87,12,40,42),(24,87,12,45,23),(25,87,11,36,87),(26,87,11,41,68),(27,87,11,46,77),(28,87,10,37,79),(29,87,10,42,63),(30,87,10,47,77),(31,88,17,33,95),(32,88,17,38,45),(33,88,17,43,39),(34,88,13,34,61),(35,88,13,39,88),(36,88,13,44,56),(37,88,12,35,14),(38,88,12,40,3),(39,88,12,45,72),(40,88,11,36,49),(41,88,11,41,30),(42,88,11,46,1),(43,88,10,37,14),(44,88,10,42,70),(45,88,10,47,4),(46,89,17,33,10),(47,89,17,38,37),(48,89,17,43,56),(49,89,13,34,69),(50,89,13,39,75),(51,89,13,44,69),(52,89,12,35,19),(53,89,12,40,87),(54,89,12,45,78),(55,89,11,36,28),(56,89,11,41,5),(57,89,11,46,42),(58,89,10,37,94),(59,89,10,42,43),(60,89,10,47,31),(61,84,17,33,28),(62,84,17,38,43),(63,84,17,43,34),(64,84,13,34,41),(65,84,13,39,1),(66,84,13,44,80),(67,84,12,35,96),(68,84,12,40,41),(69,84,12,45,16),(70,84,11,36,55),(71,84,11,41,30),(72,84,11,46,82),(73,84,10,37,19),(74,84,10,42,49),(75,84,10,47,87),(76,85,17,33,90),(77,85,17,38,87),(78,85,17,43,64),(79,85,13,34,60),(80,85,13,39,8),(81,85,13,44,60),(82,85,12,35,72),(83,85,12,40,83),(84,85,12,45,98),(85,85,11,36,42),(86,85,11,41,14),(87,85,11,46,45),(88,85,10,37,80),(89,85,10,42,68),(90,85,10,47,96),(91,86,17,33,76),(92,86,17,38,91),(93,86,17,43,28),(94,86,13,34,65),(95,86,13,39,41),(96,86,13,44,11),(97,86,12,35,29),(98,86,12,40,13),(99,86,12,45,76),(100,86,11,36,42),(101,86,11,41,83),(102,86,11,46,86),(103,86,10,37,80),(104,86,10,42,40),(105,86,10,47,63);
 /*!40000 ALTER TABLE `student_results` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -357,7 +359,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -366,7 +368,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'A1','$2b$10$W2amF2fmf/cza662x.uUnuLr.lb2wfRoLz02BR4yP5pXRPMGSct1q','Admin 1','admin1@gmail.com','admin'),(2,'S1','$2b$10$mVpyvddhPVSMRQ7vp./HxOrPdQaw2FzwlP45zPQfPSsRngwaC9GxG','Student 1','student1@gamil.com','student'),(5,'S2','$2b$10$xPkjQwc5ivd0u08phkupg.TO6YWmQlaIwmptzefTFVsGl6S5YxUNC','Student 2','student2@gmail.com','student'),(66,'S3','$2b$10$OpCrbpm75zztnYK3Zi2hsuHziTgHQnCSCKIkOpDxreWL9x3fQWUUu','Student 3','student3@gmail.com','student'),(67,'S4','$2b$10$jKcn1VwzXeUcZJmLZxwkJuXJOMrH4gMxiBtslR7jp9KdXHsFoP51m','Student 4','student4@gmail.com','student'),(68,'S5','$2b$10$5VcTxjUT4Kpdu1hz7qNRmemFW4FBLsy/Z8OIlbT..iBYhuR3kyF5O','Student 5','student5@gmail.com','student'),(69,'T1','$2b$10$N.SucYRIl68WOd5kZb0fReIKlzXShA3l671Vn0EpdEsZRoLuZFqLm','Teacher 1','teacher1@gmail.com','teacher'),(71,'T2','$2b$10$GtmqsMv1rlN/hJQW1p3aCegV2diiOdDQ19mdZU6/ZkgBb.j0rHL2C','Teacher 2','teacher2@gmail.com','teacher'),(72,'T3','$2b$10$yEJi/hpXXF3G5rCqnlRb5./a7U8mkuv4lL1FLr5.NJ2Kc52Yw6CbO','Teacher 3','teacher3@gmail.com','teacher'),(73,'T4','$2b$10$8JmR3v3mlJx2lluZjeAuz.a5EtmD3lFKpjRYJb930XsFZ1o5O/QZG','Teacher 4','teacher4@gmail.com','teacher'),(74,'T5','$2b$10$.DuQaE5nvwJ8q0tjIlaNheY/uPJ9iRCyumbyQ/VsvvUYFjwrnQ/0C','Teacher 5','teacher5@gmail.com','teacher'),(83,'S6','$2b$10$.LUI/nw2BLGoICoEYIK2Q.s1fE36XsD.0eQB2XbO9uiu1/GoHR6b6','Student 6','studentsix@gmail.com','student'),(84,'S7','$2b$10$eLZXyFxtcUOvO/Ob8ApFa.69d7IQLg3VgkjTHMkciI7P4BPbE45hO','student 7','lsjbsjlb','student');
+INSERT INTO `users` VALUES (1,'A1','$2b$10$W2amF2fmf/cza662x.uUnuLr.lb2wfRoLz02BR4yP5pXRPMGSct1q','Admin 1','admin1@gmail.com','admin'),(2,'S1','$2b$10$mVpyvddhPVSMRQ7vp./HxOrPdQaw2FzwlP45zPQfPSsRngwaC9GxG','Student 1','student1@gamil.com','student'),(5,'S2','$2b$10$xPkjQwc5ivd0u08phkupg.TO6YWmQlaIwmptzefTFVsGl6S5YxUNC','Student 2','student2@gmail.com','student'),(66,'S3','$2b$10$OpCrbpm75zztnYK3Zi2hsuHziTgHQnCSCKIkOpDxreWL9x3fQWUUu','Student 3','student3@gmail.com','student'),(67,'S4','$2b$10$jKcn1VwzXeUcZJmLZxwkJuXJOMrH4gMxiBtslR7jp9KdXHsFoP51m','Student 4','student4@gmail.com','student'),(68,'S5','$2b$10$5VcTxjUT4Kpdu1hz7qNRmemFW4FBLsy/Z8OIlbT..iBYhuR3kyF5O','Student 5','student5@gmail.com','student'),(69,'T1','$2b$10$N.SucYRIl68WOd5kZb0fReIKlzXShA3l671Vn0EpdEsZRoLuZFqLm','Teacher 1','teacher1@gmail.com','teacher'),(71,'T2','$2b$10$GtmqsMv1rlN/hJQW1p3aCegV2diiOdDQ19mdZU6/ZkgBb.j0rHL2C','Teacher 2','teacher2@gmail.com','teacher'),(72,'T3','$2b$10$yEJi/hpXXF3G5rCqnlRb5./a7U8mkuv4lL1FLr5.NJ2Kc52Yw6CbO','Teacher 3','teacher3@gmail.com','teacher'),(73,'T4','$2b$10$8JmR3v3mlJx2lluZjeAuz.a5EtmD3lFKpjRYJb930XsFZ1o5O/QZG','Teacher 4','teacher4@gmail.com','teacher'),(74,'T5','$2b$10$.DuQaE5nvwJ8q0tjIlaNheY/uPJ9iRCyumbyQ/VsvvUYFjwrnQ/0C','Teacher 5','teacher5@gmail.com','teacher'),(83,'S6','$2b$10$.LUI/nw2BLGoICoEYIK2Q.s1fE36XsD.0eQB2XbO9uiu1/GoHR6b6','Student 6','studentsix@gmail.com','student'),(84,'S7','$2b$10$eLZXyFxtcUOvO/Ob8ApFa.69d7IQLg3VgkjTHMkciI7P4BPbE45hO','student 7','lsjbsjlb','student'),(85,'S8','$2b$10$epaXksP1lqSfSX5ccZAguuEnubElFCswQ.yx0mG374e19RDqMDZTe','student 8','student8@gmail.com','student'),(86,'S9','$2b$10$OY9oeZAiXejpo0/v6dKsue3UBDbL4u5.0IGx00Jo0vIpFhy31Es7q','student 9','student9@gmail.com','student'),(87,'S10','$2b$10$yqsrktuN4xxxg3CcIRP3ieL2Bzp7t/ZlVNowsT9RvAAkKUGmlnh1m','student 10','student10@gmail.com','student'),(88,'S11','$2b$10$Go7PwzdfVggaE9MB1jsFEO3FaSa5CErb8/Ga8r5yZJa8/DMGU3FxS','student 11','student11@gmail.com','student'),(89,'S12','$2b$10$MwM5AEayjhDYpWyxHgkM9uv.VuRXzgUqjL9cyPs6TR/SFEPN9Azwy','student 12','student12@gmail.com','student'),(90,'S13','$2b$10$oQVmsrvqiTkf/Pxenn8csOzizYRw2A1SR06wf.4.wKwk2UWYIxaWi','student 13','student13@gmail.com','student'),(91,'S14','$2b$10$KjWPgYHPsTmmOvInAwh3/ujrLfnxgnF8b827D.c6DZvAz9oMxWcSe','student 14','student14@gmail.com','student'),(92,'S15','$2b$10$NrSJYqy.RlzbY8Iykrrkdej8Utmv4gm0zByxdHgzjNc.sEKJCkWgW','student 15','student15@gmail.com','student');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -379,4 +381,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-24 15:16:04
+-- Dump completed on 2025-04-25  0:07:50
