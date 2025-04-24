@@ -9,11 +9,27 @@ import mysql.connector
 from PIL import Image
 import io
 from dotenv import load_dotenv
-app = Flask(__name__)
-CORS(app)
 
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+defined_emotions = ['happy', 'sad', 'angry', 'surprised', 'neutral', 'disgusted', 'fearful']
 load_dotenv()
+
 captured_frames = []
+@app.route('/emotion', methods=['POST'])
+
+def emotion():
+    print("[FLASK] Received /emotion request")
+    if 'image' not in request.files:
+        print("[FLASK] No image file in request.files:", request.files)
+        return jsonify({'error': 'No image file provided'}), 400
+
+    img = request.files['image']
+    print(f"[FLASK] Image received: filename={img.filename}, content_type={img.content_type}")
+    chosen_emotion = random.choice(defined_emotions)
+    print(f"[FLASK] Returning emotion: {chosen_emotion}")
+
+    return jsonify({'emotion': chosen_emotion})
 
 @app.route('/capture_frame', methods=['POST'])
 def capture_frame():
