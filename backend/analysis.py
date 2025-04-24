@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 # Configure DB connection
 
-given_test_id = 12
+given_test_id = 13
 
 conn = mysql.connector.connect(
     user='root',
@@ -102,7 +102,7 @@ for _, row in pivot.iterrows():
         ax.set_title(subj, fontsize=16)
         max_a  = 360
         if analytics[subj]["max"] > 0:
-            stud_a = max(0, row[subj] / analytics[subj]["max"] * 360)
+            stud_a = max(0, row[subj] / analytics[subj]["max"] * 360) 
             avg_a  = max(0, analytics[subj]["avg"] / analytics[subj]["max"] * 360)
         else:
             stud_a = 0
@@ -148,18 +148,20 @@ for _, row in pivot.iterrows():
 
     # Pie chart of subject distribution
     fig, ax = plt.subplots(figsize=(6,6))
-    # vals = [row[subj] for subj in subject_columns if subj!="Total"]
     vals = [max(0, row[subj]) for subj in subject_columns if subj != "Total"]
+    labs = [subj for subj in subject_columns if subj != "Total"]
 
-    labs = [subj for subj in subject_columns if subj!="Total"]
-    ax.pie(vals, labels=labs, autopct="%1.1f%%", startangle=90)
-    ax.set_title(f"Distribution: {sname}", fontsize=16)
-    # pie_path = f"static/student_pie_{uname}.png"
-    pie_path = f"static/student_pie_{uname}_test_{given_test_id}.png"
-    plt.savefig(pie_path)
+    # Check for valid pie input
+    if sum(vals) > 0 and not any(np.isnan(vals)):
+        ax.pie(vals, labels=labs, autopct="%1.1f%%", startangle=90)
+        ax.set_title(f"Distribution: {sname}", fontsize=16)
+        pie_path = f"static/student_pie_{uname}_test_{given_test_id}.png"
+        plt.savefig(pie_path)
+        student_pie_charts[uname] = pie_path
+    else:
+        print(f"Skipping pie chart for {sname} due to no valid values.")
     plt.close(fig)
-    student_pie_charts[uname] = pie_path
-
+    # vals = [row[subj] for subj in subject_columns if subj!="Total"]
 # Output summary
 # print(pivot.head())
 # print("Analytics:", analytics)
