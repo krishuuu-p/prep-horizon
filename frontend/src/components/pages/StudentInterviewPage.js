@@ -77,7 +77,7 @@ function InterviewPage() {
           .then((data) => setEmotion(data.emotion))
           .catch((err) => console.error("Error sending emotion request:", err));
       }, "image/png");
-    }, 1000000);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [stream]);
