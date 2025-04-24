@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
-import Panel from "./Panel";
+import Panel from "./StudentPanel";
 
 // Server URLs
 const SOCKET_SERVER_URL = "http://localhost:5000"; // Update THIS to your socket server URL
