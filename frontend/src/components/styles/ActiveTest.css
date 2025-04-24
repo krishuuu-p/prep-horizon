@@ -168,9 +168,17 @@ body {
     font-weight: 500;
   }
   
+  .detailsCandidate span.timer {
+    background-color: #2e8bc0;
+    color: black !important;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: bold;
+  }
+  
   .timer {
     background-color: #2e8bc0;
-    color: white;
+    color: black;
     padding: 2px 8px;
     border-radius: 8px;
     font-weight: bold;
@@ -225,4 +233,3 @@ body {
       transform: translateY(0);
     }
   }
-  
