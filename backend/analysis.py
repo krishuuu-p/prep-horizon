@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 # Configure DB connection
 
-given_test_id = 14
+given_test_id = 12
 
 conn = mysql.connector.connect(
     user='root',
@@ -29,9 +29,8 @@ sections = pd.read_sql(
 )
 
 responses = pd.read_sql(
-    "SELECT student_id, question_id, marks_obtained "
-    "FROM student_responses "
-    "WHERE status = 'Answered'",
+    "SELECT student_id, test_id, section_id, marks_obtained "
+    "FROM student_results",
     conn
 )
 # <-- updated here: use `name` as student_name, filter to role='student'
@@ -46,12 +45,13 @@ conn.close()
 # 2) MERGE TOGETHER
 df = (
     responses
-    .merge(questions, on="question_id", how="left")
+    # .merge(questions, on="question_id", how="left")
     .merge(sections,  on="section_id",  how="left")
     .merge(users,     on="student_id",  how="inner")  # inner: drop non-students
 )
 
 # 3) PIVOT: one column per section_name, summing marks_obtained
+df = df[df["test_id"] == given_test_id]
 pivot = (
     df
     .pivot_table(
@@ -63,7 +63,6 @@ pivot = (
     )
     .reset_index()
 )
-df = df[df["test_id"] == given_test_id]
 
 
 # 4) COMPUTE TOTAL & ANALYTICS
@@ -190,7 +189,7 @@ plt.savefig(path)
 plt.close()
 for subj in subject_columns:
     plt.figure(figsize=(8, 5))
-    plt.hist(pivot[subj], bins=8, color='skyblue', edgecolor='black')
+    plt.hist(pivot[subj], bins=5, color='skyblue', edgecolor='black')
     plt.title(f"Marks Distribution in {subj}")
     plt.xlabel("Marks")
     plt.ylabel("Number of Students")

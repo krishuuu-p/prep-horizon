@@ -50,7 +50,13 @@ function StudentHomePage() {
         navigate(`/${userType}/${userName}/start-test/${testName}/${testId}`);
     }
     
-
+    const handleViewAnalysis = (testId, testName) => {
+        testName = testName.replace(/\s+/g, '');
+        navigate(`/${userType}/${userName}/analysis/${testName}/${testId}`, {
+            state: { testId, testName }
+        });
+    };
+    
     return (
         <div className="student-page">
             <Panel activePage={activePage} setActivePage={setActivePage} />
@@ -78,7 +84,9 @@ function StudentHomePage() {
                                         <h3>{test.test_name}</h3>
                                         <p><strong>Start:</strong> {startdate} at {starttime}</p>
                                         <p><strong>End:</strong> {enddate} at {endtime}</p>
-                                        <button className="start-btn" onClick={() => handleStartTest(test.id,test.test_name)}>Start Test</button>
+                                        <button className="analysis-btn" onClick={() => handleViewAnalysis(test.id, test.test_name)}>
+                                            View Analysis
+                                        </button>
                                     </div>
                                 );
                             })}
@@ -120,7 +128,9 @@ function StudentHomePage() {
                                     <div className="test-card recent-test" key={index}>
                                         <h3>{test.test_name}</h3>
                                         <p><strong>Active:</strong> {startdate} at {starttime} - {enddate} at {endtime}</p>
-                                        <button className="analysis-btn">View Analysis</button>
+                                        <button className="analysis-btn" onClick={() => handleViewAnalysis(test.id, test.test_name)}>
+                                            View Analysis
+                                        </button>
                                     </div>
                                 );
                             })}
