@@ -26,6 +26,20 @@ async function getActiveTestsForUser(username) {
         `;
 
         const [activeTests] = await pool.query(activeTestsQuery, [classIds]);
+        // for each test in activeTests, append a field called is_submitted which is true if the test is submitted by the student and false otherwise
+        for (let i = 0; i < activeTests.length; i++) {
+            const testId = activeTests[i].id;
+            const isSubmittedQuery = `
+                SELECT is_submitted FROM student_tests
+                WHERE student_id = ? AND test_id = ?;
+            `;
+            const [isSubmittedResult] = await pool.query(isSubmittedQuery, [idResult[0].id, testId]);
+            if (isSubmittedResult && isSubmittedResult.length > 0) {
+                activeTests[i].is_submitted = isSubmittedResult[0].is_submitted;
+            } else {
+                activeTests[i].is_submitted = false;
+            }
+        }
         return activeTests || [];
     } catch (error) {
         throw new Error("Error fetching active tests: " + error.message);
@@ -423,6 +437,17 @@ async function getTestState(studentUsername, testId) {
         SELECT * FROM questions
         WHERE test_id = ?;
     `;
+        
+        // get end_time of the test
+        const testQuery = `
+        SELECT end_time FROM tests
+        WHERE id = ?;
+    `;
+        const [testRows] = await pool.query(testQuery, [testId]);
+        if (!testRows || testRows.length === 0) {
+            throw new Error("Test not found");
+        }
+        const endTime = new Date(testRows[0].end_time);
 
         const [questionRows] = await pool.query(questionsQuery, [testId]);
         if (!questionRows || questionRows.length === 0) {
@@ -564,7 +589,7 @@ async function getTestState(studentUsername, testId) {
             });
         }
         // return the test state with remaining time
-        return { testState, remainingTime };
+        return { testState, remainingTime, endTime };
     }
     catch (error) {
         throw new Error("Error fetching test state: " + error.message);
@@ -766,6 +791,100 @@ async function initializeTest(studentId, testId) {
     }
 }
 
+async function saveStudentTestResults(username, testId) {
+    console.log("Saving student test results for user:", username, "for test ID:", testId);
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // check if username exists in users table
+        const userQuery = 'SELECT id FROM users WHERE username = ?;';
+        const [userRows] = await connection.query(userQuery, [username]);
+        if (userRows.length === 0) {
+            throw new Error("User not found");
+        }
+        const studentId = userRows[0].id;
+
+        // check if testId exists in tests table
+        const testQuery = 'SELECT id FROM tests WHERE id = ?;';
+        const [testRows] = await connection.query(testQuery, [testId]);
+        if (testRows.length === 0) {
+            throw new Error("Test not found");
+        }
+
+        // check if student has already submitted the test
+        const studentTestQuery = `
+            SELECT * FROM student_tests
+            WHERE student_id = ? AND test_id = ?;
+        `;
+        const [studentTestRows] = await connection.query(studentTestQuery, [studentId, testId]);
+        if (studentTestRows.length === 0) {
+            throw new Error("Test not found for the student");
+        }
+        if (studentTestRows[0].is_submitted) {
+            throw new Error("Test already submitted");
+        }
+
+        // update the student_tests table to set is_submitted to true
+        const updateQuery = `
+            UPDATE student_tests
+            SET is_submitted = true
+            WHERE student_id = ? AND test_id = ?;
+        `;
+        await connection.query(updateQuery, [studentId, testId]);
+
+        // populate the student_results table according to responses of the student section-wise
+        const sectionsQuery = `
+            SELECT * FROM sections
+            WHERE test_id = ?;
+        `;
+        const [sectionRows] = await connection.query(sectionsQuery, [testId]);
+        if (!sectionRows || sectionRows.length === 0) {
+            throw new Error(`No sections found for the test with ID ${testId}`);
+        }
+
+        for (const section of sectionRows) {
+            const sectionId = section.id;
+            const questionsQuery = `
+                SELECT * FROM questions
+                WHERE test_id = ? AND section_id = ?;
+            `;
+            const [questionRows] = await connection.query(questionsQuery, [testId, sectionId]);
+            if (!questionRows || questionRows.length === 0) {
+                throw new Error(`No questions found for the test with ID ${testId} and section ID ${sectionId}`);
+            }
+
+            // add student_id, test_id, section_id, marks_obtained (for that whole section) to student_results table
+            let totalMarks = 0;
+            for (const question of questionRows) {
+                const questionId = question.id;
+                const responseQuery = `
+                    SELECT * FROM student_responses
+                    WHERE student_id = ? AND question_id = ?;
+                `;
+                const [responseRows] = await connection.query(responseQuery, [studentId, questionId]);
+                if (!responseRows || responseRows.length === 0) {
+                    throw new Error(`No responses found for the test with ID ${testId}, section ID ${sectionId} and question ID ${questionId}`);
+                }
+                const responseRow = responseRows[0];
+                totalMarks += responseRow.marks_obtained;
+            }
+            const insertQuery = `
+                INSERT INTO student_results (student_id, test_id, section_id, marks_obtained)
+                VALUES (?, ?, ?, ?);
+            `;
+            await connection.query(insertQuery, [studentId, testId, sectionId, totalMarks]);
+        }
+
+        await connection.commit();
+    } catch (error) {
+        await connection.rollback();
+        throw new Error("Error saving student test results: " + error.message);
+    } finally {
+        connection.release();
+    }
+}
+
 module.exports = {
     getTestsForUser,
     getActiveTestsForUser,
@@ -781,5 +900,6 @@ module.exports = {
     getTestState,
     saveTestState,
     getTeacherMetrics,
-    getStudentsForTeacher
+    getStudentsForTeacher,
+    saveStudentTestResults
 };

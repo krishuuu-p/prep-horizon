@@ -101,6 +101,11 @@
     cursor: pointer;
 }
 
+.start-btn:disabled {
+    background-color: #b2dfdb !important;
+    cursor: not-allowed;
+}
+
 .analysis-btn {
     background-color: #1976d2;
     color: white;

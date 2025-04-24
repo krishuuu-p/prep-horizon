@@ -37,7 +37,7 @@ function StudentHomePage() {
                 );
                 setRecentTests(
                     data.recentTests.filter(test => {
-                        const testDate = new Date(test.start_time);
+                        const testDate = new Date(test.end_time);
                         return testDate <= currentDate && testDate >= weekBeforeNow;
                     })
                 );
@@ -45,18 +45,18 @@ function StudentHomePage() {
             .catch(error => console.error("Error fetching test data:", error));
     }, [user]);
 
-    const handleStartTest = (testId,testName) => {
+    const handleStartTest = (testId, testName) => {
         testName = testName.replace(/\s+/g, '');
         navigate(`/${userType}/${userName}/start-test/${testName}/${testId}`);
     }
-    
+
     const handleViewAnalysis = (testId, testName) => {
         testName = testName.replace(/\s+/g, '');
         navigate(`/${userType}/${userName}/analysis/${testName}/${testId}`, {
             state: { testId, testName }
         });
     };
-    
+
     return (
         <div className="student-page">
             <Panel activePage={activePage} setActivePage={setActivePage} />
@@ -76,16 +76,25 @@ function StudentHomePage() {
                                 <p className='caption'>No active tests at the moment.</p>
                             )}
                             {activeTests.map((test, index) => {
-                                const {date: startdate, time: starttime} = formatDateTime(test.start_time);
-                                const {date: enddate, time: endtime} = formatDateTime(test.end_time);
+                                const { date: startdate, time: starttime } = formatDateTime(test.start_time);
+                                const { date: enddate, time: endtime } = formatDateTime(test.end_time);
 
                                 return (
                                     <div className="test-card active-test" key={index}>
                                         <h3>{test.test_name}</h3>
                                         <p><strong>Start:</strong> {startdate} at {starttime}</p>
                                         <p><strong>End:</strong> {enddate} at {endtime}</p>
-                                        <button className="analysis-btn" onClick={() => handleViewAnalysis(test.id, test.test_name)}>
-                                            View Analysis
+                                        <button
+                                            className="start-btn"
+                                            disabled={test.is_submitted}
+                                            title={
+                                                test.is_submitted
+                                                    ? `You've already submitted this test. Results will be visible after ${enddate} at ${endtime}`
+                                                    : ""
+                                            }
+                                            onClick={() => handleStartTest(test.id, test.test_name)}
+                                        >
+                                            Start Test
                                         </button>
                                     </div>
                                 );
@@ -100,8 +109,8 @@ function StudentHomePage() {
                                 <p className='caption'>No upcoming tests this week.</p>
                             )}
                             {upcomingTests.map((test, index) => {
-                                const {date: startdate, time: starttime} = formatDateTime(test.start_time);
-                                const {date: enddate, time: endtime} = formatDateTime(test.end_time);
+                                const { date: startdate, time: starttime } = formatDateTime(test.start_time);
+                                const { date: enddate, time: endtime } = formatDateTime(test.end_time);
 
                                 return (
                                     <div className="test-card upcoming-test" key={index}>
@@ -121,9 +130,9 @@ function StudentHomePage() {
                                 <p className='caption'>No tests given this week.</p>
                             )}
                             {recentTests.map((test, index) => {
-                                const {date: startdate, time: starttime} = formatDateTime(test.start_time);
-                                const {date: enddate, time: endtime} = formatDateTime(test.end_time); 
-                                
+                                const { date: startdate, time: starttime } = formatDateTime(test.start_time);
+                                const { date: enddate, time: endtime } = formatDateTime(test.end_time);
+
                                 return (
                                     <div className="test-card recent-test" key={index}>
                                         <h3>{test.test_name}</h3>
@@ -136,7 +145,7 @@ function StudentHomePage() {
                             })}
                         </div>
                     </div>
-                </div>                
+                </div>
             </div>
         </div>
     );

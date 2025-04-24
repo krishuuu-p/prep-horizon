@@ -2,10 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams } from 'react-router-dom';
 import Webcam from "react-webcam";
 import '../styles/ActiveTest.css';
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../../UserContext";
 import axios from "axios";
 
 const ActiveTestPage = () => {
     const { userName, testName, testId } = useParams();
+    const { user } = useUser();
+    const userType = user.userType;
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [sections, setSections] = useState({});
     const [currentSubject, setCurrentSubject] = useState();
@@ -18,12 +23,12 @@ const ActiveTestPage = () => {
     const [isFullscreen, setIsFullscreen] = useState(true);
     const [testSubmitted, setTestSubmitted] = useState(false);
     const [webcamAllowed, setWebcamAllowed] = useState(null);
+    const [endTime, setEndTime] = useState(null);
 
     const [canProceed, setCanProceed] = useState(false);
 
     useEffect(() => {
         // Fetch sections from backend
-        console.log("Hi")
         const fetchSections = async () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/get-test-state/${userName}/${testId}`);
@@ -33,6 +38,7 @@ const ActiveTestPage = () => {
                 const sections = data.testState;
                 setSections(sections);
                 setTimer(data.remainingTime);
+                setEndTime(data.endTime);
                 setLoading(false);
 
                 const firstSubject = Object.keys(sections)[0];
@@ -64,10 +70,6 @@ const ActiveTestPage = () => {
         } catch (error) {
             console.error("Error saving sections:", error);
         }
-
-
-
-        
     };
 
     useEffect(() => {
@@ -98,18 +100,29 @@ const ActiveTestPage = () => {
     const SubmitTest = async () => {
         try {
             // First save the current state
-            await postSectionsToBackend(userName, testId, sections);
-            setTestSubmitted(true);
-            setTestStarted(false);
-        // To check if fullscreen exists and the document is active before exiting
-        if (document.fullscreenElement && document.hasFocus()) {
-            document.exitFullscreen().catch((err) => {
-                console.warn("Failed to exit fullscreen:", err);
-            });
-        }
+            handleSubmitTest();
             alert("Test has been submitted due to multiple tab switches.");
         } catch (error) {
             console.error("Error auto-submitting test:", error);
+            alert("Error submitting test. Please try again.");
+        }
+    };
+
+    const handleSubmitTest = async () => {
+        try {
+            // First save the current state
+            await postSectionsToBackend(userName, testId, sections);
+            setTestSubmitted(true);
+            setTestStarted(false);
+            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/student/${userName}/test/${testId}/submit`);
+            // To check if fullscreen exists and the document is active before exiting
+            if (document.fullscreenElement && document.hasFocus()) {
+                document.exitFullscreen().catch((err) => {
+                    console.warn("Failed to exit fullscreen:", err);
+                });
+            }
+        } catch (error) {
+            console.error("Error submitting test:", error);
             alert("Error submitting test. Please try again.");
         }
     };
@@ -131,13 +144,12 @@ const ActiveTestPage = () => {
             SubmitTest();
         }
 
-    }, [tabSwitchCount,testStarted,testSubmitted]);
-    useEffect(() => 
-    { 
-        const d = e=>e.preventDefault(); 
-        document.addEventListener("contextmenu", d); 
-        window.addEventListener("keydown", e=>e.ctrlKey&&e.preventDefault()); 
-        return ()=>document.removeEventListener("contextmenu", d);
+    }, [tabSwitchCount, testStarted, testSubmitted]);
+    useEffect(() => {
+        const d = e => e.preventDefault();
+        document.addEventListener("contextmenu", d);
+        window.addEventListener("keydown", e => e.ctrlKey && e.preventDefault());
+        return () => document.removeEventListener("contextmenu", d);
     }, []);
 
     useEffect(() => {
@@ -233,22 +245,22 @@ const ActiveTestPage = () => {
         } else if (q.type === "numerical") {
             q.useranswer = selectedAnswer ? selectedAnswer : null;
         }
-        if(selectedAnswer){
-            if(typeof(selectedAnswer)===String||Array.isArray(selectedAnswer)){
-                if(selectedAnswer.length>0){
-                    q.status="Answered";
+        if (selectedAnswer) {
+            if (typeof (selectedAnswer) === String || Array.isArray(selectedAnswer)) {
+                if (selectedAnswer.length > 0) {
+                    q.status = "Answered";
                 }
-                else{
-                    q.status="Visited but Not Answered";
+                else {
+                    q.status = "Visited but Not Answered";
                 }
             }
-            else{
+            else {
                 console.log("Yes");
-                q.status="Answered";
+                q.status = "Answered";
             }
         }
-        else{
-            q.status="Visited but Not Answered";
+        else {
+            q.status = "Visited but Not Answered";
         }
         // q.status = selectedAnswer && selectedAnswer.length > 0 ? "Answered" : "Visited but Not Answered";
         console.log("I am handle Save and Next.")
@@ -305,19 +317,6 @@ const ActiveTestPage = () => {
             loadQuestion(index + 1);
         }
     };
-
-    const handleSubmitTest = async () => {
-        try {
-            // First save the current state
-            await postSectionsToBackend(userName, testId, sections);
-            setTestSubmitted(true);
-            setTestStarted(false);
-            alert("Test submitted successfully!");
-        } catch (error) {
-            console.error("Error submitting test:", error);
-            alert("Error submitting test. Please try again.");
-        }
-    };
     
     useEffect(() => {
         try {
@@ -325,9 +324,9 @@ const ActiveTestPage = () => {
             console.log("This is current question index", currentQuestionIndex);
             console.log("This is sections", sections);
             const question = sections[currentSubject][currentQuestionIndex[currentSubject]];
-            
+
             let savedAnswer;
-            
+
             if (question.type === "single_correct") {
                 savedAnswer = question.useranswer || null;
             } else if (question.type === "multi_correct") {
@@ -342,9 +341,9 @@ const ActiveTestPage = () => {
             console.error("Error in useEffect:", error);
         }
     }, [currentSubject, currentQuestionIndex, sections]);
-    
-    
-    const toggleProceed=(e)=>{
+
+
+    const toggleProceed = (e) => {
         setCanProceed(e.target.checked);
     }
 
@@ -353,7 +352,7 @@ const ActiveTestPage = () => {
     }
     if (!testStarted || testSubmitted) {
         return (
-            <div style={{ marginTop: 50, fontFamily:"Roboto"}}>
+            <div style={{ marginTop: 50, fontFamily: "Roboto" }}>
                 {!testSubmitted ? (
                     <div style={{marginLeft: "10px"}}>
                     <div className="heading" style={{textAlign: 'center'}}>
@@ -473,7 +472,24 @@ const ActiveTestPage = () => {
 
                     </div>
                 ) : (
-                    <h2>✅ Test has been submitted</h2>
+                    <div style={{ textAlign: 'center', marginTop: 50 }}>
+                        <h2>✅ Test has been submitted</h2>
+                        {endTime && (
+                            <p>
+                                Results will be displayed after{" "}
+                                {new Date(endTime).toLocaleString(undefined, {
+                                    year: "numeric", month: "long", day: "numeric",
+                                    hour: "2-digit", minute: "2-digit"
+                                })}
+                            </p>
+                        )}
+                        <button
+                            style={{ padding: "10px 20px", marginTop: "20px" }}
+                            onClick={() => navigate(`/${userType}/${userName}/home`)}
+                        >
+                            Return to Home
+                        </button>
+                    </div>
                 )}
             </div>
         );
@@ -481,42 +497,42 @@ const ActiveTestPage = () => {
     return (
         <div>
             <header className="prep-header">
-            <div className="logo">
-                <span className="logo-glow">Prep</span><span className="logo-text">Horizon</span>
-            </div>
+                <div className="logo">
+                    <span className="logo-glow">Prep</span><span className="logo-text">Horizon</span>
+                </div>
             </header>
 
 
             <div className="top-palette">
-            <div className="candidate-info">
-                <div className="avatar" />
-                <div className="detailsCandidate">
-                <p><strong>Candidate Name :</strong> {`${userName}`}</p>
-                <p><strong>Exam Name :</strong> {`${testName}`}</p>
-                <p><strong>Remaining Time :</strong> <span className="timer">{formatTime()}</span></p>
+                <div className="candidate-info">
+                    <div className="avatar" />
+                    <div className="detailsCandidate">
+                        <p><strong>Candidate Name :</strong> {`${userName}`}</p>
+                        <p><strong>Exam Name :</strong> {`${testName}`}</p>
+                        <p><strong>Remaining Time :</strong> <span className="timer">{formatTime()}</span></p>
+                    </div>
                 </div>
-            </div>
 
-            <div className="language-select">
-                <select>
-                <option>English</option>
-                <option>Hindi</option>
-                </select>
-            </div>
+                <div className="language-select">
+                    <select>
+                        <option>English</option>
+                        <option>Hindi</option>
+                    </select>
+                </div>
             </div>
 
 
             <div className="subject-palette">
                 <ul className="subject-list">
                     {Object.keys(sections).map((subject) => (
-                    <li key={subject}>
-                        <button
-                        onClick={() => setCurrentSubject(subject)}
-                        className={`subject-button ${currentSubject === subject ? 'active' : ''}`}
-                        >
-                        {subject}
-                        </button>
-                    </li>
+                        <li key={subject}>
+                            <button
+                                onClick={() => setCurrentSubject(subject)}
+                                className={`subject-button ${currentSubject === subject ? 'active' : ''}`}
+                            >
+                                {subject}
+                            </button>
+                        </li>
                     ))}
                 </ul>
             </div>
@@ -526,9 +542,9 @@ const ActiveTestPage = () => {
                 <div className="question-section">
                     <h3 className="question-heading">Question {currentQuestionIndex[currentSubject] + 1}</h3>
                     <p className="question-text">{sections[currentSubject][currentQuestionIndex[currentSubject]].question}</p>
-                    {sections[currentSubject][currentQuestionIndex[currentSubject]].image&&
-                    
-                        <img src={`${process.env.REACT_APP_BACKEND_URL}/extracted_images/${sections[currentSubject][currentQuestionIndex[currentSubject]].image}`} alt="Question" width="500vw"/>
+                    {sections[currentSubject][currentQuestionIndex[currentSubject]].image &&
+
+                        <img src={`${process.env.REACT_APP_BACKEND_URL}/extracted_images/${sections[currentSubject][currentQuestionIndex[currentSubject]].image}`} alt="Question" width="500vw" />
                     }
 
 

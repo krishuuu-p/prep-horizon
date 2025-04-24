@@ -226,6 +226,18 @@ function parseExcelDate(value) {
     return new Date((value - 25569) * 86400 * 1000).toISOString();
 }
 
+app.post("/api/student/:userName/test/:testId/submit", async (req, res) => {
+    try {
+        console.log("Submitting test:", req.body);
+        const { userName, testId } = req.params;
+        const result = await queries.saveStudentTestResults(userName, testId);
+        res.json(result);
+    } catch (error) {
+        console.error("Error submitting test:", error);
+        res.status(500).json({ message: "Error submitting test" });
+    }
+});
+
 app.get("/api/teacher/:username/classes", async (req, res) => {
     try {
         const { username } = req.params;
