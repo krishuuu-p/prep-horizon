@@ -4,7 +4,7 @@ import TeacherDashboard from "./TeacherDashboard";
 import TeacherClasses from "./TeacherClasses";
 import TeacherStudents from "./TeacherStudents";
 import TeacherAnalysis from "./TeacherAnalysis";
-import "../styles/TeacherHomePage.css";
+import "../styles/TeacherDashboard.css";
 
 export default function TeacherHomePage() {
   const [activePage, setActivePage] = useState("Home");

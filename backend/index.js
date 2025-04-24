@@ -226,7 +226,7 @@ function parseExcelDate(value) {
     return new Date((value - 25569) * 86400 * 1000).toISOString();
 }
 
-app.get("/get-classes-for-user/:username", async (req, res) => {
+app.get("/api/teacher/:username/classes", async (req, res) => {
     try {
         const { username } = req.params;
         const classes = await queries.getClassesForUser(username);
@@ -234,6 +234,62 @@ app.get("/get-classes-for-user/:username", async (req, res) => {
     } catch (error) {
         console.error("Error fetching classes for user:", error);
         res.status(500).json({ message: "Error fetching classes for user" });
+    }
+});
+
+app.get("/api/teacher/:username/metrics", async (req, res) => {
+    try {
+        const { username } = req.params;
+        const metrics = await queries.getTeacherMetrics(username);
+        console.log("Metrics:", metrics);
+        res.json(metrics);
+    } catch (error) {
+        console.error("Error fetching teacher metrics:", error);
+        res.status(500).json({ message: "Error fetching teacher metrics" });
+    }
+});
+
+app.get("/api/teacher/:username/students", async (req, res) => {
+    try {
+        const { username } = req.params;
+        const studentsByClass = await queries.getStudentsForTeacher(username);
+        res.json(studentsByClass);
+    } catch (error) {
+        console.error("Error fetching students for teacher:", error);
+        res.status(500).json({ message: "Error fetching students for teacher" });
+    }
+});
+
+app.get("/api/classes/:classId/recent-tests", async (req, res) => {
+    try {
+        const { classId } = req.params;
+        const tests = await queries.getRecentTestsForClass(classId);
+        res.json({ tests });
+    } catch (error) {
+        console.error("Error fetching recent tests for class:", error);
+        res.status(500).json({ message: "Error fetching recent tests for class" });
+    }
+});
+
+app.get("/api/teacher/:username/upcoming-tests", async (req, res) => {
+    try {
+        const { username } = req.params;
+        const upcomingTests = await queries.getUpcomingTestsForUser(username);
+        res.json(upcomingTests);
+    } catch (error) {
+        console.error("Error fetching upcoming tests for teacher:", error);
+        res.status(500).json({ message: "Error fetching upcoming tests for teacher" });
+    }
+});
+
+app.get("/api/teacher/:username/test-performance", async (req, res) => {
+    try {
+        const { username } = req.params;
+        const performance = await queries.getRecentTestPerformance(username);
+        res.json(performance);
+    } catch (error) {
+        console.error("Error fetching test performance for teacher:", error);
+        res.status(500).json({ message: "Error fetching test performance for teacher" });
     }
 });
 
@@ -250,7 +306,7 @@ app.get("/get-classes", async (req, res) => {
 app.get("/get-upcoming-tests/:classId", async (req, res) => {
     try {
         const { classId } = req.params;
-        const tests = await queries.getTestsForClass(classId);
+        const tests = await queries.getUpcomingTestsForClass(classId);
         res.json({ tests });
     } catch (error) {
         console.error("Error fetching tests:", error);
@@ -261,7 +317,7 @@ app.get("/get-upcoming-tests/:classId", async (req, res) => {
 app.get("/api/tests/:studentId", async (req, res) => {
     try {
         const { studentId } = req.params;
-        const tests = await queries.getTestsForStudent(studentId);
+        const tests = await queries.getTestsForUser(studentId);
         res.json(tests);
     } catch (error) {
         console.error("Error fetching tests:", error);

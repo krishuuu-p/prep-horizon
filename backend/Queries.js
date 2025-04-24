@@ -1,9 +1,8 @@
 const pool = require('./db');
-
-async function getTestsForStudent(studentId) {
+async function getActiveTestsForUser(username) {
     try {
         const idQuery = `SELECT id FROM users WHERE username = ?;`;
-        const [idResult] = await pool.query(idQuery, [studentId]);
+        const [idResult] = await pool.query(idQuery, [username]);
 
         if (!idResult || idResult.length === 0) {
             throw new Error("Student not found");
@@ -13,7 +12,7 @@ async function getTestsForStudent(studentId) {
         const [classResult] = await pool.query(classQuery, [idResult[0].id]);
 
         if (!classResult || classResult.length === 0) {
-            return { activeTests: [], upcomingTests: [], recentTests: [] };
+            return [];
         }
 
         const classIds = classResult.map(row => row.class_id);
@@ -25,6 +24,32 @@ async function getTestsForStudent(studentId) {
             ) AND NOW() BETWEEN start_time AND end_time
             ORDER BY start_time ASC;
         `;
+
+        const [activeTests] = await pool.query(activeTestsQuery, [classIds]);
+        return activeTests || [];
+    } catch (error) {
+        throw new Error("Error fetching active tests: " + error.message);
+    }
+}
+
+async function getUpcomingTestsForUser(username) {
+    try {
+        const idQuery = `SELECT id FROM users WHERE username = ?;`;
+        const [idResult] = await pool.query(idQuery, [username]);
+
+        if (!idResult || idResult.length === 0) {
+            throw new Error("Student not found");
+        }
+
+        const classQuery = `SELECT class_id FROM enrollments WHERE user_id = ?;`;
+        const [classResult] = await pool.query(classQuery, [idResult[0].id]);
+
+        if (!classResult || classResult.length === 0) {
+            return [];
+        }
+
+        const classIds = classResult.map(row => row.class_id);
+
         const upcomingTestsQuery = `
             SELECT * FROM tests
             WHERE id IN (
@@ -32,6 +57,33 @@ async function getTestsForStudent(studentId) {
             ) AND start_time > NOW()
             ORDER BY start_time ASC;
         `;
+
+        const [upcomingTests] = await pool.query(upcomingTestsQuery, [classIds]);
+        return upcomingTests || [];
+    } catch (error) {
+        throw new Error("Error fetching upcoming tests: " + error.message);
+    }
+}
+
+
+async function getRecentTestsForUser(username) {
+    try {
+        const idQuery = `SELECT id FROM users WHERE username = ?;`;
+        const [idResult] = await pool.query(idQuery, [username]);
+
+        if (!idResult || idResult.length === 0) {
+            throw new Error("Student not found");
+        }
+
+        const classQuery = `SELECT class_id FROM enrollments WHERE user_id = ?;`;
+        const [classResult] = await pool.query(classQuery, [idResult[0].id]);
+
+        if (!classResult || classResult.length === 0) {
+            return [];
+        }
+
+        const classIds = classResult.map(row => row.class_id);
+
         const recentTestsQuery = `
             SELECT * FROM tests 
             WHERE id IN (
@@ -40,14 +92,23 @@ async function getTestsForStudent(studentId) {
             ORDER BY end_time DESC;
         `;
 
-        const [activeTests] = await pool.query(activeTestsQuery, [classIds]);
-        const [upcomingTests] = await pool.query(upcomingTestsQuery, [classIds]);
         const [recentTests] = await pool.query(recentTestsQuery, [classIds]);
+        return recentTests || [];
+    } catch (error) {
+        throw new Error("Error fetching recent tests: " + error.message);
+    }
+}
+
+async function getTestsForUser(username) {
+    try {
+        const activeTests = await getActiveTestsForUser(username);
+        const upcomingTests = await getUpcomingTestsForUser(username);
+        const recentTests = await getRecentTestsForUser(username);
 
         return {
-            activeTests: activeTests || [],
-            upcomingTests: upcomingTests || [],
-            recentTests: recentTests || [],
+            activeTests,
+            upcomingTests,
+            recentTests,
         };
     } catch (error) {
         throw new Error("Error fetching tests: " + error.message);
@@ -87,7 +148,130 @@ async function getClassesForUser(username) {
     }
 }
 
-async function getTestsForClass(classId) {
+async function getTeacherMetrics(username) {
+    // metrics consist of number of classes, number of students, number of upcoming tests, number of recent tests
+    try {
+        const userQuery = 'SELECT id FROM users WHERE username = ?;';
+        const [userRows] = await pool.query(userQuery, [username]);
+        if (userRows.length === 0) {
+            throw new Error("User not found");
+        }
+        const userId = userRows[0].id;
+        // get number of classes, number of students, number of upcoming tests, number of recent tests
+        // number of classes will be fetched from enrollments table, number of students will be fetched from enrollments table (enrollments contain both teachers and students), number of upcoming tests will be fetched from tests table, number of recent tests will be fetched from tests table
+        // while fetching number of students we will confirm their role is student
+        const query = `
+        SELECT
+            /* number of classes this user is enrolled in/teaching */
+            (SELECT COUNT(DISTINCT e.class_id)
+            FROM enrollments e
+            WHERE e.user_id = ?) AS num_classes,
+
+            /* number of *students* across those same classes */
+            (SELECT COUNT(DISTINCT e2.user_id)
+            FROM enrollments e2
+            JOIN users u ON u.id = e2.user_id
+            WHERE e2.class_id IN (
+                SELECT class_id
+                FROM enrollments
+                WHERE user_id = ?
+            )
+            AND u.role = 'student'
+            ) AS num_students,
+
+            /* tests in those classes whose start_time is in the future */
+            (SELECT COUNT(*)
+            FROM tests t
+            JOIN class_test ct ON t.id = ct.test_id
+            WHERE ct.class_id IN (
+                SELECT class_id
+                FROM enrollments
+                WHERE user_id = ?
+            )
+            AND t.start_time > NOW()
+            ) AS num_upcoming_tests,
+
+            /* tests in those classes whose end_time is in the past */
+            (SELECT COUNT(*)
+            FROM tests t
+            JOIN class_test ct ON t.id = ct.test_id
+            WHERE ct.class_id IN (
+                SELECT class_id
+                FROM enrollments
+                WHERE user_id = ?
+            )
+            AND t.end_time < NOW()
+            ) AS num_recent_tests;
+        `;
+
+        const [rows] = await pool.query(query, [userId, userId, userId, userId]);
+
+        return rows[0];
+    } catch (error) {
+        throw new Error("Error fetching teacher metrics: " + error.message);
+    }
+}
+
+async function getStudentsForTeacher(username) {
+    // first get classes for the teacher, then get students for each class
+    try {
+        const userQuery = 'SELECT id FROM users WHERE username = ?;';
+        const [userRows] = await pool.query(userQuery, [username]);
+        if (userRows.length === 0) {
+            throw new Error("User not found");
+        }
+        // get the classes for the user
+        const query = `
+            SELECT c.id, c.class_code, c.class_name, c.description 
+            FROM classes c
+            JOIN enrollments e ON c.id = e.class_id
+            JOIN users u ON e.user_id = u.id
+            WHERE u.username = ?;
+        `;
+        const [classRows] = await pool.query(query, [username]);
+        if (classRows.length === 0) {
+            throw new Error("No classes found for user");
+        }
+        const classIds = classRows.map(row => row.id);
+        // get the students for each class
+        const studentsQuery = `
+            SELECT u.id, u.username, u.name, u.email 
+            FROM users u
+            JOIN enrollments e ON u.id = e.user_id
+            WHERE e.class_id IN (?) AND u.role = 'student';
+        `;
+        const [studentRows] = await pool.query(studentsQuery, [classIds]);
+        if (studentRows.length === 0) {
+            throw new Error("No students found for user");
+        }
+        // map the students to their classes
+        // get the students for each class in the classRows array there is no class_id in the studentRow
+        // iterate over the classRows array and for each class, get the students for that class
+        let studentsByClass = [];
+        for (const classRow of classRows) {
+            const classId = classRow.id;
+            const studentQuery = `
+                SELECT u.id, u.username, u.name, u.email
+                FROM users u
+                JOIN enrollments e ON u.id = e.user_id
+                WHERE e.class_id = ? AND u.role = 'student';
+            `
+            const [students] = await pool.query(studentQuery, [classId]);
+            if (students.length > 0) {
+                studentsByClass.push({
+                    class: classRow,
+                    students: students
+                });
+            }
+        }
+
+        return studentsByClass;
+    } catch (error) {
+        throw new Error("Error fetching classes for user: " + error.message);
+    }
+}
+
+async function getUpcomingTestsForClass(classId) {
     try {
         const query = `
             SELECT * FROM tests 
@@ -100,6 +284,106 @@ async function getTestsForClass(classId) {
         return rows;
     } catch (error) {
         throw new Error("Error fetching upcoming tests for class: " + error.message);
+    }
+}
+
+async function getRecentTestPerformance(username) {
+    // 1) lookup user
+    const [userRows] = await pool.query(
+        'SELECT id FROM users WHERE username = ?',
+        [username]
+    );
+    if (!userRows.length) {
+        throw new Error(`User “${username}” not found`);
+    }
+
+    // 2) fetch & sort the last 3 tests by end_time DESC
+    let recentTests = await getRecentTestsForUser(username);
+    recentTests = recentTests
+        .sort(
+            (a, b) => new Date(b.end_time) - new Date(a.end_time)
+        )
+        .slice(0, 3);
+
+    // 3) for each of those, pull stats and top-scorer
+    const performance = await Promise.all(
+        recentTests.map(async (test) => {
+            const testId = test.id;
+
+            // a) avgScore & numStudents, aliased to camelCase
+            const statsQuery = `
+          SELECT
+            COALESCE(AVG(total_marks), 0) AS avgScore,
+            COALESCE(COUNT(*), 0)      AS numStudents
+          FROM (
+            SELECT student_id, SUM(marks_obtained) AS total_marks
+            FROM student_results
+            WHERE test_id = ?
+            GROUP BY student_id
+          ) AS student_scores;
+        `;
+            const [[{ avgScore, numStudents }]] = await pool.query(statsQuery, [testId]);
+            const roundedAvgScore = parseFloat(avgScore.toFixed(2));
+
+            // b) top-scorer + name in one go
+            const topQuery = `
+          SELECT
+            u.name             AS studentName,
+            SUM(sr.marks_obtained) AS totalMarks
+          FROM student_results sr
+          JOIN users u
+            ON u.id = sr.student_id
+          WHERE sr.test_id = ?
+          GROUP BY sr.student_id
+          ORDER BY totalMarks DESC
+          LIMIT 1;
+        `;
+            const [topRows] = await pool.query(topQuery, [testId]);
+
+            const topScorer = topRows.length
+                ? `${topRows[0].studentName} (${parseFloat(topRows[0].totalMarks.toFixed(2))})`
+                : "N/A";
+
+            return {
+                testName: test.test_name,
+                numStudents,
+                avgScore: roundedAvgScore,
+                topScorer,
+            };
+        })
+    );
+
+    return performance;
+}
+
+async function getRecentTestsForClass(classId) {
+    try {
+        const query = `
+            SELECT * FROM tests 
+            WHERE id IN (
+                SELECT test_id FROM class_test WHERE class_id = ?
+            ) AND end_time < NOW()
+            ORDER BY end_time DESC;
+        `;
+        const [rows] = await pool.query(query, [classId]);
+        return rows;
+    } catch (error) {
+        throw new Error("Error fetching recent tests for class: " + error.message);
+    }
+}
+async function getActiveTestsForClass(classId) {
+    try {
+        const query = `
+            SELECT * FROM tests 
+            WHERE id IN (
+                SELECT test_id FROM class_test WHERE class_id = ?
+            ) AND NOW() BETWEEN start_time AND end_time
+            ORDER BY start_time ASC;
+        `;
+        const [rows] = await pool.query(query, [classId]);
+        return rows;
+    } catch (error) {
+        throw new Error("Error fetching active tests for class: " + error.message);
     }
 }
 
@@ -119,7 +403,7 @@ async function insertQuestion(testId, sectionId, question) {
     }
 }
 
-async function getUserId (username) {
+async function getUserId(username) {
     try {
         const query = `SELECT id FROM users WHERE username = ?;`;
         const [rows] = await pool.query(query, [username]);
@@ -196,7 +480,7 @@ async function getTestState(studentUsername, testId) {
         }
         const testDuration = testDurationRows[0].duration * 1000; // convert to milliseconds
         const currentTime = new Date();
-        const timeElapsed = currentTime - startTime; 
+        const timeElapsed = currentTime - startTime;
         // get remaining time in seconds
         const remainingTime = Math.max(0, Math.floor((testDuration - timeElapsed) / 1000));
 
@@ -280,7 +564,7 @@ async function getTestState(studentUsername, testId) {
             });
         }
         // return the test state with remaining time
-        return {testState, remainingTime};
+        return { testState, remainingTime };
     }
     catch (error) {
         throw new Error("Error fetching test state: " + error.message);
@@ -418,7 +702,7 @@ async function saveTestState(studentUsername, testId, sections) {
                             while (selectedOptionIds.length < 4) {
                                 selectedOptionIds.push(null);
                             }
-                            
+
                             // check the answer
                             const correctAnswers = question.answer;
                             // console.log("These are correct answers", correctAnswers);
@@ -448,7 +732,7 @@ async function saveTestState(studentUsername, testId, sections) {
     }
 }
 
-async function initializeTest (studentId, testId) {
+async function initializeTest(studentId, testId) {
     // for each question in the test, insert a row in student_responses table with default values
     try {
         const questionsQuery = `
@@ -483,11 +767,19 @@ async function initializeTest (studentId, testId) {
 }
 
 module.exports = {
-    getTestsForStudent,
+    getTestsForUser,
+    getActiveTestsForUser,
+    getUpcomingTestsForUser,
+    getRecentTestsForUser,
+    getRecentTestPerformance,
     getClasses,
     getClassesForUser,
-    getTestsForClass,
+    getUpcomingTestsForClass,
+    getRecentTestsForClass,
+    getActiveTestsForClass,
     insertQuestion,
     getTestState,
-    saveTestState
+    saveTestState,
+    getTeacherMetrics,
+    getStudentsForTeacher
 };

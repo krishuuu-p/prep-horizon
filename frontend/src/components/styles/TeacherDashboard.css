@@ -1,0 +1,109 @@
+.teacher-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    background-color: white;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.teacher-content {
+    display: flex;
+    flex-direction: column;
+    font-size: 18px;
+    width: 100%;
+}
+
+.teacher-greeting {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.teacher-greeting h1 {
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+.teacher-caption {
+    color: #4b4747;
+}
+
+.teacher-separator {
+    border: none;
+    height: 1px;
+    background-color: #444;
+    margin: 10px 0;
+}
+
+.teacher-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.teacher-section {
+    margin-left: 20px;   
+}
+
+.teacher-section h2 {
+    color: #144884;
+    margin-bottom: 10px;
+}
+
+.teacher-test-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.teacher-test-card {
+    width: 400px;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s;
+    margin-bottom: 20px;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.teacher-test-card:hover {
+    transform: scale(1.03);
+}
+
+.teacher-upcoming-test {
+    background-color: #fff3e0;
+    border-left: 5px solid #ff9800;
+}
+
+.teacher-test-performance {
+    background-color: #e0f2f1;
+    border-left: 5px solid #00796b;
+}
+
+.teacher-overview-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #144884;
+    font-size: 20px;
+}
+
+.teacher-overview-icon svg {
+    height: 24px;
+    width: 24px;
+}
+
+.overview-card {
+    background: linear-gradient(135deg, #f0f4ff, #dceeff);
+    border-left: 5px solid #144884;
+}

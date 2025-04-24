@@ -1,0 +1,50 @@
+/* TeacherClasses.css */
+
+.teacher-classes {
+    padding: 2rem;
+    background-color: #f9fafb;
+    min-height: 100vh;
+    color: #1f2937;
+}
+
+.teacher-classes h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #111827;
+}
+
+/* List container */
+.teacher-class-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Individual class card */
+.teacher-class-card {
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.teacher-class-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-class-card strong {
+    display: block;
+    font-size: 1.1rem;
+    color: #111827;
+    margin-bottom: 0.25rem;
+}
+
+.teacher-class-card span {
+    font-size: 0.95rem;
+    color: #4b5563;
+}
