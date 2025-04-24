@@ -12,7 +12,6 @@ function ClassesPage() {
     const [displayedUsers, setDisplayedUsers] = useState([]);
     const [displayClassCode, setDisplayClassCode] = useState("");
 
-
     useEffect(() => {
         const fetchClasses = async () => {
             try {

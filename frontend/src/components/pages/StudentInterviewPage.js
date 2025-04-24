@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
-import Panel from "./Panel";
+import Panel from "./StudentPanel";
 
 const socket = io("http://10.81.65.73:5000", { transports: ["websocket"] });
 function InterviewPage() {

@@ -9,7 +9,7 @@ async function getTestsForStudent(studentId) {
             throw new Error("Student not found");
         }
 
-        const classQuery = `SELECT class_id FROM enrollments WHERE student_id = ?;`;
+        const classQuery = `SELECT class_id FROM enrollments WHERE user_id = ?;`;
         const [classResult] = await pool.query(classQuery, [idResult[0].id]);
 
         if (!classResult || classResult.length === 0) {
@@ -64,6 +64,29 @@ async function getClasses() {
     }
 }
 
+async function getClassesForUser(username) {
+    try {
+        // return error if username not found in users table
+        const userQuery = 'SELECT id FROM users WHERE username = ?;';
+        const [userRows] = await pool.query(userQuery, [username]);
+        if (userRows.length === 0) {
+            throw new Error("User not found");
+        }
+        // get the classes for the user
+        const query = `
+            SELECT c.id, c.class_code, c.class_name, c.description 
+            FROM classes c
+            JOIN enrollments e ON c.id = e.class_id
+            JOIN users u ON e.user_id = u.id
+            WHERE u.username = ?;
+        `;
+        const [rows] = await pool.query(query, [username]);
+        return rows;
+    } catch (error) {
+        throw new Error("Error fetching classes for user: " + error.message);
+    }
+}
+
 async function getTestsForClass(classId) {
     try {
         const query = `
@@ -108,7 +131,6 @@ async function getUserId (username) {
         throw new Error("Error fetching user ID: " + error.message);
     }
 }
-
 
 async function getTestState(studentUsername, testId) {
     try {
@@ -460,10 +482,10 @@ async function initializeTest (studentId, testId) {
     }
 }
 
-
 module.exports = {
     getTestsForStudent,
     getClasses,
+    getClassesForUser,
     getTestsForClass,
     insertQuestion,
     getTestState,

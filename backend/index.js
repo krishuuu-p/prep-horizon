@@ -226,6 +226,17 @@ function parseExcelDate(value) {
     return new Date((value - 25569) * 86400 * 1000).toISOString();
 }
 
+app.get("/get-classes-for-user/:username", async (req, res) => {
+    try {
+        const { username } = req.params;
+        const classes = await queries.getClassesForUser(username);
+        res.json({ classes });
+    } catch (error) {
+        console.error("Error fetching classes for user:", error);
+        res.status(500).json({ message: "Error fetching classes for user" });
+    }
+});
+
 app.get("/get-classes", async (req, res) => {
     try {
         const classes = await queries.getClasses();
@@ -996,7 +1007,7 @@ app.post("/add-users-to-class", uploadUsers.single("file"), async (req, res) => 
             const user_id = userResults[0].id;
 
             try {
-                await dbQuery("INSERT INTO enrollments (student_id, class_id) VALUES (?, ?)", [user_id, class_id]);
+                await dbQuery("INSERT INTO enrollments (user_id, class_id) VALUES (?, ?)", [user_id, class_id]);
             } catch (insertError) {
                 console.error(`Error adding ${username}:`, insertError);
             }
@@ -1067,7 +1078,7 @@ app.post("/remove-users-from-class", uploadUsers.single("file"), async (req, res
             const user_id = userResults[0].id;
 
             try {
-                await dbQuery("DELETE FROM enrollments WHERE student_id = ? AND class_id = ?", [user_id, class_id]);
+                await dbQuery("DELETE FROM enrollments WHERE user_id = ? AND class_id = ?", [user_id, class_id]);
             } catch (deleteError) {
                 console.error(`Error removing ${username} from class:`, deleteError);
             }
@@ -1167,7 +1178,7 @@ app.get("/get-students-in-class/:class_code", async (req, res) => {
             const query = `
                 SELECT u.id, u.name, u.username, u.email 
                 FROM enrollments e
-                JOIN users u ON e.student_id = u.id
+                JOIN users u ON e.user_id = u.id
                 WHERE e.class_id = ? AND u.role = 'student'
             `;
             db.query(query, [classId], (err, results) => {
@@ -1210,7 +1221,7 @@ app.get("/get-teachers-in-class/:class_code", async (req, res) => {
             const query = `
                 SELECT u.id, u.name, u.username, u.email 
                 FROM enrollments e
-                JOIN users u ON e.student_id = u.id
+                JOIN users u ON e.user_id = u.id
                 WHERE e.class_id = ? AND u.role = 'teacher'
             `;
             db.query(query, [classId], (err, results) => {

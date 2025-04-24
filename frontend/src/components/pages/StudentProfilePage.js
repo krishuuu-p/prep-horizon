@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useUser } from "../../UserContext";
-import Panel from "./Panel";
+import Panel from "./StudentPanel";
 import "../styles/ProfilePage.css";
 import {
   LineChart,

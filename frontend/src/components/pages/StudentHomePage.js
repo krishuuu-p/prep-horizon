@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Panel from './Panel';
+import Panel from './StudentPanel';
 import { useUser } from '../../UserContext';
 import { formatDateTime } from '../utils';
 import '../styles/StudentHomePage.css';

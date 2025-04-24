@@ -3,7 +3,7 @@ import { useUser } from '../../UserContext';
 import { useNavigate } from "react-router-dom";
 import { formatDateTime } from "../utils";
 import "../styles/TestPage.css";
-import Panel from "./Panel";
+import Panel from "./StudentPanel";
 
 const TestsPage = () => {
     const { user } = useUser();

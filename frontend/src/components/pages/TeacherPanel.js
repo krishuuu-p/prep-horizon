@@ -2,11 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
 import '../styles/Panel.css';
 
-function AdminPanel({ activePage, setActivePage }) {
+function Panel({ activePage, setActivePage }) {
     const navigate = useNavigate();
     const { user, setUser } = useUser();
-    const userType = user.userType;
-    const userName = user.userName;
 
     const handleLogout = () => {
         setUser({ userType: null, userName: '', name: '' });
@@ -16,16 +14,12 @@ function AdminPanel({ activePage, setActivePage }) {
 
     const handleNavigation = (page) => {
         setActivePage(page);
-        console.log("userName is",userName);
-        if (page !== activePage) {
-            navigate(`/${userType}/${userName}/${page.toLowerCase().replace(/\s+/g, '-')}`);
-        }
     };
 
     return (
         <div className="panel">
             <div className="left-options">
-                {["Home", "Classes", "Student Management", "Teacher Management", "Tests Management"].map((page) => (
+                {["Home", "Classes", "Students", "Analysis"].map((page) => (
                     <span
                         key={page}
                         className={activePage === page ? "active" : ""}
@@ -43,4 +37,4 @@ function AdminPanel({ activePage, setActivePage }) {
     );
 }
 
-export default AdminPanel;
+export default Panel;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from "axios";
-import Panel from './Panel';
+import Panel from './StudentPanel';
 import '../styles/PdfToQuizPage.css';
 
 function PdfToQuizPage() {
