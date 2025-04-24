@@ -926,6 +926,93 @@ async function getRecentTestScores(username) {
     }
 }
 
+async function getTestAnalysis(testId) {
+    try {
+        const query = `
+            SELECT * FROM tests 
+            WHERE id = ?;
+        `;
+        const [rows] = await pool.query(query, [testId]);
+        if (rows.length === 0) {
+            throw new Error("Test not found");
+        }
+        const test = rows[0];
+        const sectionsQuery = `
+            SELECT * FROM sections 
+            WHERE test_id = ?;
+        `;
+        const [sectionRows] = await pool.query(sectionsQuery, [testId]);
+        if (sectionRows.length === 0) {
+            throw new Error("No sections found for the test");
+        }
+        // get analysis in this format: {sections: [{section_id, section_name, avg_score}], top5: [{student_id, name, score}]}
+        const analysis = {
+            sections: [],
+            top5: [],
+            all_students: [],
+        };
+        for (const section of sectionRows) {
+            const sectionId = section.id;
+            const sectionName = section.section_name;
+            const avgScoreQuery = `
+                SELECT AVG(marks_obtained) AS avg_score
+                FROM student_results
+                WHERE test_id = ? AND section_id = ?;
+            `;
+            const [avgScoreRows] = await pool.query(avgScoreQuery, [testId, sectionId]);
+            if (avgScoreRows.length > 0) {
+                analysis.sections.push({
+                    section_id: sectionId,
+                    section_name: sectionName,
+                    avg_score: parseFloat(avgScoreRows[0].avg_score.toFixed(2))
+                });
+            }
+        }
+        // get top 5 students for the test
+        const top5Query = `
+            SELECT u.id AS student_id, u.name, SUM(sr.marks_obtained) AS total_marks
+            FROM student_results sr
+            JOIN users u ON u.id = sr.student_id
+            WHERE sr.test_id = ?
+            GROUP BY sr.student_id
+            ORDER BY total_marks DESC
+            LIMIT 5;
+        `;
+        const [top5Rows] = await pool.query(top5Query, [testId]);
+        if (top5Rows.length > 0) {
+            analysis.top5 = top5Rows.map(row => ({
+                student_id: row.student_id,
+                name: row.name,
+                score: row.total_marks
+            }));
+        }
+
+        // get all the students who took the test and their scores
+        const allStudentsQuery = `
+            SELECT u.id AS student_id, u.name, SUM(sr.marks_obtained) AS total_marks
+            FROM student_results sr
+            JOIN users u ON u.id = sr.student_id
+            WHERE sr.test_id = ?
+            GROUP BY sr.student_id
+            ORDER BY total_marks DESC;
+        `;
+        const [allStudentsRows] = await pool.query(allStudentsQuery, [testId]);
+        if (allStudentsRows.length > 0) {
+            analysis.all_students = allStudentsRows.map(row => ({
+                student_id: row.student_id,
+                name: row.name,
+                score: row.total_marks
+            }));
+        }
+
+        return analysis;
+    }
+    catch (error) {
+        throw new Error("Error fetching test analysis: " + error.message);
+    }
+}
+
+
 module.exports = {
     getTestsForUser,
     getActiveTestsForUser,
@@ -943,5 +1030,6 @@ module.exports = {
     getTeacherMetrics,
     getStudentsForTeacher,
     saveStudentTestResults,
-    getRecentTestScores
+    getRecentTestScores,
+    getTestAnalysis,
 };

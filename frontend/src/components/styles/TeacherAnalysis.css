@@ -1,0 +1,94 @@
+/* TeacherAnalysis.css */
+
+.teacher-analysis {
+    padding: 2rem;
+    background-color: #f9fafb;
+    min-height: 100vh;
+    color: #1f2937;
+}
+
+.teacher-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #111827;
+}
+
+/* Selectors row */
+.teacher-selectors {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.teacher-dropdown {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    color: #111827;
+    cursor: pointer;
+}
+
+.teacher-dropdown:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Stack cards vertically */
+.teacher-analysis-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Base card styling */
+.teacher-card {
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 8px solid transparent;
+}
+
+/* 1st card: section averages (warm yellow) */
+.teacher-analysis-results .teacher-card:nth-child(1) {
+    background-color: #fefce8;      /* amber-50 */
+    border-left-color: #facc15;     /* amber-400 */
+}
+
+/* 2nd card: top 5 students (cool blue) */
+.teacher-analysis-results .teacher-card:nth-child(2) {
+    background-color: #eff6ff;      /* blue-50 */
+    border-left-color: #3b82f6;     /* blue-500 */
+}
+
+/* 3rd card: all students (soft green) */
+.teacher-analysis-results .teacher-card:nth-child(3) {
+    background-color: #ecfdf5;      /* emerald-50 */
+    border-left-color: #10b981;     /* emerald-500 */
+}
+
+.teacher-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #111827;
+}
+
+/* List styling */
+.teacher-list-item {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    color: #374151;
+}
+
+.teacher-section-name,
+.teacher-student-name {
+    font-weight: 600;
+    color: #111827;
+}
+
+.teacher-score {
+    font-weight: 500;
+    color: #2563eb;
+}

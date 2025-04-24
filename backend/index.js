@@ -315,6 +315,19 @@ app.get("/api/tests/:userName/recent-scores", async (req, res) => {
     }
 });
 
+app.get("/api/tests/:testId/analysis", async (req, res) => {
+    try {
+        
+        const { testId } = req.params;
+        const analysis = await queries.getTestAnalysis(testId);
+        res.json(analysis);
+    }
+    catch (error) {
+        console.error("Error fetching test analysis:", error);
+        res.status(500).json({ message: "Error fetching test analysis" });
+    }
+});
+
 app.get("/get-classes", async (req, res) => {
     try {
         const classes = await queries.getClasses();
