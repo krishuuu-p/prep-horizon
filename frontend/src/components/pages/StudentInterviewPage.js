@@ -1,14 +1,14 @@
+// src/pages/InterviewPage.js
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
-import Panel from "./Panel";
+import Panel from "./StudentPanel";
+import "../styles/InterviewPage.css";
 
 // Server URLs
-const SOCKET_SERVER_URL = "http://localhost:5000"; // Update THIS to your socket server URL
-const EMOTION_SERVER_URL = "http://localhost:5001"; // Update THIS to your emotion server URL
-
+const SOCKET_SERVER_URL = "http://localhost:5000";  // REPLACE THIS WITH YOUR URLS
+const EMOTION_SERVER_URL = "http://localhost:5001"; // REPLACE THIS WITH YOUR URLS
 const socket = io(SOCKET_SERVER_URL, { transports: ["websocket"] });
-
 function InterviewPage() {
   const [activePage, setActivePage] = useState("Interview Practice");
   const [stream, setStream] = useState(null);
@@ -22,7 +22,6 @@ function InterviewPage() {
   const userVideo = useRef(null);
   const connectionRef = useRef(null);
 
-  // Initialize media stream and socket listeners
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then((currentStream) => {
@@ -52,21 +51,19 @@ function InterviewPage() {
     };
   }, [stream]);
 
-  // Capture a frame every 5 seconds and send for emotion analysis
+  // Capture a frame every second for emotion analysis
   useEffect(() => {
     if (!stream) return;
     const interval = setInterval(() => {
       const video = myVideo.current;
       if (!video) return;
 
-      // Draw video frame to canvas
       const canvas = document.createElement("canvas");
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Convert to blob and send to backend
       canvas.toBlob((blob) => {
         if (!blob) return;
         const formData = new FormData();
@@ -80,7 +77,7 @@ function InterviewPage() {
           .then((data) => setEmotion(data.emotion))
           .catch((err) => console.error("Error sending emotion request:", err));
       }, "image/png");
-    }, 1000);
+    }, 1000000);
 
     return () => clearInterval(interval);
   }, [stream]);
@@ -112,7 +109,10 @@ function InterviewPage() {
     const peer = new Peer({ initiator: false, trickle: false, stream });
 
     peer.on("signal", (signalData) => {
-      socket.emit("returning-signal", { signal: signalData, callerID: caller });
+      socket.emit("returning-signal", {
+        signal: signalData,
+        callerID: caller
+      });
     });
 
     peer.on("stream", (remoteStream) => {
@@ -124,23 +124,27 @@ function InterviewPage() {
   };
 
   return (
-    <div>
+    <div className="interview-page">
       <Panel activePage={activePage} setActivePage={setActivePage} />
       <h1>Interview Page</h1>
       <button onClick={joinRoom}>Join Room</button>
-      <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
-        <div>
+
+      <div className="video-container">
+        <div className="video-box">
           <h3>Your Video</h3>
-          <video playsInline muted ref={myVideo} autoPlay style={{ width: "300px" }} />
-          <div style={{ marginTop: "10px" }}><strong>Emotion:</strong> {emotion}</div>
+          <video playsInline muted ref={myVideo} autoPlay />
+          <div className="emotion-label">
+            <strong>Emotion:</strong> {emotion}
+          </div>
         </div>
-        <div>
+        <div className="video-box">
           <h3>Remote Video</h3>
-          <video playsInline ref={userVideo} autoPlay style={{ width: "300px" }} />
+          <video playsInline ref={userVideo} autoPlay />
         </div>
       </div>
+
       {receivingCall && !callAccepted && (
-        <div style={{ marginTop: "20px" }}>
+        <div className="incoming-call">
           <h2>Someone is calling you...</h2>
           <button onClick={acceptCall}>Accept</button>
         </div>

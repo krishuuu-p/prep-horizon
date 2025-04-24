@@ -6,6 +6,7 @@ from flask_cors import CORS
 import os
 import subprocess  # To call the local command-line tool
 import mysql.connector
+import random
 from PIL import Image
 import io
 from dotenv import load_dotenv
