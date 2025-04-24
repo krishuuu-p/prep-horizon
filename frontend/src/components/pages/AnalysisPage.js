@@ -14,10 +14,13 @@ const AnalysisPage = () => {
     
     // console.log(pieImage, mainImage);
     useEffect(() => {
-        if (user.userType === "admin") {
+        if (user.userType === "teacher") {
             fetch(`${process.env.REACT_APP_FLASK_URL}/api/subjects/${testId}`)
                 .then(res => res.json())
-                .then(data => setSubjects(data))
+                .then(data => {
+                    console.log("Fetched subjects:", data);  // <-- this will print the subjects to the browser console
+                    setSubjects(data);
+                })
                 .catch(err => console.error("Failed to fetch subjects:", err));
         }
     }, [user, testId])
@@ -34,8 +37,8 @@ const AnalysisPage = () => {
                     <img src={mainImage} alt="Performance Chart" style={{ width: "600px" }} />
                 </div>
             )}
-            {user.userType === "admin" && (
-                <div className="admin-analysis">
+            {user.userType === "teacher" && (
+                <div className="teacher-analysis">
                     <h3>Test Summary (Max / Mean / Median)</h3>
                     <img src={summaryImage} alt="Test Summary" style={{ width: "100%", maxWidth: "800px" }} />
 

@@ -136,8 +136,7 @@ def get_subjects_by_test(test_id):
     query = """
         SELECT DISTINCT s.section_name
         FROM sections s
-        JOIN questions q ON q.section_id = s.id
-        WHERE q.test_id = %s
+        WHERE s.test_id = %s; 
     """
     cursor = conn.cursor()
     cursor.execute(query, (test_id,))
