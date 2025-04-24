@@ -385,6 +385,7 @@ async function getRecentTestsForClass(classId) {
         throw new Error("Error fetching recent tests for class: " + error.message);
     }
 }
+
 async function getActiveTestsForClass(classId) {
     try {
         const query = `
@@ -885,6 +886,46 @@ async function saveStudentTestResults(username, testId) {
     }
 }
 
+async function getRecentTestScores(username) {
+    try {
+        const userQuery = 'SELECT id FROM users WHERE username = ?;';
+        const [userRows] = await pool.query(userQuery, [username]);
+        if (userRows.length === 0) {
+            throw new Error("User not found");
+        }
+        const userId = userRows[0].id;
+        // get the recent tests for the user
+        const recentTests = await getRecentTestsForUser(username);
+        if (recentTests.length === 0) {
+            throw new Error("No recent tests found for user");
+        }
+
+        const testScores = await Promise.all(
+            recentTests.map(async (test) => {
+                const testId = test.id;
+                // we have to calculate total marks obtained by the student in that test by summing up the marks obtained in each section of that test
+                const totalMarksQuery = `
+                    SELECT SUM(marks_obtained) AS total_marks
+                    FROM student_results
+                    WHERE student_id = ? AND test_id = ?;
+                `;
+                const [rows] = await pool.query(totalMarksQuery, [userId, testId]);
+                if (rows.length === 0) {
+                    throw new Error(`No marks found for the test with ID ${testId}`);
+                }
+                const totalMarks = rows[0].total_marks;
+                return {
+                    testName: test.test_name,
+                    score: totalMarks ? totalMarks : 0,
+                };
+            })
+        );
+        return testScores;
+    } catch (error) {
+        throw new Error("Error fetching recent test scores: " + error.message);
+    }
+}
+
 module.exports = {
     getTestsForUser,
     getActiveTestsForUser,
@@ -901,5 +942,6 @@ module.exports = {
     saveTestState,
     getTeacherMetrics,
     getStudentsForTeacher,
-    saveStudentTestResults
+    saveStudentTestResults,
+    getRecentTestScores
 };
