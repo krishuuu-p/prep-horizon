@@ -6,11 +6,38 @@ from flask_cors import CORS
 import os
 import subprocess  # To call the local command-line tool
 import mysql.connector
+from PIL import Image
+import io
 from dotenv import load_dotenv
 app = Flask(__name__)
 CORS(app)
 
 load_dotenv()
+captured_frames = []
+
+@app.route('/capture_frame', methods=['POST'])
+def capture_frame():
+    # 1️⃣ basic validation
+    if 'frame' not in request.files:
+        return jsonify({'error': 'No frame received'}), 400
+
+    # 2️⃣ read into a PIL image (for your future model)
+    file = request.files['frame']
+    img = Image.open(io.BytesIO(file.read()))
+    captured_frames.append(img)
+
+    total = len(captured_frames)
+
+    # 3️⃣ stub logic: first 10 always “yes”, then random
+    if total <= 10:
+        result = 'no'
+    else:
+        result = 'no'
+
+    return jsonify({
+        'result':       result,
+        'total_frames': total
+    })
 def extract_text_from_url(url):
     try:
         response = requests.get(url)
