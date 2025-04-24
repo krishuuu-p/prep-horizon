@@ -241,7 +241,6 @@ app.get("/api/teacher/:username/metrics", async (req, res) => {
     try {
         const { username } = req.params;
         const metrics = await queries.getTeacherMetrics(username);
-        console.log("Metrics:", metrics);
         res.json(metrics);
     } catch (error) {
         console.error("Error fetching teacher metrics:", error);
