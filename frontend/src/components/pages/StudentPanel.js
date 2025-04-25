@@ -35,7 +35,7 @@ function Panel({ activePage, setActivePage }) {
                 ))}
             </div>
             <div className="right-options">
-                <span className="coaching-name">Nalle Institute</span>
+                <span className="coaching-name">Xyz Institute</span>
                 <button className="logout-btn" onClick={handleLogout}>Logout</button>
             </div>
         </div>
