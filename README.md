@@ -34,7 +34,7 @@ Mac/Linux:
 5. Run Flask server:
 `python flask_backend.py`
 
-✅ Flask backend running on http://localhost:5001
+Flask backend running on http://localhost:5001
 
 🖥️ Terminal 2 (Node.js Backend)
 1. Navigate to the backend folder:
@@ -46,7 +46,7 @@ Mac/Linux:
 3. Run the Node.js backend:
 `node index.js`
 
-✅ Node.js backend running on http://localhost:5000
+Node.js backend running on http://localhost:5000
 
 🖥️ Terminal 3 (Frontend - React)
 1. Navigate to the frontend folder:
@@ -58,7 +58,7 @@ Mac/Linux:
 3. Run the React app:
 `npm start`
 
-✅ React app running on http://localhost:3000
+React app running on http://localhost:3000
 
 Run `python script(analysis.py)` in backend folder and change the `given_test_id` to the test id you want analysis of
 
@@ -95,6 +95,19 @@ Running InterviewPage.js, running interviewpage.js on  a single laptop can be do
 -> chrome://flags/#unsafely-treat-insecure-origin-as-secure
 -> Enter your ip adderess https://your-ip-address:3000 and enable it
 -> Then use this link on any other devices connected to the same network: https://your-ip-address:3000 
+# Word Doc file format Guide
+To upload questions for a particular test, the admin has to upload a word file with a fixed format as given in the 'sample_Test_file.doc' given in the root directory of the source code.
+General explanation of the format: -
+-> Every new subject has to be started by '&' followed by the subject name in a new line
+-> Write each question under the subject in the format: 'Question_number-type_of_question. question_text'
+We have three types of questions: MC for Single correct mcqs
+                                  NU for Numerical type
+                                  MMC for multi correct mcqs
+In next line we have to specify whether this question has an image or not as 'Image= Yes/No'
+If Image is there then append the image in the next line
+In the following 2 lines we have 'Positive marks = marks_for_the_question' and 'Negative marks = negative_for_the_question'
+If it is an mcq question then the options will come in each of next 4 lines.
+In the next line there will be the answer to that question as 'Answer = answer_for_that_question'
 
 # Excel File Format Guide
 
