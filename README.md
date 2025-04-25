@@ -7,7 +7,9 @@ Create 2 separates .env files by copying the contents of .env.example files in b
 * Main database file is database_dump.sql
 * If you make any changes to database structure or add data and want to create a dump: `mysqldump -u root -p --default-character-set=utf8 --databases prep_horizon > database_dump.sql`
 * Whenever you pull, sync the changes to your local database: `mysql -u root -p prep_horizon < database_dump.sql`
+* In order to import the database into your system you must have an empty database named prep_horizon.
 * You can also change the encoding scheme by opening the dump in notepad and saving using the UTF-8 encoding.
+* Also, to see the database manually, you can do so using `mysql -u root -p` in the Command Prompt and entering your password. Then, open the database using `USE prep_horizon;`
 
 ### Running the website
 Running the Full Stack Application
