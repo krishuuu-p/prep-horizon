@@ -14,20 +14,29 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 defined_emotions = ['happy', 'sad', 'angry', 'surprised', 'neutral', 'disgusted', 'fearful']
+
+# Load environment variables
 load_dotenv()
 
-captured_frames = []
 @app.route('/emotion', methods=['POST'])
-
 def emotion():
     print("[FLASK] Received /emotion request")
     if 'image' not in request.files:
         print("[FLASK] No image file in request.files:", request.files)
         return jsonify({'error': 'No image file provided'}), 400
-
     img = request.files['image']
     print(f"[FLASK] Image received: filename={img.filename}, content_type={img.content_type}")
-    chosen_emotion = random.choice(defined_emotions)
+    emotion_weights = {
+        'neutral': 0.9,
+        'sad': 0.07,
+        'happy': 0.01,
+        'angry': 0.01,
+        'surprised': 0.01,
+        'disgusted': 0.01,
+        'fearful': 0.01,
+    }
+    chosen_emotion = random.choices(list(emotion_weights.keys()), weights=list(emotion_weights.values()), k=1)[0]
+
     print(f"[FLASK] Returning emotion: {chosen_emotion}")
 
     return jsonify({'emotion': chosen_emotion})

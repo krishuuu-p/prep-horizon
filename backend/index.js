@@ -317,7 +317,7 @@ app.get("/api/tests/:userName/recent-scores", async (req, res) => {
 
 app.get("/api/tests/:testId/analysis", async (req, res) => {
     try {
-        
+
         const { testId } = req.params;
         const analysis = await queries.getTestAnalysis(testId);
         res.json(analysis);

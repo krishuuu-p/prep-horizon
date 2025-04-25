@@ -444,6 +444,7 @@ async function getTestState(studentUsername, testId) {
         SELECT end_time FROM tests
         WHERE id = ?;
     `;
+    console.log(testId);
         const [testRows] = await pool.query(testQuery, [testId]);
         if (!testRows || testRows.length === 0) {
             throw new Error("Test not found");
