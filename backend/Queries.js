@@ -965,7 +965,10 @@ async function getTestAnalysis(testId) {
                 analysis.sections.push({
                     section_id: sectionId,
                     section_name: sectionName,
-                    avg_score: parseFloat(avgScoreRows[0].avg_score.toFixed(2))
+                    avg_score: avgScoreRows[0].avg_score != null 
+                    ? parseFloat(avgScoreRows[0].avg_score.toFixed(2)) 
+                    : 0.0
+
                 });
             }
         }
