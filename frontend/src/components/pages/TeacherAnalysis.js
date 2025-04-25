@@ -1,4 +1,3 @@
-// TeacherAnalysis.js
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useUser } from "../../UserContext";
@@ -10,30 +9,6 @@ export default function TeacherAnalysis() {
     const [classId, setClassId] = useState("");
     const [tests, setTests] = useState([]);
     const [analysis, setAnalysis] = useState(null);
-
-    const defaultAnalysis = {
-        sections: [
-            { section_id: 1, section_name: "Physics", avg_score: 9 },
-            { section_id: 2, section_name: "Maths", avg_score: 7 },
-            { section_id: 3, section_name: "Chemistry", avg_score: 8 }
-        ],
-        top5: [
-            { student_id: 1, name: "Student 7", score: 23 },
-            { student_id: 2, name: "Student 1", score: 22 },
-            { student_id: 3, name: "Student 9", score: 20 },
-            { student_id: 4, name: "Student 11", score: 20 },
-            { student_id: 5, name: "Student 12", score: 19 }
-        ],
-        all_students: [
-            { student_id: 1, name: "Student 7", score: 23 },
-            { student_id: 2, name: "Student 1", score: 22 },
-            { student_id: 3, name: "Student 9", score: 20 },
-            { student_id: 4, name: "Student 11", score: 20 },
-            { student_id: 5, name: "Student 12", score: 19 },
-            { student_id: 6, name: "Student 8", score: 18 },
-            { student_id: 7, name: "Student 10", score: 17 }
-        ]
-    };
 
     useEffect(() => {
         axios
@@ -52,8 +27,6 @@ export default function TeacherAnalysis() {
 
     const onTestChange = (e) => {
         const testId = e.target.value;
-        // show defaults until real data arrives
-        setAnalysis(defaultAnalysis);
         axios
             .get(`${process.env.REACT_APP_BACKEND_URL}/api/tests/${testId}/analysis`)
             .then((res) => setAnalysis(res.data))
@@ -95,7 +68,6 @@ export default function TeacherAnalysis() {
 
             {analysis && (
                 <div className="teacher-analysis-results">
-                    {/* Section-wise averages */}
                     <div className="teacher-card">
                         <h3>Section-wise Avg Scores</h3>
                         <ul>
@@ -116,7 +88,6 @@ export default function TeacherAnalysis() {
                         </ul>
                     </div>
 
-                    {/* Top 5 */}
                     <div className="teacher-card">
                         <h3>Top 5 Students</h3>
                         <ol>
@@ -137,10 +108,9 @@ export default function TeacherAnalysis() {
                         </ol>
                     </div>
 
-                    {/* All students */}
                     <div className="teacher-card teacher-all-students">
                         <h3>All Students' Scores</h3>
-                        <ul>
+                        <ol>
                             {analysis.all_students.map((stu) => (
                                 <li
                                   key={stu.student_id}
@@ -155,7 +125,7 @@ export default function TeacherAnalysis() {
                                     </span>
                                 </li>
                             ))}
-                        </ul>
+                        </ol>
                     </div>
                 </div>
             )}
