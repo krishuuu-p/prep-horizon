@@ -86,34 +86,6 @@ Set up:
 Install ollama 
 On terminal run ollama pull gemma3
 
-1. **Install Dependencies:**
-   ```sh
-   pip install flask torch transformers
-   ```
-2. **Run the Flask Server:**
-   ```sh
-   python app.py
-   ```
-3. **Send a Request to Generate MCQs:**
-   ```sh
-   curl -X POST "http://127.0.0.1:5001/process-pdf" -F "file=@sample.pdf"
-   ```
-
-### Running `Gemma 3`
-- Ensure that `Gemma 3` is installed and accessible within the environment.
-- Modify inference parameters in the configuration file:
-  ```json
-  {
-      "stop": [
-          "<end_of_turn>"
-      ],
-      "temperature": 1,
-      "top_k": 64,
-      "top_p": 0.95
-  }
-  ```
-- Adjust parameters as needed to improve output quality.
-
 ###
 Running InterviewPage.js, running interviewpage.js on  a single laptop can be done by localhost:5000 on two seperate tabs. For running it on two seperate devices. You need to enable certain permissions.
 -> chrome://flags/#unsafely-treat-insecure-origin-as-secure
