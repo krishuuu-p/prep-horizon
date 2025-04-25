@@ -83,8 +83,8 @@ This project focuses on generating multiple-choice questions (MCQs) using machin
 ## Running & Setup
 ### Setting Up the MCQ Generation System
 Set up:
-Install ollama 
-On terminal run ollama pull gemma3
+-Install ollama 
+-On terminal run ollama pull gemma3
 
 ###
 Running InterviewPage.js, running interviewpage.js on  a single laptop can be done by localhost:5000 on two seperate tabs. For running it on two seperate devices. You need to enable certain permissions.
