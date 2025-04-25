@@ -92,6 +92,71 @@ Running InterviewPage.js, running interviewpage.js on  a single laptop can be do
 -> Enter your ip adderess https://your-ip-address:3000 and enable it
 -> Then use this link on any other devices connected to the same network: https://your-ip-address:3000 
 
+# 📊 Excel File Format Guide
+
+This guide explains how to prepare Excel (`.xlsx`) files for uploading data to the system. These uploads are used for:
+
+- Adding / Editing / Deleting **Students**
+- Adding / Editing / Deleting **Teachers**
+- Adding?Removing **Students / Teachers to Classes**
+
+> All files must be in **`.xlsx`** format (Excel Workbook)  
+> CSV or other formats are **not supported**
+
+---
+
+## 1. Add / Edit / Delete Students / Teachers
+
+### Required Columns
+
+| Column Name | Description               | Example            |
+|-------------|---------------------------|--------------------|
+| username    | Unique student username   | `john_doe`         |
+| name        | Full name of the student  | `John Doe`         |
+| email       | Valid email ID            | `john@example.com` |
+| password    | Password                  | `pass1234`         |
+
+### Operation-Specific Instructions
+
+- **Add Students**: Fill all columns. The student is added to the system.
+- **Edit Students**: Match existing `username`; updated `name` and/or `email` will be applied.
+- **Delete Students**: Only `username` is required.
+
+---
+
+
+## 2. Add Students / Teachers to Class
+
+### Required Columns
+
+| Column Name | Description                 | Example      |
+|-------------|-----------------------------|--------------|
+| username    | Student/Teacher username    | `john_doe`   |
+
+> We select classes using a dropdown menu on the page.
+
+---
+
+## General Guidelines
+
+- Column headers must match **exactly** as shown (case-sensitive, no extra spaces).
+- Always include a **header row** (first row must contain column names).
+- Do **not** include blank rows, formulas, merged cells, or styled formatting.
+- Keep all data in **one worksheet** (first sheet only will be read).
+- If uploading fails, double-check spelling of headers and file format and also check if there are duplicates.
+
+---
+
+## Examples
+
+### Example excel files are added for your reference.
+- You can find sample Excel files inside the `/sample_excels/` folder of this repository.
+
+---
+
+
+If you need help, please contact the admin team or raise an issue in this repo.
+
 ---
 *This document will be updated as development progresses.*
 
