@@ -153,11 +153,6 @@ This guide explains how to prepare Excel (`.xlsx`) files for uploading data to t
 - You can find sample Excel files inside the `/sample_excels/` folder of this repository.
 
 ---
-
-
-If you need help, please contact the admin team or raise an issue in this repo.
-
----
 *This document will be updated as development progresses.*
 
 
