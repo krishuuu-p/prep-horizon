@@ -57,7 +57,6 @@ Mac/Linux:
 
 ✅ React app running on http://localhost:3000
 
-Run python script(analysis.py) in backend folder and change the given_test_id to the test id you want analysis of.
 # Quiz Generation Progress
 
 ## Overview
@@ -108,6 +107,12 @@ This project focuses on generating multiple-choice questions (MCQs) using machin
   }
   ```
 - Adjust parameters as needed to improve output quality.
+
+###
+Running InterviewPage.js, running interviewpage.js on  a single laptop can be done by localhost:5000 on two seperate tabs. For running it on two seperate devices. You need to enable certain permissions.
+-> chrome://flags/#unsafely-treat-insecure-origin-as-secure
+-> Enter your ip adderess https://your-ip-address:3000 and enable it
+-> Then use this link on any other devices connected to the same network: https://your-ip-address:3000 
 
 ## Next Steps
 - Debug API communication errors.
