@@ -10,17 +10,10 @@ import threading
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-####################################
-# Load Pretrained TorchScript Model
-####################################
-MODEL_TS_PATH = "complex_audio_emotion_model_ts.pt"  # Ensure this file is in your working directory
+MODEL_TS_PATH = "complex_audio_emotion_model_ts.pt"  
 model = torch.jit.load(MODEL_TS_PATH, map_location=device)
 model.eval()
 
-####################################
-# Inverse Label Mapping (must match your training)
-####################################
-# Example mapping if you trained with 8 classes:
 idx_to_emotion = {
     0: "angry",
     1: "calm",
@@ -32,9 +25,6 @@ idx_to_emotion = {
     7: "neutral"
 }
 
-####################################
-# Hardcoded Nervousness Mapping Function
-####################################
 base_nervousness = {
     "angry": 80,
     "fearful": 90,
@@ -65,16 +55,12 @@ def compute_nervousness(predicted_emotion, f0_std):
     final_score = base_score + adjustment
     return np.clip(final_score, 0, 100)
 
-####################################
-# PyAudio Setup for Real-Time Audio Capture
-####################################
 AUDIO_RATE = 16000  # Sampling rate (Hz)
 CHUNK = 1024       # Number of samples per frame
 audio_buffer = deque(maxlen=AUDIO_RATE)  # 1-second buffer
 buffer_lock = threading.Lock()
 
 def audio_callback(in_data, frame_count, time_info, status):
-    # Convert the incoming byte data to a numpy array of float32 normalized to [-1, 1]
     data = np.frombuffer(in_data, dtype=np.int16).astype(np.float32) / 32768.0
     with buffer_lock:
         audio_buffer.extend(data.tolist())
@@ -91,9 +77,6 @@ def start_audio_stream():
     stream.start_stream()
     return p, stream
 
-####################################
-# Real-Time Inference Function
-####################################
 def real_time_inference(update_threshold=5.0, smoothing_window=5):
     """
     Captures 1-second audio windows from the microphone and computes:
