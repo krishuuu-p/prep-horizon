@@ -88,14 +88,19 @@ export default function TeacherAnalysis() {
                     <div className="teacher-card">
                         <h3>Section-wise Avg Scores</h3>
                         <ul>
-                            {analysis.sections.map((s) => (
-                                <li key={s.section_id} className="teacher-list-item">
-                                    <span className="teacher-section-name">{s.section_name}</span>:&nbsp;
-                                    <span className="teacher-score">{s.avg_score}</span>
-                                </li>
-                            ))}
+                            {analysis.sections.map((s) => {
+                                // Check if avg_score is a valid number
+                                const avgScore = isNaN(s.avg_score) ? "N/A" : parseFloat(s.avg_score).toFixed(2);
+                                return (
+                                    <li key={s.section_id} className="teacher-list-item">
+                                        <span className="teacher-section-name">{s.section_name}</span>:&nbsp;
+                                        <span className="teacher-score">{avgScore}</span>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </div>
+
 
                     <div className="teacher-card">
                         <h3>Top 5 Students</h3>
@@ -103,7 +108,7 @@ export default function TeacherAnalysis() {
                             {analysis.top5.map((stu) => (
                                 <li key={stu.student_id} className="teacher-list-item">
                                     <span className="teacher-student-name">{stu.name}</span>&nbsp;—&nbsp;
-                                    <span className="teacher-score">{stu.score}</span>
+                                    <span className="teacher-score">{(stu.score ?? 0).toFixed(2)}</span>
                                 </li>
                             ))}
                         </ol>
@@ -115,7 +120,8 @@ export default function TeacherAnalysis() {
                             {analysis.all_students.map((stu) => (
                                 <li key={stu.student_id} className="teacher-list-item">
                                     <span className="teacher-student-name">{stu.name}</span>:&nbsp;
-                                    <span className="teacher-score">{stu.score}</span>
+                                    
+                                    <span className="teacher-score">{(stu.score ?? 0).toFixed(2)}</span>
                                 </li>
                             ))}
                         </ol>
