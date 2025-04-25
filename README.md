@@ -92,7 +92,7 @@ Running InterviewPage.js, running interviewpage.js on  a single laptop can be do
 -> Enter your ip adderess https://your-ip-address:3000 and enable it
 -> Then use this link on any other devices connected to the same network: https://your-ip-address:3000 
 
-# 📊 Excel File Format Guide
+# Excel File Format Guide
 
 This guide explains how to prepare Excel (`.xlsx`) files for uploading data to the system. These uploads are used for:
 
