@@ -11,17 +11,10 @@ from PIL import Image  # Added missing import
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-####################################
-# Load Pretrained TorchScript Visual Model
-####################################
 MODEL_TS_PATH = "complex_visual_emotion_model_ts.pt"  # Ensure this file is in your working directory
 model = torch.jit.load(MODEL_TS_PATH, map_location=device)
 model.eval()
 
-####################################
-# Inverse Label Mapping (should match training)
-####################################
-# For example, if you trained with FER2013 (7 classes):
 idx_to_emotion = {
     0: "angry",
     1: "disgust",
@@ -32,10 +25,6 @@ idx_to_emotion = {
     6: "neutral"
 }
 
-####################################
-# Hardcoded Nervousness Mapping for Visual Cues
-####################################
-# Base nervousness scores for each emotion (values based on literature)
 base_nervousness = {
     "angry": 80,
     "fear": 90,
@@ -47,15 +36,6 @@ base_nervousness = {
 }
 
 def compute_nervousness_visual(predicted_emotion, furrow_intensity):
-    """
-    Computes a nervousness score (0-100) using:
-      - A base score for the predicted emotion.
-      - An adjustment based on eyebrow furrow intensity (normalized 0-1).
-    For example:
-        furrow_intensity < 0.3: adjustment = 0,
-        0.3 <= furrow_intensity < 0.6: adjustment = +10,
-        furrow_intensity >= 0.6: adjustment = +20.
-    """
     base_score = base_nervousness.get(predicted_emotion, 40)
     if furrow_intensity < 0.3:
         adjustment = 0
@@ -66,9 +46,6 @@ def compute_nervousness_visual(predicted_emotion, furrow_intensity):
     final_score = base_score + adjustment
     return np.clip(final_score, 0, 100)
 
-####################################
-# Set Up Image Preprocessing for Face Crop
-####################################
 preprocess = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
@@ -76,9 +53,6 @@ preprocess = transforms.Compose([
                          std=[0.229, 0.224, 0.225])
 ])
 
-####################################
-# Set Up MediaPipe Face Mesh
-####################################
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False,
                                   max_num_faces=1,
@@ -86,9 +60,6 @@ face_mesh = mp_face_mesh.FaceMesh(static_image_mode=False,
                                   min_detection_confidence=0.5,
                                   min_tracking_confidence=0.5)
 
-####################################
-# Compute Eyebrow Furrow Intensity
-####################################
 def extract_eyebrow_furrow_intensity(image, landmarks):
     """
     Computes a proxy for eyebrow furrow intensity by measuring the Euclidean distance
@@ -118,9 +89,6 @@ def extract_eyebrow_furrow_intensity(image, landmarks):
         intensity = (max_distance - distance) / (max_distance - min_distance)
     return intensity
 
-####################################
-# Real-Time Visual Inference Function
-####################################
 def real_time_visual_inference(update_threshold=5.0, smoothing_window=5):
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
