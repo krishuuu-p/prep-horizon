@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 # Configure DB connection
 
-given_test_id = 13
+given_test_id = 10
 
 conn = mysql.connector.connect(
     user='root',
@@ -100,14 +100,23 @@ for _, row in pivot.iterrows():
     for i, subj in enumerate(subject_columns):
         ax = axes[i]
         ax.set_title(subj, fontsize=16)
-        max_a  = 360
+        max_a  = analytics[subj]["max"]/10 *360
         if analytics[subj]["max"] > 0:
-            stud_a = max(0, row[subj] / analytics[subj]["max"] * 360) 
-            avg_a  = max(0, analytics[subj]["avg"] / analytics[subj]["max"] * 360)
+            stud_a = max(0, row[subj] / 10 * 360) 
+            avg_a  = max(0, analytics[subj]["avg"] / 10 * 360)
         else:
             stud_a = 0
             avg_a  = 0
         width  = 0.2
+        if(subj=='Total'):
+            max_a  = analytics[subj]["max"]/30 *360
+            if analytics[subj]["max"] > 0:
+                stud_a = max(0, row[subj] / 30 * 360) 
+                avg_a  = max(0, analytics[subj]["avg"] / 30 * 360)
+            else:
+                stud_a = 0
+                avg_a  = 0
+            width  = 0.2
         # ax.pie([max_a, 0], radius=1,
         #        wedgeprops=dict(width=width, edgecolor="white"),
         #        colors=["lightgray","none"], startangle=90)
@@ -125,10 +134,10 @@ for _, row in pivot.iterrows():
         ax.pie([avg_a, max(0, 360 - avg_a)], radius=1 -  width,
             wedgeprops=dict(width=width, edgecolor="white"),
             colors=[colors[2], "none"], startangle=90)
-        ax.pie([max_a, 0], radius=1-2*width,
+        ax.pie([max_a, 360-max_a], radius=1-2*width,
         wedgeprops=dict(width=width, edgecolor="white"),
         colors=[colors[0], "none"], startangle=90)
-        
+        # print(max_a,avg_a,stud_a,subj)
         ax.text(0,  0.1, f"{(row[subj]):.2f}",ha="center", va="center", fontweight="bold", fontsize=14, color=colors[1])
         ax.text(0, -0.05, f"Avg:{analytics[subj]['avg']:.2f}", ha="center", va="center", fontsize=12, color=colors[2])
         ax.text(0, -0.2, f"Max: {analytics[subj]['max']:.2f}",ha='center', va='center', fontsize=12,color=colors[0])
