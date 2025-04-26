@@ -1,6 +1,7 @@
 # Face Recognition Setup and Usage Guide
 
 Follow these steps to set up and run the face recognition system:
+First run : pip install -r requirements.txt
 
 ## 1. Download Model Weights
 
