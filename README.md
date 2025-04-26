@@ -156,6 +156,9 @@ This guide explains how to prepare Excel (`.xlsx`) files for uploading data to t
 
 ## Regarding models 
 Refer to there respective folders to know how to work with them.
+Facial Recogition model runs indepedently.
+Emotion Recognition model runs independently.
+They still need to be integrated with the project.
 
 ## General Guidelines
 
