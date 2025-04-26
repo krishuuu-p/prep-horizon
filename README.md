@@ -154,6 +154,9 @@ This guide explains how to prepare Excel (`.xlsx`) files for uploading data to t
 
 ---
 
+## Regarding models 
+Refer to there respective folders to know how to work with them.
+
 ## General Guidelines
 
 - Column headers must match **exactly** as shown (case-sensitive, no extra spaces).
