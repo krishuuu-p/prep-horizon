@@ -30,11 +30,13 @@ After downloading, organize the weights into the following directories:
 
 ## 3. Capture Reference Images
 
-Run the following command to capture 5 reference images of the face you want to recognize:
+Run the following command to capture 5 reference images by pressing c to click photo of the face you want to recognize:
 
 ```bash
 python capture_refs.py
 ```
+
+These photos get stored in datasets/target_person
 
 ## 4. Run Detection
 
